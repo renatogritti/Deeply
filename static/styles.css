@@ -1,0 +1,1075 @@
+:root {
+    --primary-color: #8A05BE; /* Roxo Nubank */
+    --primary-dark: #6A03A0;    /* Roxo mais escuro */
+    --primary-light: #A020F0;   /* Roxo mais vibrante */
+    --primary-lighter: #F0E6FF; /* Roxo clarinho para hover */
+    --secondary-color: #f5f5f7;
+    --accent-color: #8A05BE;
+    --text-primary: #1d1d1f;
+    --text-secondary: #86868b;
+    --border-color: #d2d2d7;
+    --background-color: #f0f0f0;
+    --board-background: #e8e8e8;
+    
+    /* Cores das colunas - todos em tons de roxo bem claro */
+    --parking-color: var(--primary-lighter);
+    --plan-color: var(--primary-lighter);
+    --doing-color: var(--primary-lighter);
+    --done-color: var(--primary-lighter);
+    --column-background: #ffffff;
+    --column-hover: #f8f8f8;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    background-color: var(--background-color);
+    margin: 0;
+    padding: 0;
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    /* Remova ou comente o background-image existente para um visual mais clean */
+}
+
+/* Header styles */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%);
+    color: white;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: none; /* Remove a borda inferior */
+    position: fixed;
+    width: 100%;
+    z-index: 101; /* Aumenta o z-index para ficar acima da sidebar */
+    padding: 12px 0; /* Remove padding lateral */
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(138, 5, 190, 0.3);
+    height: 64px; /* Altura fixa para o header */
+    box-sizing: border-box;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 0 0 auto;
+    padding-left: 0; /* Remove padding à esquerda */
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 0 0 auto;
+}
+
+/* Estilo para os filtros no header */
+.header-filters {
+    display: flex;
+    gap: 10px;
+    margin-left: auto; /* Isso empurra os filtros para a direita */
+    padding-right: 20px; /* Espaço à direita dos filtros */
+}
+
+.header-filters select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background-color: white;
+    color: var(--primary-color);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    min-width: 150px; /* Largura mínima para os selects */
+    will-change: transform;
+    backface-visibility: hidden; /* Reduz problemas de rendering */
+}
+
+.header-filters select:hover {
+    border-color: var(--primary-light);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(138, 5, 190, 0.2);
+}
+
+.header-filters select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(138, 5, 190, 0.1);
+}
+
+.header-filters select option {
+    background-color: white;
+    color: var(--primary-color);
+    padding: 8px;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: white;
+}
+
+.logo {
+    width: 32px;
+    height: 32px;
+    fill: white; /* Cor cinza para o logo */
+    margin-left: 24px; /* Ajusta para alinhar com o padding da sidebar */
+}
+
+.header-buttons {
+    display: flex;
+    gap: 10px;
+    margin-right: 20px;
+}
+
+.team-button {
+    padding: 10px 20px;
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    margin: 0 10px;
+}
+
+.team-button:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Button styles */
+.new-card-button {
+    margin: 0 10px;
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.new-card-button:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.tag-button {
+    padding: 10px 20px;
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    margin: 0 10px;
+}
+
+.tags-container {
+    margin: 10px 0;
+}
+
+.tags-selection {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.tag-checkbox {
+    display: flex;
+    align-items: center;
+}
+
+.tag-checkbox label {
+    padding: 2px 8px;
+    border-radius: 12px;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    margin-left: 4px;
+}
+
+.card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 8px;
+}
+
+.card-tag {
+    padding: 2px 8px;
+    border-radius: 12px;
+    color: white;
+    font-size: 11px;
+}
+
+/* Board layout */
+.kanban-board {
+    display: flex;
+    margin: 20px;
+    gap: 24px;
+    height: 100%;
+    padding: 24px;
+}
+
+/* Column styles */
+.kanban-column {
+    flex: 1;
+    min-width: 280px;
+    background-color: var(--column-background);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);  /* Borda mais visível */
+    display: flex;
+    flex-direction: column;
+    transition: background-color 0.2s ease;
+}
+
+.kanban-column:hover {
+    background: linear-gradient(180deg, white 0%, var(--primary-lighter) 50%, white 100%);
+    box-shadow: 0 4px 15px rgba(138, 5, 190, 0.15);
+}
+
+#parking {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-top-color: var(--parking-border);
+}
+
+#parking h2 {
+    background-color: var(--parking-color);
+    color: var(--parking-border);
+    border-bottom: 2px solid var(--parking-border);
+}
+
+#plan { border-top-color: var(--plan-border); }
+#doing { border-top-color: var(--doing-border); }
+#done { border-top-color: var(--done-border); }
+
+#plan h2 {
+    background-color: var(--plan-color);
+    color: var(--plan-border);
+    border-bottom: 2px solid var(--plan-border);
+}
+
+#doing h2 {
+    background-color: var(--doing-color);
+    color: var(--doing-border);
+    border-bottom: 2px solid var(--doing-border);
+}
+
+#done h2 {
+    background-color: var(--done-color);
+    color: var(--done-border);
+    border-bottom: 2px solid var(--done-border);
+}
+
+.kanban-column h2 {
+    background-color: #e3f2fd;
+    color: var(--primary-color);
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
+    border-bottom: none !important;
+    border-radius: 8px 8px 0 0;
+}
+
+/* Card styles */
+.kanban-card {
+    background-color: white;
+    padding: 16px;
+    margin: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    cursor: move;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    will-change: transform;
+    contain: content; /* Melhor performance no paint */
+}
+
+.kanban-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    border-color: var(--accent-color);
+}
+
+.kanban-card:active {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* Adicione um efeito sutil de brilho na borda ao passar o mouse */
+.kanban-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.kanban-card:hover::before {
+    opacity: 1;
+}
+
+.kanban-card h3 {
+    margin: 0 0 12px 0;
+    color: var(--text-primary);
+    font-size: 16px;  /* Aumentado de 14px para 16px */
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+/* Estilo dos usuários no card */
+.card-users {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.user-tag {
+    display: inline-flex;
+    align-items: center;
+    background-color: #f5f5f5;
+    padding: 4px 8px 4px 4px;
+    border-radius: 12px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    gap: 6px;
+}
+
+.user-tag::before {
+    content: '';
+    width: 20px;
+    height: 20px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%238A05BE' d='M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    flex-shrink: 0;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.user-tag:hover::before {
+    opacity: 1;
+}
+
+.kanban-card p {
+    margin: 5px 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+/* Update card styles to show team */
+.kanban-card .team-tag {
+    display: inline-block;
+    padding: 2px 6px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 3px;
+    font-size: 11px;
+    margin-top: 5px;
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 24px;
+    width: 500px;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.modal-content h3 {
+    margin: 0 0 20px 0;
+    color: var(--text-primary);
+}
+
+.modal-content input,
+.modal-content select {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+    font-size: 14px;
+}
+
+.modal-content input:focus,
+.modal-content select:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+.modal-content button {
+    padding: 12px 24px;
+    margin: 10px 5px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.modal-content button:first-of-type {
+    background-color: var(--accent-color);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.modal-content button:first-of-type:hover {
+    opacity: 0.9;
+}
+
+.modal-content button:last-of-type {
+    background-color: var(--secondary-color);
+    color: var(--text-secondary);
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.delete-button {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+.delete-button:hover {
+    background-color: #c82333 !important;
+}
+
+/* Atualize os estilos dos botões */
+.modal-content button:last-of-type,
+button[onclick*="close"],
+button[onclick*="cancel"] {
+    background-color: #4a4a4a !important;
+    color: white !important;
+    transition: all 0.2s ease;
+}
+
+.modal-content button:last-of-type:hover,
+button[onclick*="close"]:hover,
+button[onclick*="cancel"]:hover {
+    background-color: #3a3a3a !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Atualize os estilos dos botões para um cinza mais claro */
+.modal-content button:last-of-type,
+button[onclick*="close"],
+button[onclick*="cancel"] {
+    background-color: #909090 !important;
+    color: white !important;
+    transition: all 0.2s ease;
+}
+
+.modal-content button:last-of-type:hover,
+button[onclick*="close"]:hover,
+button[onclick*="cancel"]:hover {
+    background-color: #808080 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Team styles */
+#teamsList {
+    margin-top: 20px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.team-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin: 5px 0;
+    background-color: var(--secondary-color);
+    border-radius: 4px;
+}
+
+.team-item button {
+    padding: 5px 10px;
+    margin-left: 5px;
+    border-radius: 3px;
+    border: none;
+    cursor: pointer;
+}
+
+.team-item button:first-of-type {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.team-item button:last-of-type {
+    background-color: #dc3545;
+    color: white;
+}
+
+.footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    border-top: 1px solid var(--border-color);
+    background-color: white;
+    margin-top: auto; /* Push footer to bottom */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Frames layout */
+.frames-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 80px);
+    margin-left: 220px;
+    width: calc(100% - 220px);
+    padding: 0 20px;
+    margin-top: 64px; /* Espaço para o header fixo */
+}
+
+/* Estilos para a lista de tags */
+.tags-list {
+    margin-top: 20px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 20px;
+}
+
+.tag-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    margin: 5px 0;
+    background-color: var(--secondary-color);
+    border-radius: 4px;
+}
+
+.tag-preview {
+    padding: 2px 8px;
+    border-radius: 12px;
+    color: white;
+    font-size: 12px;
+}
+
+.tag-item button {
+    padding: 4px 8px;
+    margin-left: 5px;
+    border-radius: 3px;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.tag-item button:first-of-type {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.tag-item button:last-of-type {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Adicione estes estilos ao final do arquivo styles.css */
+.sidebar {
+    width: 200px;
+    background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary-light) 100%);
+    color: white;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid var(--border-color);
+    padding: 24px 16px;
+    height: calc(100vh - 64px);
+    position: fixed;
+    left: 0;
+    top: 64px;
+    box-shadow: 2px 0 10px rgba(138, 5, 190, 0.3);
+    margin-top: -1px;
+    border-top: none;
+}
+
+.sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 60px; /* Espaço para o botão config */
+}
+
+.config-button {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 200px; /* Mesma largura da sidebar */
+    padding: 16px;
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+    z-index: 101;
+}
+
+/* Atualização dos estilos dos botões da sidebar */
+.sidebar-button {
+    width: 100%;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    background: white;
+    border: none;
+    color: var(--primary-color);
+    border-radius: 8px;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-button:hover {
+    background: linear-gradient(135deg, white 0%, var(--primary-lighter) 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(138, 5, 190, 0.2);
+}
+
+.sidebar-button svg {
+    fill: var(--primary-color);
+}
+
+.sidebar-filter {
+    margin-bottom: 20px;
+    padding: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    margin-left: -8px; /* Alinha com os botões */
+    margin-right: -8px;
+    padding: 0 8px 20px 8px;
+}
+
+.sidebar-filter select {
+    width: 100%;
+    padding: 12px 16px; /* Mesmo padding dos botões */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background-color: white;
+    color: var(--primary-color);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    will-change: transform;
+    backface-visibility: hidden; /* Reduz problemas de rendering */
+}
+
+.sidebar-filter select:hover {
+    border-color: var(--primary-light);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(138, 5, 190, 0.2);
+}
+
+.sidebar-filter select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(138, 5, 190, 0.1);
+}
+
+.sidebar-filter select option {
+    background-color: white;
+    color: var(--primary-color);
+    padding: 8px;
+}
+
+.main-content {
+    margin-left: 220px; /* largura da sidebar + padding */
+    padding: 20px;
+}
+
+/* Ajuste o frames-container para considerar a sidebar */
+.frames-container {
+    margin-left: 220px;
+    width: calc(100% - 220px);
+}
+
+/* Adicione estes estilos ao arquivo */
+.column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: linear-gradient(135deg, #F0E6FF 0%, #E6D5FF 100%) !important;
+    border-radius: 12px 12px 0 0;
+    box-shadow: none; /* Remove a sombra */
+    border: none; /* Remove todas as bordas */
+}
+
+/* Remover todas as bordas das colunas */
+#parking, #plan, #doing, #done {
+    border-top: none;
+}
+
+#parking h2,
+#plan h2,
+#doing h2,
+#done h2 {
+    border-bottom: none !important;
+}
+
+/* Remove todas as bordas das colunas */
+#parking .column-header,
+#plan .column-header,
+#doing .column-header,
+#done .column-header {
+    border: none !important;
+    border-bottom: none !important;
+}
+
+.add-card-button {
+    width: 28px;
+    height: 28px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    border: none;
+    color: white;
+    font-size: 18px;
+    transition: all 0.2s;
+    box-shadow: 0 2px 5px rgba(138, 5, 190, 0.3);
+}
+
+.add-card-button:hover {
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(138, 5, 190, 0.4);
+}
+
+/* Ajuste os estilos existentes das colunas */
+.kanban-column h2 {
+    padding: 0;
+    border-bottom: none !important;
+}
+
+#parking .column-header,
+#plan .column-header,
+#doing .column-header,
+#done .column-header {
+    border-bottom: 2px solid var(--primary-color);
+}
+
+/* Adicione estes estilos para o filtro na sidebar */
+.sidebar-filter {
+    margin-bottom: 20px;
+    padding: 0 8px 20px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    margin-left: -8px; /* Alinha com os botões */
+    margin-right: -8px;
+}
+
+/* Adicione estes estilos para o campo de busca */
+.search-container {
+    flex: 0 1 600px; /* Largura máxima do container */
+    display: flex;
+    justify-content: center;
+    padding: 0 20px;
+}
+
+.search-box {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    background: white;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.search-box:hover,
+.search-box:focus-within {
+    box-shadow: 0 3px 8px rgba(138, 5, 190, 0.2);
+}
+
+.search-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--primary-color);
+    margin-right: 8px;
+}
+
+#searchInput {
+    flex: 1;
+    border: none;
+    padding: 12px 0;
+    font-size: 14px;
+    color: var(--text-primary);
+    background: transparent;
+}
+
+#searchInput:focus {
+    outline: none;
+}
+
+#searchInput::placeholder {
+    color: var(--text-secondary);
+}
+
+/* Otimização dos animations para melhor performance */
+@keyframes cardHover {
+    from { transform: translateY(0); }
+    to { transform: translateY(-4px); }
+}
+
+/* Agrupamento de propriedades comuns */
+.header, .sidebar {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%);
+    color: white;
+}
+
+/* Melhor performance em dispositivos móveis */
+@media (max-width: 768px) {
+    .kanban-card {
+        /* Desativa animações em dispositivos móveis */
+        transform: none !important;
+        transition: none !important;
+    }
+    
+    .frames-container {
+        margin-left: 0;
+        width: 100%;
+    }
+    
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .sidebar.active {
+        transform: translateX(0);
+    }
+}
+
+/* Remova os estilos antigos do header-filters */
+.search-wrapper {
+    flex: 0 1 500px; /* Aumentado de 400px para 500px */
+    display: flex;
+    flex-direction: row-reverse; /* Inverte a ordem dos elementos */
+    justify-content: center;
+    align-items: center;
+    padding: 0 20px;
+    gap: 10px;
+    position: absolute;
+    right: 24px; /* Mesmo padding da última coluna */
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.search-box {
+    flex: 1;
+    background: white;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    padding: 4px 16px;
+    min-width: 300px; /* Garante uma largura mínima */
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.search-box:hover,
+.search-box:focus-within {
+    box-shadow: 0 3px 8px rgba(138, 5, 190, 0.2);
+    transform: translateY(-1px);
+}
+
+.search-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--primary-color);
+    margin-right: 12px;
+}
+
+#searchInput {
+    flex: 1;
+    border: none;
+    padding: 8px 0;
+    font-size: 16px;
+    color: var(--text-primary);
+    background: transparent;
+    width: 100%;
+}
+
+#searchInput:focus {
+    outline: none;
+}
+
+#searchInput::placeholder {
+    color: var(--text-secondary);
+}
+
+.share-button {
+    flex-shrink: 0; /* Impede que o botão encolha */
+    background: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: var(--primary-color);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-left: 10px; /* Adiciona um espaço entre a busca e o botão */
+}
+
+.share-button:hover {
+    background: var(--primary-lighter);
+    transform: translateY(-1px);
+}
+
+.share-button svg {
+    width: 18px;
+    height: 18px;
+}
+
+#shareModal .modal-content {
+    max-width: 400px;
+}
+
+#shareEmail {
+    width: 100%;
+    padding: 12px;
+    margin: 16px 0;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+#shareEmail:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.share-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Estilos para o botão de configuração */
+.config-button {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 16px;
+    background: inherit; /* Usa o mesmo gradiente da sidebar */
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    z-index: 10; /* Garante que fique acima de outros elementos */
+}
+
+.config-button:hover {
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-dark) 100%);
+}
+
+.config-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Estilos para o modal de configuração */
+.config-modal {
+    position: absolute; /* Mudado de fixed para absolute */
+    bottom: 60px; /* Ajustado para ficar logo acima do botão */
+    left: 0;
+    width: calc(100% - 32px); /* Ajustado para respeitar o padding da sidebar */
+    margin: 0 16px; /* Centraliza dentro da sidebar */
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    display: none;
+    padding: 16px;
+}
+
+.config-modal button {
+    width: 100%;
+    padding: 10px;
+    margin: 4px 0;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.config-modal .save-button {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.config-modal .close-button {
+    background-color: #909090;
+    color: white;
+}
+
+.config-modal button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
