@@ -15,8 +15,6 @@ from db import *
 
 mail = Mail(app)
 
-
-
 # Create database and tables
 with app.app_context():
     db.create_all()
