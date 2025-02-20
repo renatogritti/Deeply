@@ -1,0 +1,17 @@
+.vscode/settings.json
+__pycache__/config.cpython-312.pyc
+__pycache__/db.cpython-312.pyc
+Backup/.env
+Backup/app.py
+Backup/.vscode/settings.json
+Backup/instance/kanban.db
+Backup/old/app.py
+Backup/old/.vscode/settings.json
+Backup/old/instance/kanban.db
+Backup/old/static/styles.css
+Backup/old/templates/kanban.html
+Backup/static/styles.css
+Backup/templates/kanban.html
+instance/kanban.db
+instance/kanban.db-shm
+instance/kanban.db-wal

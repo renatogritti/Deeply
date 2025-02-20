@@ -52,6 +52,15 @@ body {
     box-sizing: border-box;
 }
 
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    padding: 0 24px;
+    gap: 24px;
+}
+
 .header-left {
     display: flex;
     align-items: center;
@@ -301,6 +310,7 @@ body {
     overflow: hidden;
     will-change: transform;
     contain: content; /* Melhor performance no paint */
+    z-index: 1; /* Menor z-index para ficar atrás da sidebar */
 }
 
 .kanban-card:hover {
@@ -616,13 +626,13 @@ button[onclick*="cancel"]:hover {
 
 /* Adicione estes estilos ao final do arquivo styles.css */
 .sidebar {
-    width: 200px;
+    width: 80px; /* Reduzido de 200px */
     background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary-light) 100%);
     color: white;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-right: 1px solid var(--border-color);
-    padding: 24px 16px;
+    padding: 16px 8px; /* Reduzido padding */
     height: calc(100vh - 64px);
     position: fixed;
     left: 0;
@@ -630,6 +640,14 @@ button[onclick*="cancel"]:hover {
     box-shadow: 2px 0 10px rgba(138, 5, 190, 0.3);
     margin-top: -1px;
     border-top: none;
+    overflow: hidden;
+    transition: width 0.3s ease;
+    z-index: 1000; /* Aumentar z-index para ficar acima dos cards */
+}
+
+.sidebar:hover {
+    width: 200px;
+    box-shadow: 4px 0 15px rgba(138, 5, 190, 0.2);
 }
 
 .sidebar-content {
@@ -659,27 +677,66 @@ button[onclick*="cancel"]:hover {
 /* Atualização dos estilos dos botões da sidebar */
 .sidebar-button {
     width: 100%;
-    padding: 12px 16px;
-    margin-bottom: 10px;
-    background: white;
-    border: none;
-    color: var(--primary-color);
+    padding: 12px;
+    margin-bottom: 8px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
     border-radius: 8px;
-    text-align: left;
+    text-align: center; /* Centralizado quando compacto */
     font-size: 14px;
-    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.sidebar-button:hover {
-    background: linear-gradient(135deg, white 0%, var(--primary-lighter) 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(138, 5, 190, 0.2);
 }
 
 .sidebar-button svg {
-    fill: var(--primary-color);
+    fill: white; /* Ícone branco por padrão */
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    transition: fill 0.3s ease;
+}
+
+.sidebar-button span {
+    display: none;
+    white-space: nowrap;
+    color: white; /* Texto branco por padrão */
+    transition: color 0.3s ease;
+}
+
+/* Estados hover */
+.sidebar-button:hover {
+    background: white;
+    border-color: white;
+    color: var(--primary-color);
+    transform: translateY(-1px);
+}
+
+.sidebar-button:hover svg {
+    fill: var(--primary-color); /* Ícone roxo no hover */
+}
+
+.sidebar-button:hover span {
+    color: var(--primary-color); /* Texto roxo no hover */
+}
+
+/* Ajustes quando a sidebar está expandida */
+.sidebar:hover .sidebar-button {
+    text-align: left;
+    justify-content: flex-start;
+    padding: 12px 16px;
+}
+
+.sidebar:hover .sidebar-button span {
+    display: inline;
+}
+
+.sidebar-button.share-button {
+    margin-top: 10px;
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .sidebar-filter {
@@ -731,8 +788,8 @@ button[onclick*="cancel"]:hover {
 
 /* Ajuste o frames-container para considerar a sidebar */
 .frames-container {
-    margin-left: 220px;
-    width: calc(100% - 220px);
+    margin-left: 80px; /* Mesma largura da sidebar */
+    width: calc(100% - 80px);
 }
 
 /* Adicione estes estilos ao arquivo */
@@ -955,6 +1012,10 @@ button[onclick*="cancel"]:hover {
 }
 
 .share-button {
+    display: none; /* Remove o estilo antigo */
+}
+
+.share-button {
     flex-shrink: 0; /* Impede que o botão encolha */
     background: white;
     border: none;
@@ -1072,4 +1133,65 @@ button[onclick*="cancel"]:hover {
 .config-modal button:hover {
     transform: translateY(-1px);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Header layout */
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    padding: 0 24px;
+    gap: 24px;
+}
+
+/* Barra de busca expandida à esquerda */
+.search-box {
+    flex: 1;
+    max-width: 800px; /* Aumentado de 600px */
+    background: white;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    padding: 4px 16px;
+    margin-right: auto;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Dropdown de projetos à direita */
+.project-filter {
+    width: 200px;
+    margin-left: auto;
+}
+
+.project-filter select {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: white;
+    border: 1px solid var(--border-color);
+    color: var(--primary-color);
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* Ajuste da sidebar para incluir botão de compartilhar */
+.sidebar-button {
+    width: 100%;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sidebar-button.share-button {
+    margin-top: 10px;
+    background: transparent;
+    color: white;
+}
+
+.sidebar-button.share-button:hover {
+    background: rgba(255, 255, 255, 0.1);
 }
