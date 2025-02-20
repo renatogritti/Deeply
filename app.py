@@ -353,7 +353,16 @@ def delete_project(project_id):
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400
-    
+
+# Atualize ou adicione esta rota
+@app.route('/api/projects/<int:project_id>', methods=['GET'])
+def get_project(project_id):
+    """Get a specific project by ID."""
+    try:
+        project = Project.query.get_or_404(project_id)
+        return jsonify(project.to_dict())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 404
 
 """
 share_kanban: Compartilhar o quadro Kanban

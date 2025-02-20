@@ -1289,3 +1289,64 @@ button[onclick*="cancel"]:hover {
         width: 100%;
     }
 }
+
+.project-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    margin: 8px 0;
+    background-color: var(--secondary-color);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.project-item:hover {
+    background-color: var(--primary-lighter);
+    transform: translateY(-1px);
+}
+
+.project-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.project-name {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.project-description {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.project-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.project-actions button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.project-actions .edit-btn {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.project-actions .delete-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.project-actions button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
