@@ -128,14 +128,15 @@ class Phase(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     order = db.Column(db.Integer, nullable=False)
-    project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id', ondelete='CASCADE'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
         return {
             'id': self.id,
             'name': self.name,
-            'order': self.order
+            'order': self.order,
+            'project_id': self.project_id
         }
 
 class KanbanCard(db.Model):

@@ -38,7 +38,7 @@
     </div>
 
     <div class="sidebar">
-        <button class="sidebar-button" onclick="openProjectModal()">
+        <button class="sidebar-button" onclick="window.location.href='/projects'">
             <svg viewBox="0 0 24 24">
                 <path fill="currentColor" d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
             </svg>
@@ -121,7 +121,7 @@
     </div>
 
 
-    <!-- Modifique o createModal, adicione o select de projeto antes do select de time -->
+    <!-- Modifique o createModal -->
     <div id="createModal" class="modal">
         <div class="modal-content">
             <h3>Create New Card</h3>
@@ -138,18 +138,7 @@
             <select id="newCardPhase" required>
                 <option value="">Select Phase</option>
             </select>
-            <select id="newCardTeam" style="display: none">
-                <option value="">Select Team</option>
-                {% for team in teams %}
-                    <option value="{{ team.id }}">{{ team.name }}</option>
-                {% endfor %}
-            </select>
-            <div class="tags-container">
-                <label>Tags:</label>
-                <div id="newCardTags" class="tags-selection">
-                    <!-- Tags will be added here -->
-                </div>
-            </div>
+            
             <div class="users-container">
                 <label>Assigned Users (Ctrl+Click for multiple):</label>
                 <select id="newCardUsers" multiple size="4">
@@ -157,6 +146,13 @@
                         <option value="{{ team.id }}">{{ team.name }}</option>
                     {% endfor %}
                 </select>
+            </div>
+            
+            <div class="tags-container">
+                <label>Tags:</label>
+                <div id="newCardTags" class="tags-selection">
+                    <!-- Tags will be added here -->
+                </div>
             </div>
             <button onclick="createNewCard()">Create</button>
             <button onclick="closeCreateModal()">Cancel</button>
@@ -215,26 +211,6 @@
             <input type="hidden" id="editTagId">
             <button onclick="saveTagEdit()">Save</button>
             <button onclick="closeEditTagModal()">Cancel</button>
-        </div>
-    </div>
-
-    <!-- Adicione o modal de projetos -->
-    <div id="projectModal" class="modal">
-        <div class="modal-content">
-            <h3>Manage Project</h3>
-            <input type="text" id="projectName" placeholder="Project Name">
-            <input type="text" id="projectDescription" placeholder="Project Description">
-            
-            <div class="phases-container">
-                <h4>Phases</h4>
-                <div id="phasesList">
-                    <!-- Phases will be added here -->
-                </div>
-                <button onclick="addPhaseInput()">Add Phase</button>
-            </div>
-            
-            <button onclick="createProject()">Add Project</button>
-            <button onclick="closeProjectModal()">Close</button>
         </div>
     </div>
 
@@ -336,23 +312,86 @@
         }
 
         function openNewCardModal(phase_id) {
-            const selectedProjectId = document.getElementById("projectFilter").value;
-            document.getElementById("createModal").style.display = "block";
+            const modal = document.getElementById("createModal");
             const newCardProject = document.getElementById("newCardProject");
+            const selectedProjectId = document.getElementById("projectFilter").value;
+
+            modal.style.display = "block";
             
-            if (selectedProjectId) {
-                newCardProject.value = selectedProjectId;
-                newCardProject.disabled = true;
-                loadPhasesByProject(selectedProjectId).then(() => {
-                    document.getElementById("newCardPhase").value = phase_id;
+            // Limpar campos
+            document.getElementById("newCardTitle").value = "";
+            document.getElementById("newCardDescription").value = "";
+            document.getElementById("newCardTempo").value = "";
+            document.getElementById("newCardDeadline").value = "";
+
+            // Carregar usuários primeiro
+            fetch('/api/teams')
+                .then(response => response.json())
+                .then(teams => {
+                    // Atualizar lista de usuários
+                    const userSelect = document.getElementById('newCardUsers');
+                    userSelect.innerHTML = teams.map(team => 
+                        `<option value="${team.id}">${team.name}</option>`
+                    ).join('');
+                    
+                    // Depois de carregar usuários, configurar projeto e fases
+                    if (selectedProjectId) {
+                        newCardProject.value = selectedProjectId;
+                        newCardProject.disabled = true;
+                        loadPhasesByProject(selectedProjectId).then(() => {
+                            if (phase_id) {
+                                document.getElementById("newCardPhase").value = phase_id.replace('phase_', '');
+                            }
+                        });
+                    }
+                    
+                    // Carregar tags
+                    loadTags();
+                })
+                .catch(error => {
+                    console.error('Error loading teams:', error);
+                    alert('Error loading users list');
                 });
-            } else {
-                newCardProject.disabled = false;
-                newCardProject.value = "";
-                document.getElementById('newCardPhase').innerHTML = '<option value="">Select Phase</option>';
-            }
         }
 
+        function loadTeamsList() {
+            return fetch('/api/teams')
+                .then(response => response.json())
+                .then(teams => {
+                    // Atualizar lista de usuários no modal de criar card
+                    const userSelect = document.getElementById('newCardUsers');
+                    if (userSelect) {
+                        userSelect.innerHTML = teams.map(team => 
+                            `<option value="${team.id}">${team.name}</option>`
+                        ).join('');
+                    }
+
+                    // Atualizar lista de usuários no modal de editar card
+                    const editUserSelect = document.getElementById('editCardUsers');
+                    if (editUserSelect) {
+                        editUserSelect.innerHTML = teams.map(team => 
+                            `<option value="${team.id}">${team.name}</option>`
+                        ).join('');
+                    }
+
+                    // Atualizar lista de times
+                    const teamsList = document.getElementById("teamsList");
+                    if (teamsList) {
+                        teamsList.innerHTML = teams.map(team => `
+                            <div class="team-item">
+                                <div>
+                                    <div>${team.name}</div>
+                                    <div style="font-size: 0.8em; color: #666;">${team.description}</div>
+                                </div>
+                                <div>
+                                    <button onclick="editTeam(${team.id})">Edit</button>
+                                    <button onclick="deleteTeam(${team.id})">Delete</button>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                });
+        }
 
         function closeCreateModal() {
             document.getElementById("createModal").style.display = "none";
@@ -374,7 +413,6 @@
             const tempo = document.getElementById("newCardTempo").value;
             const deadline = document.getElementById("newCardDeadline").value;
             const phase_id = document.getElementById("newCardPhase").value;
-            const teamId = document.getElementById("newCardTeam").value;
             const projectId = document.getElementById("newCardProject").value;
             const selectedTags = Array.from(document.querySelectorAll('#newCardTags input[type="checkbox"]:checked'))
                 .map(checkbox => parseInt(checkbox.value));
@@ -409,7 +447,6 @@
                     tempo: tempo,
                     deadline: deadline || null,
                     phase_id: phase_id,
-                    team_id: teamId || null,
                     project_id: projectId,
                     tag_ids: selectedTags,
                     user_ids: selectedUsers
@@ -418,24 +455,19 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    const teamSelect = document.getElementById("newCardTeam");
-                    const teamName = teamId ? teamSelect.options[teamSelect.selectedIndex].text : '';
-                    
                     const card = createCard(
                         id, 
                         title, 
                         description, 
                         tempo, 
-                        teamName, 
+                        null, // não tem mais team_name
                         data.card.tags,
                         projectId, 
                         deadline, 
                         data.card.users
                     );
 
-                    // Adiciona o card na coluna correta usando o phase_id
                     document.getElementById(`phase_${phase_id}`).appendChild(card);
-                    
                     closeCreateModal();
                     
                     document.querySelectorAll('#newCardTags input[type="checkbox"]').forEach(checkbox => {
@@ -1514,26 +1546,60 @@
             const phasesList = document.getElementById('phasesList');
             const phaseDiv = document.createElement('div');
             phaseDiv.className = 'phase-input';
+            phaseDiv.draggable = true;
             phaseDiv.innerHTML = `
-                <input type="text" placeholder="Phase Name" class="phase-name">
-                <button onclick="this.parentElement.remove()">Remove</button>
+                <span class="drag-handle">⋮</span>
+                <input type="text" class="phase-name" placeholder="Phase Name" required>
+                <button class="remove-phase" onclick="this.parentElement.remove()">&times;</button>
             `;
+            
+            // Adicionar eventos de drag and drop
+            phaseDiv.ondragstart = handleDragStart;
+            phaseDiv.ondragover = handleDragOver;
+            phaseDiv.ondrop = handleDrop;
+            
             phasesList.appendChild(phaseDiv);
         }
 
-        function getPhases() {
-            return Array.from(document.querySelectorAll('.phase-name'))
-                .map(input => ({
-                    name: input.value
-                }))
-                .filter(phase => phase.name.trim() !== '');
+        // Funções para drag and drop das fases
+        function handleDragStart(e) {
+            e.target.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', '');
         }
 
-        // Atualizar as funções de criação e edição de projeto
+        function handleDragOver(e) {
+            e.preventDefault();
+            const draggingElement = document.querySelector('.dragging');
+            const container = document.getElementById('phasesList');
+            const siblings = [...container.querySelectorAll('.phase-input:not(.dragging)')];
+            
+            const nextSibling = siblings.find(sibling => {
+                const rect = sibling.getBoundingClientRect();
+                return e.clientY < rect.top + rect.height / 2;
+            });
+            
+            if (nextSibling) {
+                container.insertBefore(draggingElement, nextSibling);
+            } else {
+                container.appendChild(draggingElement);
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            document.querySelector('.dragging').classList.remove('dragging');
+        }
+
+        // Função atualizada para criar projeto
         function createProject() {
-            const name = document.getElementById('projectName').value;
-            const description = document.getElementById('projectDescription').value;
-            const phases = getPhases();
+            const name = document.getElementById('projectName').value.trim();
+            const description = document.getElementById('projectDescription').value.trim();
+            const phaseInputs = document.querySelectorAll('.phase-name');
+            const phases = Array.from(phaseInputs)
+                .map(input => ({
+                    name: input.value.trim()
+                }))
+                .filter(phase => phase.name !== '');
 
             if (!name) {
                 alert('Project name is required!');
@@ -1542,6 +1608,12 @@
 
             if (phases.length === 0) {
                 alert('At least one phase is required!');
+                return;
+            }
+
+            // Verificar se todas as fases têm nome
+            if (phases.some(phase => !phase.name)) {
+                alert('All phases must have a name!');
                 return;
             }
 
@@ -1561,40 +1633,121 @@
                 if (data.success) {
                     closeProjectModal();
                     loadProjects();
+                    // Se houver um projeto selecionado, recarregue o board
+                    const selectedProject = document.getElementById('projectFilter').value;
+                    if (selectedProject) {
+                        loadBoard(selectedProject);
+                    }
                 } else {
                     alert('Error creating project: ' + data.error);
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error creating project');
             });
         }
 
         function loadPhasesByProject(projectId) {
             if (!projectId) {
                 document.getElementById('newCardPhase').innerHTML = '<option value="">Select Phase</option>';
-                return;
+                return Promise.resolve();
             }
 
-            fetch(`/api/cards/phases/${projectId}`)
+            return fetch(`/api/projects/${projectId}/phases`)
                 .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const phaseSelect = document.getElementById('newCardPhase');
-                        phaseSelect.innerHTML = '<option value="">Select Phase</option>' +
-                            data.phases.map(phase => 
-                                `<option value="${phase.id}">${phase.name}</option>`
-                            ).join('');
-                    } else {
-                        console.error('Error loading phases:', data.error);
-                    }
+                .then(phases => {
+                    const phaseSelect = document.getElementById('newCardPhase');
+                    phaseSelect.innerHTML = '<option value="">Select Phase</option>';
+                    phases.forEach(phase => {
+                        phaseSelect.innerHTML += `
+                            <option value="${phase.id}">${phase.name}</option>
+                        `;
+                    });
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => {
+                    console.error('Error loading phases:', error);
+                    alert('Error loading project phases');
+                });
         }
 
-        // Ao carregar a página
-        window.onload = function() {
-            loadTags();
-            loadTeams();
-            loadProjects();
-        };
+        // Modifique a função openNewCardModal
+        async function openNewCardModal(phase_id) {
+            try {
+                const modal = document.getElementById("createModal");
+                const newCardProject = document.getElementById("newCardProject");
+                const selectedProjectId = document.getElementById("projectFilter").value;
+
+                // Mostrar modal
+                modal.style.display = "block";
+
+                // Limpar campos
+                document.getElementById("newCardTitle").value = "";
+                document.getElementById("newCardDescription").value = "";
+                document.getElementById("newCardTempo").value = "";
+                document.getElementById("newCardDeadline").value = "";
+
+                // Carregar dados (usuários e tags)
+                const { users, tags } = await loadModalData();
+
+                // Atualizar select de usuários
+                const userSelect = document.getElementById('newCardUsers');
+                userSelect.innerHTML = users.map(user => 
+                    `<option value="${user.id}">${user.name}</option>`
+                ).join('');
+
+                // Atualizar tags
+                const tagsContainer = document.getElementById('newCardTags');
+                if (tagsContainer) {
+                    tagsContainer.innerHTML = tags.map(tag => `
+                        <div class="tag-checkbox">
+                            <input type="checkbox" id="new_tag_${tag.id}" value="${tag.id}">
+                            <label for="new_tag_${tag.id}" style="background-color: ${tag.color}">${tag.name}</label>
+                        </div>
+                    `).join('');
+                }
+
+                // Configurar projeto e fases
+                if (selectedProjectId) {
+                    newCardProject.value = selectedProjectId;
+                    newCardProject.disabled = true;
+                    
+                    // Carregar fases do projeto
+                    await loadPhasesByProject(selectedProjectId);
+                    
+                    // Selecionar fase se fornecida
+                    if (phase_id) {
+                        const phaseValue = typeof phase_id === 'string' ? 
+                            phase_id.replace('phase_', '') : 
+                            phase_id.toString();
+                            
+                        document.getElementById("newCardPhase").value = phaseValue;
+                    }
+                }
+            } catch (error) {
+                console.error('Error opening modal:', error);
+                // Melhor tratamento de erro - mais informativo
+                alert('Error loading card creation form. Details: ' + error.message);
+            }
+        }
+
+        // Nova função para carregar usuários e tags
+        async function loadModalData() {
+            try {
+                // Carregar usuários
+                const usersResponse = await fetch('/api/teams');
+                const users = await usersResponse.json();
+                
+                // Carregar tags
+                const tagsResponse = await fetch('/api/tags');
+                const tags = await tagsResponse.json();
+                
+                return { users, tags };
+            } catch (error) {
+                console.error('Error loading modal data:', error);
+                throw error;
+            }
+        }
     </script>
     <footer class="footer">o, antes do </body> -->
         © 2024 GrittiCorp. All rights reserved.
@@ -1616,7 +1769,70 @@
             applyFilters();
         });
     </script>
+    <style>
+        .phases-container {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .phases-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .add-phase-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .phase-input {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+            align-items: center;
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .phase-input input {
+            flex: 1;
+            margin: 0;
+        }
+
+        .phase-input .drag-handle {
+            cursor: move;
+            color: #999;
+            padding: 0 5px;
+        }
+
+        .phase-input .remove-phase {
+            background: none;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+
+        .phase-instructions {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            color: #666;
+        }
+    </style>
 </body>
 </html>
-```
-</copilot-edited-file>

@@ -31,6 +31,11 @@ def index():
     
     return render_template('kanban.html', cards=cards, teams=teams, tags=tags, projects=projects)
 
+@app.route('/projects')
+def projects():
+    """Render the projects management page."""
+    projects = Project.query.all()
+    return render_template('projects.html', projects=projects)
 
 """
 KCRUD: Kanban Card CRUD Operations
@@ -309,15 +314,27 @@ def get_projects():
 
 @app.route('/api/projects', methods=['POST'])
 def create_project():
+    """Create a new project with phases."""
     try:
         data = request.json
+        
+        # Validações
+        if not data.get('name'):
+            return jsonify({"success": False, "error": "Project name is required"}), 400
+        
+        if not data.get('phases') or len(data['phases']) == 0:
+            return jsonify({"success": False, "error": "At least one phase is required"}), 400
+            
         project = Project(
             name=data['name'],
             description=data.get('description', '')
         )
         
         # Adicionar fases do projeto
-        for idx, phase_data in enumerate(data.get('phases', [])):
+        for idx, phase_data in enumerate(data['phases']):
+            if not phase_data.get('name'):
+                return jsonify({"success": False, "error": f"Phase {idx+1} name is required"}), 400
+                
             phase = Phase(
                 name=phase_data['name'],
                 order=idx,
@@ -328,28 +345,51 @@ def create_project():
         db.session.add(project)
         db.session.commit()
         return jsonify({"success": True, "project": project.to_dict()})
+        
     except Exception as e:
         db.session.rollback()
         return jsonify({"success": False, "error": str(e)}), 400
 
 @app.route('/api/projects/<int:project_id>', methods=['PUT'])
 def update_project(project_id):
+    """Update project and its phases."""
     try:
         project = Project.query.get_or_404(project_id)
         data = request.json
         
+        # Validações
+        if 'name' in data and not data['name']:
+            return jsonify({"success": False, "error": "Project name cannot be empty"}), 400
+            
+        if 'phases' in data and len(data['phases']) == 0:
+            return jsonify({"success": False, "error": "At least one phase is required"}), 400
+        
+        # Atualizar dados básicos do projeto
         if 'name' in data:
             project.name = data['name']
         if 'description' in data:
             project.description = data['description']
             
+        # Atualizar fases
         if 'phases' in data:
+            # Primeiro, verifique se há cards em alguma fase
+            cards_count = KanbanCard.query.filter_by(project_id=project_id).count()
+            if cards_count > 0:
+                return jsonify({
+                    "success": False, 
+                    "error": "Cannot modify phases while there are cards in the project"
+                }), 400
+            
+            # Se não houver cards, pode atualizar as fases
             # Remover fases antigas
             for phase in project.phases:
                 db.session.delete(phase)
             
             # Adicionar novas fases
             for idx, phase_data in enumerate(data['phases']):
+                if not phase_data.get('name'):
+                    return jsonify({"success": False, "error": f"Phase {idx+1} name is required"}), 400
+                    
                 phase = Phase(
                     name=phase_data['name'],
                     order=idx,
@@ -359,6 +399,7 @@ def update_project(project_id):
         
         db.session.commit()
         return jsonify({"success": True, "project": project.to_dict()})
+        
     except Exception as e:
         db.session.rollback()
         return jsonify({"success": False, "error": str(e)}), 400
