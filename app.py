@@ -39,13 +39,14 @@ This module provides REST API endpoints for managing Kanban cards.
 
 @app.route('/api/cards', methods=['GET'])
 def get_cards():
-    """
-    Get all Kanban cards.
+    """Get all Kanban cards or filter by project_id."""
+    project_id = request.args.get('project_id')
     
-    Returns:
-        JSON: List of all cards in the system
-    """
-    cards = KanbanCard.query.all()
+    if project_id:
+        cards = KanbanCard.query.filter_by(project_id=project_id).all()
+    else:
+        cards = KanbanCard.query.all()
+    
     return jsonify([card.to_dict() for card in cards])
 
 @app.route('/api/cards', methods=['POST'])
@@ -58,7 +59,7 @@ def create_card():
         title: string
         description: string
         tempo: string
-        column: string
+        phase_id: integer
         team_id: integer (optional)
     
     Returns:
@@ -80,10 +81,10 @@ def create_card():
             title=data['title'],
             description=data['description'],
             tempo=data['tempo'],
-            deadline=deadline,  # Add this line
-            column=data['column'],
-            team_id=data.get('team_id'),  # Mantenha para compatibilidade
-            project_id=data['project_id']  # Adicione esta linha
+            deadline=deadline,
+            phase_id=data['phase_id'],  # Use phase_id
+            team_id=data.get('team_id'),
+            project_id=data['project_id']
         )
         
         # Add tags if provided
@@ -91,7 +92,7 @@ def create_card():
             tags = Tag.query.filter(Tag.id.in_(data['tag_ids'])).all()
             card.tags = tags
 
-        # Adicione os usuários selecionados
+        # Add selected users
         if 'user_ids' in data:
             users = Team.query.filter(Team.id.in_(data['user_ids'])).all()
             card.users = users
@@ -114,7 +115,6 @@ def update_card(card_id):
         title: string
         description: string
         tempo: string
-        column: string
         team_id: integer
     
     Returns:
@@ -133,8 +133,8 @@ def update_card(card_id):
         if 'deadline' in data:
             # Convert deadline string to datetime if provided
             card.deadline = datetime.strptime(data['deadline'], '%Y-%m-%d') if data['deadline'] else None
-        if 'column' in data:
-            card.column = data['column']
+        if 'phase_id' in data:  # Atualizado: usar phase_id ao invés de column
+            card.phase_id = data['phase_id']
         if 'team_id' in data:
             card.team_id = data['team_id']
         if 'tag_ids' in data:
@@ -152,7 +152,9 @@ def update_card(card_id):
 def get_card(card_id):
     try:
         card = KanbanCard.query.get_or_404(card_id)
-        return jsonify(card.to_dict())
+        card_data = card.to_dict()
+        card_data['users'] = [user.to_dict() for user in card.users]  # Adiciona explicitamente os usuários
+        return jsonify(card_data)
     except Exception as e:
         print(f"Error getting card {card_id}: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 404
@@ -166,10 +168,6 @@ def delete_card(card_id):
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400
-
-
-
-
 
 
 """
@@ -246,8 +244,6 @@ def delete_team(team_id):
         return jsonify({"success": False, "error": str(e)}), 400
 
 
-
-
 """
 KCRUD: Kanban Tag CRUD Operations
 This module provides REST API endpoints for managing Kanban tags.
@@ -266,7 +262,7 @@ def get_tag(tag_id):
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 404
 
-@app.route('/api/tags', methods=['POST'])
+@app.route('/api/tags', methods=['POST'])  # Corrigido: methods=['POST'] ao invés de methods['POST']
 def create_tag():
     try:
         data = request.json
@@ -291,7 +287,7 @@ def update_tag(tag_id):
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400
 
-@app.route('/api/tags/<int:tag_id>', methods=['DELETE'])
+@app.route('/api/tags/<int:tag_id>', methods=['DELETE'])  # Corrigido: methods=['DELETE'] ao invés de methods['DELETE']
 def delete_tag(tag_id):
     try:
         tag = Tag.query.get_or_404(tag_id)
@@ -302,16 +298,11 @@ def delete_tag(tag_id):
         return jsonify({"success": False, "error": str(e)}), 400
 
 
-
-
-
-
-
 """
 KCRUD: Kanban User CRUD Operations
 This module provides REST API endpoints for managing Kanban users.
 """
-@app.route('/api/projects', methods=['GET'])
+@app.route('/api/projects', methods=['GET'])  # Corrigido: methods=['GET'] ao invés de methods['GET']
 def get_projects():
     projects = Project.query.all()
     return jsonify([project.to_dict() for project in projects])
@@ -324,10 +315,21 @@ def create_project():
             name=data['name'],
             description=data.get('description', '')
         )
+        
+        # Adicionar fases do projeto
+        for idx, phase_data in enumerate(data.get('phases', [])):
+            phase = Phase(
+                name=phase_data['name'],
+                order=idx,
+                project=project
+            )
+            db.session.add(phase)
+            
         db.session.add(project)
         db.session.commit()
         return jsonify({"success": True, "project": project.to_dict()})
     except Exception as e:
+        db.session.rollback()
         return jsonify({"success": False, "error": str(e)}), 400
 
 @app.route('/api/projects/<int:project_id>', methods=['PUT'])
@@ -335,14 +337,39 @@ def update_project(project_id):
     try:
         project = Project.query.get_or_404(project_id)
         data = request.json
+        
         if 'name' in data:
             project.name = data['name']
         if 'description' in data:
             project.description = data['description']
+            
+        if 'phases' in data:
+            # Remover fases antigas
+            for phase in project.phases:
+                db.session.delete(phase)
+            
+            # Adicionar novas fases
+            for idx, phase_data in enumerate(data['phases']):
+                phase = Phase(
+                    name=phase_data['name'],
+                    order=idx,
+                    project=project
+                )
+                db.session.add(phase)
+        
         db.session.commit()
         return jsonify({"success": True, "project": project.to_dict()})
     except Exception as e:
+        db.session.rollback()
         return jsonify({"success": False, "error": str(e)}), 400
+
+@app.route('/api/projects/<int:project_id>/phases', methods=['GET'])
+def get_project_phases(project_id):
+    try:
+        project = Project.query.get_or_404(project_id)
+        return jsonify([phase.to_dict() for phase in project.phases])
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 404
 
 @app.route('/api/projects/<int:project_id>', methods=['DELETE'])
 def delete_project(project_id):
@@ -363,6 +390,16 @@ def get_project(project_id):
         return jsonify(project.to_dict())
     except Exception as e:
         return jsonify({"error": str(e)}), 404
+
+@app.route('/api/cards/phases/<int:project_id>', methods=['GET'])
+def get_phases_for_card(project_id):
+    """Get phases for a specific project for card creation/editing."""
+    try:
+        project = Project.query.get_or_404(project_id)
+        phases = [phase.to_dict() for phase in project.phases]
+        return jsonify({"success": True, "phases": phases})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 404
 
 """
 share_kanban: Compartilhar o quadro Kanban
@@ -395,7 +432,7 @@ def share_kanban():
         # Cria o conteúdo do email
         board_summary = "\n".join([
             f"Card: {card['title']}\n"
-            f"Status: {card['column']}\n"
+            f"Fase: {card.phase.name if card.phase else 'Sem fase'}\n"  # Atualizado para usar phase
             f"Descrição: {card['description']}\n"
             f"-------------------"
             for card in cards_data

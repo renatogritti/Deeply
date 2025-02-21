@@ -68,12 +68,16 @@ class Project(db.Model):
     description = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     cards = db.relationship('KanbanCard', backref='project', lazy=True)
+    phases = db.relationship('Phase', backref='project', lazy=True, 
+                           order_by="Phase.order",
+                           cascade='all, delete-orphan')
 
     def to_dict(self):
         return {
             'id': self.id,
             'name': self.name,
-            'description': self.description
+            'description': self.description,
+            'phases': [phase.to_dict() for phase in self.phases]
         }
 
 class Tag(db.Model):
@@ -107,6 +111,33 @@ card_tags = db.Table('card_tags',
     db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True)
 )
 
+class Phase(db.Model):
+    """
+    Phase Model
+    
+    Represents a phase/column in a project's Kanban board
+    
+    Attributes:
+        id (int): Primary key
+        name (str): Phase name
+        order (int): Order of the phase in the project
+        project_id (int): Foreign key to Project model
+        created_at (datetime): Phase creation timestamp
+    """
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    order = db.Column(db.Integer, nullable=False)
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'order': self.order
+        }
+
 class KanbanCard(db.Model):
     """
     KanbanCard Model
@@ -120,7 +151,6 @@ class KanbanCard(db.Model):
         description (str): Card description
         tempo (str): Time estimate for the card
         deadline (DateTime): Optional deadline for the card
-        column (str): Current column/status of the card
         team_id (int): Foreign key to Team model
         project_id (int): Foreign key to Project model
         created_at (datetime): Card creation timestamp
@@ -131,7 +161,6 @@ class KanbanCard(db.Model):
     description = db.Column(db.Text, nullable=False)
     tempo = db.Column(db.String(20), nullable=False)
     deadline = db.Column(db.DateTime, nullable=True)  # Add this line
-    column = db.Column(db.String(20), nullable=False)
     team_id = db.Column(db.Integer, db.ForeignKey('team.id'))  # Mantenha para compatibilidade
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -139,6 +168,8 @@ class KanbanCard(db.Model):
                          backref=db.backref('cards', lazy=True))
     users = db.relationship('Team', secondary=card_users, lazy='subquery',
                           backref=db.backref('assigned_cards', lazy=True))
+    phase_id = db.Column(db.Integer, db.ForeignKey('phase.id'), nullable=False)
+    phase = db.relationship('Phase', backref='cards', lazy=True)
 
     def to_dict(self):
         """Convert card object to dictionary for JSON serialization."""
@@ -149,7 +180,7 @@ class KanbanCard(db.Model):
                 'description': self.description,
                 'tempo': self.tempo,
                 'deadline': self.deadline.isoformat() if self.deadline else None,  # Add this line
-                'column': self.column,
+                'phase_id': self.phase_id,
                 'team_id': self.team_id,
                 'project_id': self.project_id,
                 'team': {'id': self.team.id, 'name': self.team.name} if self.team else None,

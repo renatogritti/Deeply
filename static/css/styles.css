@@ -238,7 +238,8 @@ body {
 /* Column styles */
 .kanban-column {
     flex: 1;
-    min-width: 280px;
+    min-width: 250px;
+    max-width: 350px;
     background-color: var(--column-background);
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -1349,4 +1350,31 @@ button[onclick*="cancel"]:hover {
 .project-actions button:hover {
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.phases-container {
+    margin: 20px 0;
+    padding: 15px;
+    background: var(--secondary-color);
+    border-radius: 8px;
+}
+
+.phase-input {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0;
+    align-items: center;
+}
+
+.phase-input input {
+    flex: 1;
+}
+
+.phase-input button {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
 }

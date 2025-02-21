@@ -15,3 +15,6 @@ Backup/templates/kanban.html
 instance/kanban.db
 instance/kanban.db-shm
 instance/kanban.db-wal
+instance/Backup/kanban.db
+instance/Backup/kanban.db-shm
+instance/Backup/kanban.db-wal

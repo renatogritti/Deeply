@@ -72,30 +72,7 @@
     <div class="frames-container">
         <div class="board-frame">
             <div class="kanban-board">
-                <div class="kanban-column" id="parking" ondrop="drop(event)" ondragover="allowDrop(event)">
-                    <div class="column-header">
-                        <h2>Parking Lot</h2>
-                        <button class="add-card-button" onclick="openNewCardModal('parking')" title="Add new card">+</button>
-                    </div>
-                </div>
-                <div class="kanban-column" id="plan" ondrop="drop(event)" ondragover="allowDrop(event)">
-                    <div class="column-header">
-                        <h2>Plan</h2>
-                        <button class="add-card-button" onclick="openNewCardModal('plan')" title="Add new card">+</button>
-                    </div>
-                </div>
-                <div class="kanban-column" id="doing" ondrop="drop(event)" ondragover="allowDrop(event)">
-                    <div class="column-header">
-                        <h2>Doing</h2>
-                        <button class="add-card-button" onclick="openNewCardModal('doing')" title="Add new card">+</button>
-                    </div>
-                </div>
-                <div class="kanban-column" id="done" ondrop="drop(event)" ondragover="allowDrop(event)">
-                    <div class="column-header">
-                        <h2>Done</h2>
-                        <button class="add-card-button" onclick="openNewCardModal('done')" title="Add new card">+</button>
-                    </div>
-                </div>
+                <!-- As colunas serão geradas dinamicamente pelo JavaScript -->
             </div>
         </div>
     </div>
@@ -148,7 +125,7 @@
     <div id="createModal" class="modal">
         <div class="modal-content">
             <h3>Create New Card</h3>
-            <select id="newCardProject" required>
+            <select id="newCardProject" required onchange="loadPhasesByProject(this.value)">
                 <option value="">Select Project</option>
                 {% for project in projects %}
                     <option value="{{ project.id }}">{{ project.name }}</option>
@@ -158,11 +135,8 @@
             <input type="text" id="newCardDescription" placeholder="Description">
             <input type="text" id="newCardTempo" placeholder="Tempo (e.g., 2h)">
             <input type="date" id="newCardDeadline" placeholder="Deadline (opcional)">
-            <select id="newCardColumn">
-                <option value="parking">Parking Lot</option>
-                <option value="plan">Plan</option>
-                <option value="doing">Doing</option>
-                <option value="done">Done</option>
+            <select id="newCardPhase" required>
+                <option value="">Select Phase</option>
             </select>
             <select id="newCardTeam" style="display: none">
                 <option value="">Select Team</option>
@@ -247,14 +221,20 @@
     <!-- Adicione o modal de projetos -->
     <div id="projectModal" class="modal">
         <div class="modal-content">
-            <h3>Manage Projects</h3>
+            <h3>Manage Project</h3>
             <input type="text" id="projectName" placeholder="Project Name">
             <input type="text" id="projectDescription" placeholder="Project Description">
+            
+            <div class="phases-container">
+                <h4>Phases</h4>
+                <div id="phasesList">
+                    <!-- Phases will be added here -->
+                </div>
+                <button onclick="addPhaseInput()">Add Phase</button>
+            </div>
+            
             <button onclick="createProject()">Add Project</button>
             <button onclick="closeProjectModal()">Close</button>
-            <div id="projectsList">
-                <!-- Projects will be listed here -->
-            </div>
         </div>
     </div>
 
@@ -355,18 +335,21 @@
             return card;
         }
 
-        function openNewCardModal(column) {
+        function openNewCardModal(phase_id) {
             const selectedProjectId = document.getElementById("projectFilter").value;
             document.getElementById("createModal").style.display = "block";
-            document.getElementById("newCardColumn").value = column;
             const newCardProject = document.getElementById("newCardProject");
             
             if (selectedProjectId) {
                 newCardProject.value = selectedProjectId;
                 newCardProject.disabled = true;
+                loadPhasesByProject(selectedProjectId).then(() => {
+                    document.getElementById("newCardPhase").value = phase_id;
+                });
             } else {
                 newCardProject.disabled = false;
                 newCardProject.value = "";
+                document.getElementById('newCardPhase').innerHTML = '<option value="">Select Phase</option>';
             }
         }
 
@@ -390,7 +373,7 @@
             const description = document.getElementById("newCardDescription").value;
             const tempo = document.getElementById("newCardTempo").value;
             const deadline = document.getElementById("newCardDeadline").value;
-            const column = document.getElementById("newCardColumn").value;
+            const phase_id = document.getElementById("newCardPhase").value;
             const teamId = document.getElementById("newCardTeam").value;
             const projectId = document.getElementById("newCardProject").value;
             const selectedTags = Array.from(document.querySelectorAll('#newCardTags input[type="checkbox"]:checked'))
@@ -409,6 +392,11 @@
                 return;
             }
 
+            if (!phase_id) {
+                alert("Please select a phase!");
+                return;
+            }
+
             fetch('/api/cards', {
                 method: 'POST',
                 headers: {
@@ -420,7 +408,7 @@
                     description: description,
                     tempo: tempo,
                     deadline: deadline || null,
-                    column: column,
+                    phase_id: phase_id,
                     team_id: teamId || null,
                     project_id: projectId,
                     tag_ids: selectedTags,
@@ -444,7 +432,9 @@
                         deadline, 
                         data.card.users
                     );
-                    document.getElementById(column).appendChild(card);
+
+                    // Adiciona o card na coluna correta usando o phase_id
+                    document.getElementById(`phase_${phase_id}`).appendChild(card);
                     
                     closeCreateModal();
                     
@@ -501,15 +491,26 @@
                 teamSelect.value = "";
             }
 
+            // Limpar seleções anteriores
+            document.querySelectorAll('#editCardTags input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            
+            document.querySelectorAll('#editCardUsers option').forEach(option => {
+                option.selected = false;
+            });
+
             fetch(`/api/cards/${card.id}`)
                 .then(response => response.json())
                 .then(data => {
+                    // Atualizar tags
                     const cardTags = data.tags || [];
                     const checkboxes = document.querySelectorAll('#editCardTags input[type="checkbox"]');
                     checkboxes.forEach(checkbox => {
                         checkbox.checked = cardTags.some(tag => tag.id === parseInt(checkbox.value));
                     });
 
+                    // Atualizar usuários
                     const userSelect = document.getElementById('editCardUsers');
                     const cardUsers = data.users || [];
                     Array.from(userSelect.options).forEach(option => {
@@ -611,13 +612,14 @@
             const newColumn = event.target.closest('.kanban-column');
            
             if (newColumn) {
+                const phase_id = newColumn.id.replace('phase_', '');
                 fetch(`/api/cards/${data}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        column: newColumn.id
+                        phase_id: parseInt(phase_id)  // Atualizado: usar phase_id ao invés de column
                     })
                 })
                 .then(response => response.json())
@@ -980,19 +982,69 @@
 
 
         function applyFilters() {
-            const projectFilter = document.getElementById('projectFilter').value;
-            const cards = document.querySelectorAll('.kanban-card');
+            const projectId = document.getElementById('projectFilter').value;
+            
+            if (projectId) {
+                loadBoard(projectId);
+            } else {
+                document.querySelector('.kanban-board').innerHTML = '<p>Please select a project</p>';
+            }
+        }
 
-            cards.forEach(card => {
-                const cardProjectId = card.getAttribute('data-project-id');
-
-                if (!projectFilter) {
-                    card.style.display = 'block';
-                    return;
-                }
-
-                card.style.display = cardProjectId === projectFilter ? 'block' : 'none';
-            });
+        function loadBoard(projectId) {
+            // Primeiro, carregue as fases do projeto
+            fetch(`/api/projects/${projectId}/phases`)
+                .then(response => response.json())
+                .then(phases => {
+                    const board = document.querySelector('.kanban-board');
+                    board.innerHTML = '';
+                    
+                    // Crie uma coluna para cada fase
+                    phases.forEach(phase => {
+                        const column = document.createElement('div');
+                        column.className = 'kanban-column';
+                        column.id = `phase_${phase.id}`;
+                        column.setAttribute('ondrop', 'drop(event)');
+                        column.setAttribute('ondragover', 'allowDrop(event)');
+                        
+                        column.innerHTML = `
+                            <div class="column-header">
+                                <h2>${phase.name}</h2>
+                                <button class="add-card-button" onclick="openNewCardModal(${phase.id})" title="Add new card">+</button>
+                            </div>
+                        `;
+                        
+                        board.appendChild(column);
+                    });
+                    
+                    // Depois de criar as colunas, carregue os cards
+                    return fetch(`/api/cards?project_id=${projectId}`);
+                })
+                .then(response => response.json())
+                .then(cards => {
+                    // Adicione cada card na coluna correta
+                    cards.forEach(card => {
+                        const column = document.getElementById(`phase_${card.phase_id}`);
+                        if (column) {
+                            const cardElement = createCard(
+                                card.id,
+                                card.title,
+                                card.description,
+                                card.tempo,
+                                card.team?.name,
+                                card.tags,
+                                card.project_id,
+                                card.deadline,
+                                card.users
+                            );
+                            column.appendChild(cardElement);
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error loading board');
+                });
         }
 
 
@@ -1101,9 +1153,15 @@
         function createProject() {
             const name = document.getElementById("projectName").value;
             const description = document.getElementById("projectDescription").value;
+            const phases = getPhases();
 
             if (!name) {
-                alert("Project name is required!");
+                alert('Project name is required!');
+                return;
+            }
+
+            if (phases.length === 0) {
+                alert('At least one phase is required!');
                 return;
             }
 
@@ -1113,16 +1171,15 @@
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    name: name,
-                    description: description
+                    name,
+                    description,
+                    phases
                 })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    document.getElementById("projectName").value = "";
-                    document.getElementById("projectDescription").value = "";
-                    loadProjectsList();
+                    closeProjectModal();
                     loadProjects();
                 } else {
                     alert('Error creating project: ' + data.error);
@@ -1383,6 +1440,161 @@
                     alert('Error loading projects list');
                 });
         }
+
+        function loadBoard(projectId) {
+            if (!projectId) {
+                document.querySelector('.kanban-board').innerHTML = '<p>Please select a project</p>';
+                return;
+            }
+
+            fetch(`/api/projects/${projectId}/phases`)
+                .then(response => response.json())
+                .then(phases => {
+                    const board = document.querySelector('.kanban-board');
+                    board.innerHTML = '';
+                    
+                    phases.forEach(phase => {
+                        const column = document.createElement('div');
+                        column.className = 'kanban-column';
+                        column.id = `phase_${phase.id}`;
+                        column.setAttribute('ondrop', 'drop(event)');
+                        column.setAttribute('ondragover', 'allowDrop(event)');
+                        
+                        column.innerHTML = `
+                            <div class="column-header">
+                                <h2>${phase.name}</h2>
+                                <button class="add-card-button" onclick="openNewCardModal(${phase.id})" title="Add new card">+</button>
+                            </div>
+                        `;
+                        
+                        board.appendChild(column);
+                    });
+                    
+                    // Recarregar os cards do projeto
+                    loadProjectCards(projectId);
+                });
+        }
+
+        function loadProjectCards(projectId) {
+            fetch(`/api/cards?project_id=${projectId}`)
+                .then(response => response.json())
+                .then(cards => {
+                    // Limpar todos os cards existentes
+                    document.querySelectorAll('.kanban-card').forEach(card => card.remove());
+                    
+                    // Adicionar os cards nas colunas corretas
+                    cards.forEach(card => {
+                        const column = document.getElementById(`phase_${card.phase_id}`);
+                        if (column) {
+                            column.appendChild(createCard(
+                                card.id,
+                                card.title,
+                                card.description,
+                                card.tempo,
+                                card.team?.name,
+                                card.tags,
+                                card.project_id,
+                                card.deadline,
+                                card.users
+                            ));
+                        }
+                    });
+                });
+        }
+
+        // Atualizar o event listener do filtro de projeto
+        document.getElementById('projectFilter').addEventListener('change', function(e) {
+            const projectId = e.target.value;
+            if (projectId) {
+                loadBoard(projectId);
+            }
+        });
+
+        function addPhaseInput() {
+            const phasesList = document.getElementById('phasesList');
+            const phaseDiv = document.createElement('div');
+            phaseDiv.className = 'phase-input';
+            phaseDiv.innerHTML = `
+                <input type="text" placeholder="Phase Name" class="phase-name">
+                <button onclick="this.parentElement.remove()">Remove</button>
+            `;
+            phasesList.appendChild(phaseDiv);
+        }
+
+        function getPhases() {
+            return Array.from(document.querySelectorAll('.phase-name'))
+                .map(input => ({
+                    name: input.value
+                }))
+                .filter(phase => phase.name.trim() !== '');
+        }
+
+        // Atualizar as funções de criação e edição de projeto
+        function createProject() {
+            const name = document.getElementById('projectName').value;
+            const description = document.getElementById('projectDescription').value;
+            const phases = getPhases();
+
+            if (!name) {
+                alert('Project name is required!');
+                return;
+            }
+
+            if (phases.length === 0) {
+                alert('At least one phase is required!');
+                return;
+            }
+
+            fetch('/api/projects', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name,
+                    description,
+                    phases
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeProjectModal();
+                    loadProjects();
+                } else {
+                    alert('Error creating project: ' + data.error);
+                }
+            });
+        }
+
+        function loadPhasesByProject(projectId) {
+            if (!projectId) {
+                document.getElementById('newCardPhase').innerHTML = '<option value="">Select Phase</option>';
+                return;
+            }
+
+            fetch(`/api/cards/phases/${projectId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const phaseSelect = document.getElementById('newCardPhase');
+                        phaseSelect.innerHTML = '<option value="">Select Phase</option>' +
+                            data.phases.map(phase => 
+                                `<option value="${phase.id}">${phase.name}</option>`
+                            ).join('');
+                    } else {
+                        console.error('Error loading phases:', data.error);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Ao carregar a página
+        window.onload = function() {
+            loadTags();
+            loadTeams();
+            loadProjects();
+        };
     </script>
     <footer class="footer">o, antes do </body> -->
         © 2024 GrittiCorp. All rights reserved.
@@ -1406,3 +1618,5 @@
     </script>
 </body>
 </html>
+```
+</copilot-edited-file>
