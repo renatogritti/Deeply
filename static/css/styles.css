@@ -614,10 +614,11 @@ button[onclick*="cancel"]:hover {
 }
 
 .tag-preview {
-    padding: 2px 8px;
-    border-radius: 12px;
+    padding: 6px 12px;
+    border-radius: 16px;
     color: white;
-    font-size: 12px;
+    font-size: 14px;
+    display: inline-block;
 }
 
 .tag-item button {
@@ -1654,4 +1655,77 @@ textarea.form-input {
 .compact-input {
     max-width: 300px;  /* Limita a largura máxima */
     width: 100%;       /* Mantém responsivo */
+}
+
+.color-input-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.color-input {
+    width: 100px !important;
+    height: 40px;
+    padding: 0 !important;
+    border: 2px solid var(--border-color);
+    cursor: pointer;
+}
+
+.color-input:hover {
+    border-color: var(--primary-light);
+}
+
+.tags-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tag-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.tag-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.tag-preview {
+    padding: 6px 12px;
+    border-radius: 16px;
+    color: white;
+    font-size: 14px;
+    min-width: 80px;
+    text-align: center;
+}
+
+.tag-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.color-input {
+    width: 100px !important;
+    height: 40px;
+    padding: 0 !important;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.color-input:hover {
+    border-color: var(--primary-light);
+}
+
+.form-input-wrapper small {
+    display: block;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    font-size: 12px;
 }

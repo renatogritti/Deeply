@@ -52,7 +52,7 @@
             <span>Manage Users</span>
         </button>
         
-        <button class="sidebar-button" onclick="openTagModal()">
+        <button class="sidebar-button" onclick="window.location.href='/tags'">
             <svg viewBox="0 0 24 24">
                 <path fill="currentColor" d="M5.5,7A1.5,1.5 0 0,1 4,5.5A1.5,1.5 0 0,1 5.5,4A1.5,1.5 0 0,1 7,5.5A1.5,1.5 0 0,1 5.5,7M21.41,11.58L12.41,2.58C12.05,2.22 11.55,2 11,2H4C2.89,2 2,2.89 2,4V11C2,11.55 2.22,12.05 2.59,12.41L11.58,21.41C11.95,21.77 12.45,22 13,22C13.55,22 14.05,21.77 14.41,21.41L21.41,14.41C21.78,14.05 22,13.55 22,13C22,12.44 21.77,11.94 21.41,11.58Z"/>
             </svg>
@@ -159,33 +159,6 @@
         </div>
     </div>
 
-
-    <!-- Add the Tag Management Modal -->
-    <div id="tagModal" class="modal">
-        <div class="modal-content">
-            <h3>Manage Tags</h3>
-            <input type="text" id="tagName" placeholder="Tag Name">
-            <input type="color" id="tagColor" value="#1a73e8">
-            <button onclick="createTag()">Add Tag</button>
-            <button onclick="closeTagModal()">Close</button>
-            <div id="tagsList">
-                <!-- Tags will be listed here -->
-            </div>
-        </div>
-    </div>
-
-
-    <!-- Adicionar modal de edição de tag -->
-    <div id="editTagModal" class="modal">
-        <div class="modal-content">
-            <h3>Edit Tag</h3>
-            <input type="text" id="editTagName" placeholder="Tag Name">
-            <input type="color" id="editTagColor">
-            <input type="hidden" id="editTagId">
-            <button onclick="saveTagEdit()">Save</button>
-            <button onclick="closeEditTagModal()">Cancel</button>
-        </div>
-    </div>
 
     <!-- Adicione o modal de compartilhamento -->
     <div id="shareModal" class="modal">
