@@ -93,7 +93,7 @@ class Tag(db.Model):
         created_at (datetime): Tag creation timestamp
     """
     
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)  # Corrigido aqui: removido o espaço entre primary e key
     name = db.Column(db.String(50), nullable=False, unique=True)
     color = db.Column(db.String(7), nullable=False, default="#1a73e8")  # Format: #RRGGBB
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -191,3 +191,29 @@ class KanbanCard(db.Model):
         except Exception as e:
             print(f"Error serializing card {self.id}: {str(e)}")
             return {}
+
+class Share(db.Model):
+    """
+    Share Model
+    
+    Represents a share record in the Kanban board application.
+    
+    Attributes:
+        id (int): Primary key
+        email (str): Email address of the recipient
+        message (str): Optional message included with the share
+        created_at (datetime): Share creation timestamp
+    """
+    
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(100), nullable=False)
+    message = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'email': self.email,
+            'message': self.message,
+            'created_at': self.created_at.isoformat()
+        }

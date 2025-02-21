@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share Management - Kanban Board</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="{{ url_for('static', filename='js/share.js') }}" defer></script>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/" class="back-button">
+                <svg viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"/>
+                </svg>
+                Back to Board
+            </a>
+            <h1>Share Management</h1>
+        </div>
+    </div>
+
+    <div class="share-container">
+        <!-- Form para compartilhar (à esquerda) -->
+        <div class="new-share-form">
+            <h2>Share Kanban</h2>
+            <form id="shareForm">
+                <div class="form-group">
+                    <label for="shareEmail">Email Address*</label>
+                    <div class="form-input-wrapper">
+                        <input type="email" id="shareEmail" class="form-input compact-input" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="shareMessage">Message (optional)</label>
+                    <div class="form-input-wrapper">
+                        <textarea id="shareMessage" class="form-input compact-textarea" rows="2" style="min-height: 60px; max-height: 120px; width: 300px;" placeholder="Add a personal message..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="primary-button">Share Board</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Lista de compartilhamentos existentes (à direita) -->
+        <div class="share-list">
+            <h2>Share History</h2>
+            <div id="sharesList" class="shares-list-container"></div>
+        </div>
+    </div>
+</body>
+</html>

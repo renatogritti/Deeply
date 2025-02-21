@@ -59,11 +59,11 @@
             <span>Manage Tags</span>
         </button>
         
-        <button class="sidebar-button" onclick="openShareModal()">
+        <button class="sidebar-button" onclick="window.location.href='/share'">
             <svg viewBox="0 0 24 24">
                 <path fill="currentColor" d="M18,16.08C17.24,16.08 16.56,16.38 16.04,16.85L8.91,12.7C8.96,12.47 9,12.24 9,12C9,11.76 8.96,11.53 8.91,11.3L15.96,7.19C16.5,7.69 17.21,8 18,8A3,3 0 0,0 21,5A3,3 0 0,0 18,2A3,3 0 0,0 15,5C15,5.24 15.04,5.47 15.09,5.7L8.04,9.81C7.5,9.31 6.79,9 6,9A3,3 0 0,0 3,12A3,3 0 0,0 6,15C6.79,15 7.5,14.69 8.04,14.19L15.16,18.34C15.11,18.55 15.08,18.77 15.08,19C15.08,20.61 16.39,21.91 18,21.91C19.61,21.91 20.92,20.61 20.92,19A2.92,2.92 0 0,0 18,16.08Z"/>
             </svg>
-            <span>Share</span>
+            <span>Share Board</span>
         </button>
     </div>
 
@@ -159,18 +159,6 @@
         </div>
     </div>
 
-
-    <!-- Adicione o modal de compartilhamento -->
-    <div id="shareModal" class="modal">
-        <div class="modal-content">
-            <h3>Compartilhar Kanban</h3>
-            <input type="email" id="shareEmail" placeholder="Digite o email para compartilhar">
-            <div class="share-buttons">
-                <button onclick="sendShareEmail()">Enviar</button>
-                <button onclick="closeShareModal()">Close</button>
-            </div>
-        </div>
-    </div>
 
     <!-- Adicione este modal após o projectModal -->
     <div id="editProjectModal" class="modal">
@@ -1013,36 +1001,101 @@
 
 
         function searchCards() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
             const cards = document.querySelectorAll('.kanban-card');
-            
-            cards.forEach(card => {
-                const title = card.querySelector('h3').textContent.toLowerCase();
-                const description = card.getAttribute('data-description').toLowerCase();
-                const tempo = card.querySelector('p:nth-child(2)').textContent.toLowerCase();
-                const tags = Array.from(card.querySelectorAll('.card-tag'))
-                    .map(tag => tag.textContent.toLowerCase());
-                const users = Array.from(card.querySelectorAll('.user-tag'))
-                    .map(user => user.textContent.toLowerCase());
-                const teamTag = card.querySelector('.team-tag');
-                const teamName = teamTag ? teamTag.textContent.toLowerCase() : '';
+            let visibleCount = 0;
 
-                const isVisible = title.includes(searchTerm) || 
-                                description.includes(searchTerm) || 
-                                tempo.includes(searchTerm) ||
-                                tags.some(tag => tag.includes(searchTerm)) ||
-                                users.some(user => user.includes(searchTerm)) ||
-                                teamName.includes(searchTerm);
-                
+            cards.forEach(card => {
+                if (!searchTerm) {
+                    card.style.display = 'block';
+                    card.querySelectorAll('.highlight').forEach(el => {
+                        el.outerHTML = el.textContent;
+                    });
+                    visibleCount++;
+                    return;
+                }
+
+                // Coleta todo o conteúdo pesquisável do card
+                const searchableContent = [
+                    card.querySelector('h3')?.textContent || '', // título
+                    card.getAttribute('data-description') || '', // descrição
+                    card.querySelector('p')?.textContent || '', // tempo
+                    card.querySelector('.card-deadline')?.textContent || '', // deadline
+                    card.querySelector('.team-tag')?.textContent || '', // time
+                    Array.from(card.querySelectorAll('.card-tag')).map(tag => tag.textContent).join(' '), // tags
+                    Array.from(card.querySelectorAll('.user-tag')).map(user => user.textContent).join(' ') // usuários
+                ].join(' ').toLowerCase();
+
+                const isVisible = searchableContent.includes(searchTerm);
                 card.style.display = isVisible ? 'block' : 'none';
+
+                if (isVisible) {
+                    visibleCount++;
+                    highlightSearchTerm(card, searchTerm);
+                }
             });
+
+            updateSearchPlaceholder(visibleCount);
         }
+
+        function highlightSearchTerm(card, searchTerm) {
+            // Remove destaques anteriores
+            card.querySelectorAll('.highlight').forEach(el => {
+                el.outerHTML = el.textContent;
+            });
+
+            // Função para adicionar destaque
+            const addHighlight = (element) => {
+                if (element && element.textContent) {
+                    element.innerHTML = element.textContent.replace(
+                        new RegExp(searchTerm, 'gi'),
+                        match => `<span class="highlight">${match}</span>`
+                    );
+                }
+            };
+
+            // Aplica destaque aos elementos
+            addHighlight(card.querySelector('h3')); // título
+            addHighlight(card.querySelector('p')); // descrição/tempo
+        }
+
+        function updateSearchPlaceholder(count) {
+            const searchInput = document.getElementById('searchInput');
+            if (!searchInput.value) {
+                searchInput.placeholder = 'Buscar por título, descrição, tags, usuários...';
+            } else {
+                searchInput.placeholder = count > 0 
+                    ? `${count} resultados encontrados` 
+                    : 'Nenhum resultado encontrado';
+            }
+        }
+
+        // Função de debounce para melhorar a performance
+        const debounce = (func, wait) => {
+            let timeout;
+            return (...args) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        };
+
+        // Aplica o debounce à função de busca
+        const debouncedSearch = debounce(searchCards, 300);
+
+        // Remove todos os outros event listeners de busca e adiciona apenas este
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                // Remove event listeners antigos
+                searchInput.replaceWith(searchInput.cloneNode(true));
+                
+                // Adiciona o novo event listener
+                document.getElementById('searchInput').addEventListener('input', debouncedSearch);
+            }
+        });
 
 
         document.getElementById('searchInput').placeholder = 'Buscar por título, descrição, tags, usuários...';
-
-
-        document.getElementById('searchInput').addEventListener('input', searchCards);
 
 
         document.addEventListener('click', function(e) {
@@ -1051,48 +1104,6 @@
             }
         });
 
-
-        function openShareModal() {
-            document.getElementById('shareModal').style.display = 'block';
-            document.getElementById('shareEmail').value = '';
-        }
-
-
-        function closeShareModal() {
-            document.getElementById('shareModal').style.display = 'none';
-        }
-
-
-        function sendShareEmail() {
-            const email = document.getElementById('shareEmail').value;
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            
-            if (!emailRegex.test(email)) {
-                alert('Por favor, insira um email válido');
-                return;
-            }
-
-            fetch('/api/share', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email: email })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Email enviado com sucesso!');
-                    closeShareModal();
-                } else {
-                    alert('Erro ao enviar email: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Erro ao enviar email');
-            });
-        }
 
         function toggleConfigModal() {
             const modal = document.getElementById('configModal');
@@ -1502,90 +1513,102 @@
             }
         }
     </script>
-    <footer class="footer">o, antes do </body> -->
+    <footer class="footer">
         © 2024 GrittiCorp. All rights reserved.
-    </footer>t { searchCards } from "{{ url_for('static', filename='js/modules/search.js') }}";
-</body> import { applyFilters } from "{{ url_for('static', filename='js/modules/filters.js') }}";
-</html> import { showModal, closeModal, openProjectModal, openTeamModal, openTagModal } from "{{ url_for('static', filename='js/modules/modals.js') }}";
-        import { loadProjects, loadProjectsList } from "{{ url_for('static', filename='js/crud/projects.js') }}";
-        import { loadTeams, loadTeamsList } from "{{ url_for('static', filename='js/crud/teams.js') }}";
-    
-        // Inicialização dos eventos
-        document.addEventListener('DOMContentLoaded', function() {
-            // Event Listeners
-            document.getElementById('searchInput').addEventListener('input', searchCards);
-            document.getElementById('projectFilter').addEventListener('change', applyFilters);
-            
-            // Initial Loads
-            loadTeams();
-            loadProjects();
-            applyFilters();
-        });
-    </script>
-    <style>
-        .phases-container {
-            margin: 20px 0;
-            padding: 15px;
-            background: #f5f5f5;
-            border-radius: 8px;
-        }
+    </footer>
 
-        .phases-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
+    <!-- Scripts -->
+    <script>
+// Função simplificada de busca
+function setupSearch() {
+    const searchInput = document.getElementById('searchInput');
+    if (!searchInput) return;
 
-        .add-phase-btn {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
+    // Remove event listeners anteriores
+    const newSearchInput = searchInput.cloneNode(true);
+    searchInput.parentNode.replaceChild(newSearchInput, searchInput);
 
-        .phase-input {
-            display: flex;
-            gap: 10px;
-            margin: 10px 0;
-            align-items: center;
-            background: white;
-            padding: 10px;
-            border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
+    let timeout = null;
+    newSearchInput.addEventListener('input', function() {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            const searchTerm = this.value.toLowerCase().trim();
+            const cards = document.querySelectorAll('.kanban-card');
+            let found = 0;
 
-        .phase-input input {
-            flex: 1;
-            margin: 0;
-        }
+            cards.forEach(card => {
+                // Reset highlights
+                card.querySelectorAll('.highlight').forEach(el => {
+                    el.outerHTML = el.textContent;
+                });
 
-        .phase-input .drag-handle {
-            cursor: move;
-            color: #999;
-            padding: 0 5px;
-        }
+                if (!searchTerm) {
+                    card.style.display = 'block';
+                    found++;
+                    return;
+                }
 
-        .phase-input .remove-phase {
-            background: none;
-            border: none;
-            color: #dc3545;
-            cursor: pointer;
-            padding: 0 5px;
-        }
+                // Busca em todos os campos do card
+                const content = [
+                    card.querySelector('h3')?.textContent,           // título
+                    card.getAttribute('data-description'),           // descrição
+                    card.querySelector('p')?.textContent,           // tempo
+                    card.querySelector('.card-deadline')?.textContent,  // deadline
+                    ...Array.from(card.querySelectorAll('.card-tag')).map(tag => tag.textContent),    // tags
+                    ...Array.from(card.querySelectorAll('.user-tag')).map(user => user.textContent)   // usuários
+                ].filter(Boolean).join(' ').toLowerCase();
 
-        .phase-instructions {
-            margin-top: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            color: #666;
+                const isMatch = content.includes(searchTerm);
+                card.style.display = isMatch ? 'block' : 'none';
+                
+                if (isMatch) {
+                    found++;
+                    // Highlight matches
+                    highlightText(card, searchTerm);
+                }
+            });
+
+            // Update placeholder
+            this.placeholder = searchTerm ? 
+                `${found} resultado${found !== 1 ? 's' : ''} encontrado${found !== 1 ? 's' : ''}` : 
+                'Buscar por título, descrição, tags, usuários...';
+        }, 300);
+    });
+}
+
+function highlightText(card, term) {
+    const elements = [
+        card.querySelector('h3'),
+        card.querySelector('p'),
+        ...card.querySelectorAll('.card-tag'),
+        ...card.querySelectorAll('.user-tag')
+    ].filter(Boolean);
+
+    elements.forEach(el => {
+        if (el.textContent.toLowerCase().includes(term)) {
+            el.innerHTML = el.textContent.replace(
+                new RegExp(`(${term})`, 'gi'),
+                '<span class="highlight">$1</span>'
+            );
         }
-    </style>
+    });
+}
+
+// Inicializa a busca quando o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', setupSearch);
+</script>
+
+<style>
+.highlight {
+    background-color: rgba(138, 5, 190, 0.2);
+    border-radius: 2px;
+    padding: 0 2px;
+}
+
+#searchInput::placeholder {
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
+}
+</style>
 </body>
 </html>

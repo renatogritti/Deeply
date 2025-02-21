@@ -49,6 +49,11 @@ def tags():
     tags = Tag.query.all()
     return render_template('tags.html', tags=tags)
 
+@app.route('/share')
+def share():
+    """Render the share management page."""
+    return render_template('share.html')
+
 """
 KCRUD: Kanban Card CRUD Operations
 This module provides REST API endpoints for managing Kanban cards.
@@ -467,10 +472,15 @@ def share_kanban():
     try:
         data = request.json
         email = data.get('email')
+        message = data.get('message', '')
         
         if not email:
             return jsonify({"success": False, "error": "Email é obrigatório"}), 400
 
+        # Salva o registro de compartilhamento
+        share = Share(email=email, message=message)
+        db.session.add(share)
+        
         # Captura o estado atual do quadro
         cards = KanbanCard.query.all()
         cards_data = [card.to_dict() for card in cards]
@@ -485,18 +495,18 @@ def share_kanban():
         # Cria o conteúdo do email
         board_summary = "\n".join([
             f"Card: {card['title']}\n"
-            f"Fase: {card.phase.name if card.phase else 'Sem fase'}\n"  # Atualizado para usar phase
             f"Descrição: {card['description']}\n"
             f"-------------------"
             for card in cards_data
         ])
         
+        if message:
+            board_summary = f"Mensagem: {message}\n\n{board_summary}"
+        
         msg.body = f"""
         Olá!
         
         Alguém compartilhou um quadro Kanban com você.
-        
-        Resumo do quadro:
         
         {board_summary}
         
@@ -507,10 +517,76 @@ def share_kanban():
         """
         
         mail.send(msg)
+        db.session.commit()
         return jsonify({"success": True, "message": "Email enviado com sucesso!"})
         
     except Exception as e:
+        db.session.rollback()
         return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/shares', methods=['GET'])
+def get_shares():
+    """Get all shares history"""
+    try:
+        shares = Share.query.order_by(Share.created_at.desc()).all()
+        return jsonify([share.to_dict() for share in shares])
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
+@app.route('/api/share/<int:share_id>/resend', methods=['POST'])
+def resend_share(share_id):
+    try:
+        share = Share.query.get_or_404(share_id)
+        
+        # Reenviar o email
+        msg = Message(
+            subject='Kanban Board Compartilhado (Reenvio)',
+            sender=app.config['MAIL_USERNAME'],
+            recipients=[share.email]
+        )
+        
+        # Captura o estado atual do quadro
+        cards = KanbanCard.query.all()
+        cards_data = [card.to_dict() for card in cards]
+        
+        # Cria o conteúdo do email
+        board_summary = "\n".join([
+            f"Card: {card['title']}\n"
+            f"Descrição: {card['description']}\n"
+            f"-------------------"
+            for card in cards_data
+        ])
+        
+        if share.message:
+            board_summary = f"Mensagem: {share.message}\n\n{board_summary}"
+        
+        msg.body = f"""
+        Olá!
+        
+        Este é um reenvio do compartilhamento do quadro Kanban.
+        
+        {board_summary}
+        
+        Acesse o quadro em: http://seu-dominio/
+        
+        Atenciosamente,
+        Equipe Kanban
+        """
+        
+        mail.send(msg)
+        return jsonify({"success": True, "message": "Share resent successfully!"})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
+@app.route('/api/share/<int:share_id>', methods=['DELETE'])
+def revoke_share(share_id):
+    try:
+        share = Share.query.get_or_404(share_id)
+        db.session.delete(share)
+        db.session.commit()
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
 
 if __name__ == '__main__':
     app.run(debug=True)
