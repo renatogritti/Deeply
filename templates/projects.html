@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Management - Kanban Board</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="{{ url_for('static', filename='js/projects.js') }}" defer></script>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/" class="back-button">
+                <svg viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"/>
+                </svg>
+                Back to Board
+            </a>
+            <h1>Project Management</h1>
+        </div>
+    </div>
+
+    <div class="projects-container">
+        <!-- Form para criar novo projeto -->
+        <div class="new-project-form">
+            <h2>Create New Project</h2>
+            <form id="projectForm">
+                <div class="form-group">
+                    <label for="projectName">Project Name*</label>
+                    <div class="form-input-wrapper">
+                        <input type="text" id="projectName" class="form-input" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="projectDescription">Description</label>
+                    <div class="form-input-wrapper">
+                        <textarea id="projectDescription" class="form-input" rows="4" placeholder="Enter a description for your project..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="phases-section">
+                    <div class="phases-header">
+                        <h3>Phases</h3>
+                        <button type="button" onclick="addPhase()" class="add-phase-btn">
+                            <svg viewBox="0 0 24 24" width="16" height="16">
+                                <path fill="currentColor" d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+                            </svg>
+                            Add Phase
+                        </button>
+                    </div>
+                    
+                    <div id="phasesList" class="phases-list">
+                        <div class="phase-item">
+                            <span class="drag-handle">⋮</span>
+                            <input type="text" class="phase-name" placeholder="Phase Name" required>
+                        </div>
+                    </div>
+                    
+                    <div class="phase-instructions">
+                        <small>* At least one phase is required</small>
+                        <small>* Drag phases to reorder them</small>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="primary-button">Create Project</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Lista de projetos existentes -->
+        <div class="projects-list">
+            <h2>Existing Projects</h2>
+            <div id="projectsList">
+                {% for project in projects %}
+                <div class="project-card" data-id="{{ project.id }}">
+                    <div class="project-header">
+                        <h3>{{ project.name }}</h3>
+                        <div class="project-actions">
+                            <button onclick="editProject({{ project.id }})" class="edit-btn">Edit</button>
+                            <button onclick="deleteProject({{ project.id }})" class="delete-btn">Delete</button>
+                        </div>
+                    </div>
+                    <p class="project-description">{{ project.description or 'No description' }}</p>
+                    <div class="project-phases">
+                        <h4>Phases:</h4>
+                        <div class="phases-chips">
+                            {% for phase in project.phases %}
+                            <span class="phase-chip">{{ phase.name }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Drag and drop para as fases
+        let draggedItem = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setupDragAndDrop();
+            setupFormSubmission();
+        });
+
+        function setupDragAndDrop() {
+            const phasesList = document.getElementById('phasesList');
+            
+            phasesList.addEventListener('dragstart', e => {
+                if (e.target.classList.contains('phase-item')) {
+                    draggedItem = e.target;
+                    e.target.classList.add('dragging');
+                }
+            });
+
+            phasesList.addEventListener('dragend', e => {
+                if (e.target.classList.contains('phase-item')) {
+                    e.target.classList.remove('dragging');
+                }
+            });
+
+            phasesList.addEventListener('dragover', e => {
+                e.preventDefault();
+                if (draggedItem) {
+                    const closestPhase = getClosestPhase(phasesList, e.clientY);
+                    if (closestPhase) {
+                        phasesList.insertBefore(draggedItem, closestPhase);
+                    } else {
+                        phasesList.appendChild(draggedItem);
+                    }
+                }
+            });
+        }
+
+        function getClosestPhase(container, y) {
+            const draggableElements = [...container.querySelectorAll('.phase-item:not(.dragging)')];
+            
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        function addPhase() {
+            const phasesList = document.getElementById('phasesList');
+            const phaseDiv = document.createElement('div');
+            phaseDiv.className = 'phase-item';
+            phaseDiv.draggable = true;
+            phaseDiv.innerHTML = `
+                <span class="drag-handle">⋮</span>
+                <input type="text" class="phase-name" placeholder="Phase Name" required>
+                <button type="button" class="remove-phase" onclick="this.parentElement.remove()">&times;</button>
+            `;
+            phasesList.appendChild(phaseDiv);
+        }
+
+        function setupFormSubmission() {
+            document.getElementById('projectForm').onsubmit = async (e) => {
+                e.preventDefault();
+                
+                const phases = Array.from(document.querySelectorAll('.phase-name'))
+                    .map(input => ({ name: input.value.trim() }))
+                    .filter(phase => phase.name !== '');
+
+                if (phases.length === 0) {
+                    alert('At least one phase is required!');
+                    return;
+                }
+
+                const projectData = {
+                    name: document.getElementById('projectName').value,
+                    description: document.getElementById('projectDescription').value,
+                    phases: phases
+                };
+
+                try {
+                    const response = await fetch('/api/projects', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(projectData)
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        window.location.reload();
+                    } else {
+                        alert('Error creating project: ' + result.error);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error creating project');
+                }
+            };
+        }
+
+        // Funções para edição e exclusão
+        async function deleteProject(id) {
+            if (!confirm('Are you sure? This will delete all cards in this project.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/projects/${id}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                if (result.success) {
+                    window.location.reload();
+                } else {
+                    alert('Error deleting project: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error deleting project');
+            }
+        }
+
+        async function editProject(id) {
+            // Implementar edição de projeto
+            alert('Edit project feature coming soon!');
+        }
+    </script>
+</body>
+</html>
