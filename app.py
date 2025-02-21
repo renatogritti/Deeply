@@ -37,6 +37,12 @@ def projects():
     projects = Project.query.all()
     return render_template('projects.html', projects=projects)
 
+@app.route('/teams')
+def teams():
+    """Render the teams management page."""
+    teams = Team.query.all()
+    return render_template('teams.html', teams=teams)
+
 """
 KCRUD: Kanban Card CRUD Operations
 This module provides REST API endpoints for managing Kanban cards.

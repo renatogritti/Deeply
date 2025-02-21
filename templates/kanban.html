@@ -45,11 +45,11 @@
             <span>Manage Projects</span>
         </button>
         
-        <button class="sidebar-button" onclick="openTeamModal()">
+        <button class="sidebar-button" onclick="window.location.href='/teams'">
             <svg viewBox="0 0 24 24">
                 <path fill="currentColor" d="M12,5.5A3.5,3.5 0 0,1 15.5,9A3.5,3.5 0 0,1 12,12.5A3.5,3.5 0 0,1 8.5,9A3.5,3.5 0 0,1 12,5.5M5,8C5.56,8 6.08,8.15 6.53,8.42C6.38,9.85 6.8,11.27 7.66,12.38C7.16,13.34 6.16,14 5,14A3,3 0 0,1 2,11A3,3 0 0,1 5,8M19,8A3,3 0 0,1 22,11A3,3 0 0,1 19,14C17.84,14 16.84,13.34 16.34,12.38C17.2,11.27 17.62,9.85 17.47,8.42C17.92,8.15 18.44,8 19,8M5.5,18.25C5.5,16.18 8.41,14.5 12,14.5C15.59,14.5 18.5,16.18 18.5,18.25V20H5.5V18.25M0,20V18.5C0,17.11 1.89,15.94 4.45,15.6C3.86,16.28 3.5,17.22 3.5,18.25V20H0M24,20H20.5V18.25C20.5,17.22 20.14,16.28 19.55,15.6C22.11,15.94 24,17.11 24,18.5V20Z"/>
             </svg>
-            <span>Manage Teams</span>
+            <span>Manage Users</span>
         </button>
         
         <button class="sidebar-button" onclick="openTagModal()">
@@ -156,33 +156,6 @@
             </div>
             <button onclick="createNewCard()">Create</button>
             <button onclick="closeCreateModal()">Cancel</button>
-        </div>
-    </div>
-
-
-    <!-- Modifique o Team Management Modal -->
-    <div id="teamModal" class="modal">
-        <div class="modal-content">
-            <h3>Manage Users</h3>
-            <input type="text" id="teamName" placeholder="Nome do Usuário" required>
-            <input type="email" id="teamDescription" placeholder="Email" required>
-            <button onclick="createTeam()">Add User</button>
-            <button onclick="closeTeamModal()">Close</button>
-            <div id="teamsList">
-                <!-- Users will be listed here -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Modifique o Edit Team Modal -->
-    <div id="editTeamModal" class="modal">
-        <div class="modal-content">
-            <h3>Edit User</h3>
-            <input type="text" id="editTeamName" placeholder="Nome do Usuário" required>
-            <input type="email" id="editTeamDescription" placeholder="Email" required>
-            <input type="hidden" id="editTeamId">
-            <button onclick="saveTeamEdit()">Save</button>
-            <button onclick="closeEditTeamModal()">Cancel</button>
         </div>
     </div>
 
@@ -667,192 +640,6 @@
         }
 
 
-        function createTeam() {
-            const name = document.getElementById("teamName").value.trim();
-            const email = document.getElementById("teamDescription").value.trim();
-            
-            if (!name) {
-                alert("Nome do usuário é obrigatório!");
-                return;
-            }
-
-            if (!email) {
-                alert("Email é obrigatório!");
-                return;
-            }
-
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                alert("Por favor, insira um endereço de email válido!");
-                return;
-            }
-
-            fetch('/api/teams', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name: name,
-                    description: email
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById("teamName").value = "";
-                    document.getElementById("teamDescription").value = "";
-                    loadTeams();
-                    loadTeamsList();
-                } else {
-                    alert('Error creating user: ' + data.error);
-                }
-            });
-        }
-
-
-        function loadTeams() {
-            fetch('/api/teams')
-                .then(response => response.json())
-                .then(teams => {
-                    const teamSelect = document.getElementById("newCardTeam");
-                    teamSelect.innerHTML = '<option value="">Select Team</option>';
-                    teams.forEach(team => {
-                        teamSelect.innerHTML += `<option value="${team.id}">${team.name}</option>`;
-                    });
-                });
-        }
-
-
-        function openTeamModal() {
-            showModal('teamModal');
-            loadTeamsList();
-        }
-
-
-        function closeTeamModal() {
-            document.getElementById("teamModal").style.display = "none";
-        }
-
-
-        function loadTeamsList() {
-            fetch('/api/teams')
-                .then(response => response.json())
-                .then(teams => {
-                    const teamsList = document.getElementById("teamsList");
-                    teamsList.innerHTML = '';
-                   
-                    teams.forEach(team => {
-                        teamsList.innerHTML += `
-                            <div class="team-item">
-                                <div>
-                                    <div>${team.name}</div>
-                                    <div style="font-size: 0.8em; color: #666;">${team.description}</div>
-                                </div>
-                                <div>
-                                    <button onclick="editTeam(${team.id})">Edit</button>
-                                    <button onclick="deleteTeam(${team.id})">Delete</button>
-                                </div>
-                            </div>
-                        `;
-                    });
-
-                    const teamSelects = ['newCardTeam', 'editCardTeam'];
-                    teamSelects.forEach(selectId => {
-                        const select = document.getElementById(selectId);
-                        if (select) {
-                            select.innerHTML = '<option value="">Select User</option>';
-                            teams.forEach(team => {
-                                select.innerHTML += `<option value="${team.id}">${team.name}</option>`;
-                            });
-                        }
-                    });
-                });
-        }
-
-
-        function editTeam(teamId) {
-            fetch(`/api/teams/${teamId}`)
-                .then(response => response.json())
-                .then(team => {
-                    document.getElementById("editTeamId").value = teamId;
-                    document.getElementById("editTeamName").value = team.name;
-                    document.getElementById("editTeamDescription").value = team.description;
-                    document.getElementById("editTeamModal").style.display = "block";
-                })
-                .catch(error => alert('Error loading team data'));
-        }
-
-
-        function closeEditTeamModal() {
-            document.getElementById("editTeamModal").style.display = "none";
-        }
-
-
-        function saveTeamEdit() {
-            const id = document.getElementById("editTeamId").value;
-            const name = document.getElementById("editTeamName").value.trim();
-            const email = document.getElementById("editTeamDescription").value.trim();
-
-            if (!name) {
-                alert("Nome do usuário é obrigatório!");
-                return;
-            }
-
-            if (!email) {
-                alert("Email é obrigatório!");
-                return;
-            }
-
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                alert("Por favor, insira um endereço de email válido!");
-                return;
-            }
-
-            fetch(`/api/teams/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name: name,
-                    description: email
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    loadTeams();
-                    loadTeamsList();
-                    closeEditTeamModal();
-                } else {
-                    alert('Error updating team: ' + data.error);
-                }
-            })
-            .catch(error => alert('Error updating team'));
-        }
-
-
-        function deleteTeam(teamId) {
-            if (confirm('Are you sure you want to delete this team?')) {
-                fetch(`/api/teams/${teamId}`, {
-                    method: 'DELETE'
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        loadTeams();
-                        loadTeamsList();
-                    } else {
-                        alert('Error deleting team: ' + data.error);
-                    }
-                })
-                .catch(error => alert('Error deleting team'));
-            }
-        }
-
-
         function loadTags() {
             fetch('/api/tags')
                 .then(response => response.json())
@@ -1114,12 +901,6 @@
         }
 
 
-        function openTeamModal() {
-            showModal('teamModal');
-            loadTeamsList();
-        }
-
-
         function openTagModal() {
             showModal('tagModal');
             loadTagsList();
@@ -1134,7 +915,6 @@
 
         window.onload = function() {
             loadTags();
-            loadTeams();
             loadProjects();
             applyFilters();
         };
