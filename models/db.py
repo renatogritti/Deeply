@@ -9,7 +9,7 @@ It includes models for Kanban cards, teams, tags, and projects.
 
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from config import *
+from app import *
 
 db = SQLAlchemy(app)
 

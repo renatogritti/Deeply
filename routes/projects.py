@@ -4,8 +4,8 @@ from datetime import datetime
 import json
 
 
-from config import *
-from db import *
+from app import *
+from models.db import *
 
 def init_app(app):
 

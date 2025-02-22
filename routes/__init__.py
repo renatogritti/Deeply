@@ -1,4 +1,4 @@
-from config import *
+from app import *
 
 from routes import (
     root,
