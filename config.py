@@ -9,6 +9,7 @@ It includes database connection details, email configuration, and other settings
 
 from flask import Flask
 
+
 # Configuração do Banco de Dados
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///kanban.db'
