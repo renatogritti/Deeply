@@ -12,7 +12,6 @@ from flask_session import Session
 
 app = Flask(__name__)
 app.secret_key = "uma_chave_muito_segura_aqui"  # Troque por uma chave segura!
-
 app.config['SESSION_TYPE'] = 'filesystem'  # Outras opções: redis, mongodb, sql
 Session(app)
 
