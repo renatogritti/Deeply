@@ -8,10 +8,17 @@ It includes database connection details, email configuration, and other settings
 """
 
 from flask import Flask
+from flask_session import Session
+
+app = Flask(__name__)
+app.secret_key = "uma_chave_muito_segura_aqui"  # Troque por uma chave segura!
+
+app.config['SESSION_TYPE'] = 'filesystem'  # Outras opções: redis, mongodb, sql
+Session(app)
+
 
 
 # Configuração do Banco de Dados
-app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///kanban.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -19,5 +26,13 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
+
+# Configuração do Usuario Master
 app.config['MAIL_USERNAME'] = 'seu-email@gmail.com'  # Substitua pelo seu email
 app.config['MAIL_PASSWORD'] = 'sua-senha-de-app'     # Substitua pela sua senha de app do Gmail
+
+# Configuração de Cookies
+app.config['SESSION_COOKIE_NAME'] = 'kanban_session'
+app.config['SESSION_COOKIE_SECURE'] = True  # Apenas via HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True  # Apenas acessível via HTTP, não JS
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Proteção contra CSRF
