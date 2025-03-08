@@ -71,6 +71,25 @@ def init_app(app):
         """Render the share management page."""
         return render_template('share.html')
 
+    @app.route('/calendar')
+    @login_required
+    def calendar():
+        """Render the calendar view page."""
+        cards_with_deadline = KanbanCard.query.filter(
+            KanbanCard.deadline.isnot(None)
+        ).order_by(KanbanCard.deadline).all()
+        
+        cards_without_deadline = KanbanCard.query.filter(
+            KanbanCard.deadline.is_(None)
+        ).all()
+        
+        projects = Project.query.all()
+        
+        return render_template('calendar.html',
+                             cards_with_deadline=cards_with_deadline,
+                             cards_without_deadline=cards_without_deadline,
+                             projects=projects)
+
     @app.route('/logout')
     def logout():
         """Logout user and clear session"""

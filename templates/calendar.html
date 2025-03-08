@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar View - Kanban Board</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}">
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.css' rel='stylesheet' />
+    <meta name="theme-color" content="#8A05BE">
+    <style>
+        .container-fluid {
+            padding-left: 80px; /* Ajuste para o sidebar */
+            height: calc(100vh - 120px); /* Altura total menos header e footer */
+            overflow: hidden;
+        }
+
+        .row {
+            height: 100%;
+        }
+
+        .col-md-7, .col-md-5 {
+            height: 100%;
+            padding: 15px;
+        }
+
+        .card {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-body {
+            flex: 1;
+            overflow: auto;
+        }
+
+        #calendar {
+            height: 100% !important;
+            min-height: 600px;
+        }
+
+        /* Ajustes para a lista de tarefas */
+        .card-body {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
+        }
+
+        .card-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .card-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .card-body::-webkit-scrollbar-thumb {
+            background-color: rgba(155, 155, 155, 0.5);
+            border-radius: 3px;
+        }
+
+        /* Ajustes responsivos */
+        @media (max-width: 768px) {
+            .container-fluid {
+                padding-left: 15px;
+                height: auto;
+            }
+
+            .row {
+                flex-direction: column;
+            }
+
+            .col-md-7, .col-md-5 {
+                height: auto;
+                max-height: 500px;
+            }
+        }
+
+        /* Estilo do filtro de projeto */
+        .project-filter {
+            margin-left: auto;  /* Alinha à direita */
+        }
+
+        .project-filter select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #fff;
+            color: #333;
+            font-size: 14px;
+            width: 200px;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M7 10l5 5 5-5H7z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 16px;
+        }
+
+        .project-filter select:hover {
+            border-color: #8A05BE;
+        }
+
+        .project-filter select:focus {
+            outline: none;
+            border-color: #8A05BE;
+            box-shadow: 0 0 0 2px rgba(138, 5, 190, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <svg class="logo" viewBox="0 0 24 24">
+                <path d="M4 3C2.89 3 2 3.89 2 5V19C2 20.11 2.89 21 22 19V5C22 3.89 21.11 3 20 3H4M4 5H20V19H4V5M6 7V17H10V7H6M12 7V11H16V7H12M12 13V17H16V13H12Z"/>
+            </svg>
+            <h1>Calendar View</h1>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <button class="sidebar-button" onclick="window.location.href='/kanban'">
+            <svg viewBox="0 0 24 24">
+                <path fill="currentColor" d="M4 3C2.89 3 2 3.89 2 5V19C2 20.11 2.89 21 22 19V5C22 3.89 21.11 3 20 3H4M4 5H20V19H4V5M6 7V17H10V7H6M12 7V11H16V7H12M12 13V17H16V13H12Z"/>
+            </svg>
+            <span>Back to Kanban</span>
+        </button>
+    </div>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <!-- Coluna do Calendário -->
+            <div class="col-md-7">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Calendário de Tarefas</h5>
+                            <div class="project-filter">
+                                <select id="projectFilter" onchange="filterCalendarEvents(this.value)">
+                                    <option value="">Todos os Projetos</option>
+                                    {% for project in projects %}
+                                        <option value="{{ project.id }}">{{ project.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="calendar"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coluna da Lista de Tarefas -->
+            <div class="col-md-5">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Lista de Tarefas por Prazo</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Tarefas com Deadline -->
+                        <div class="mb-4">
+                            <h6 class="border-bottom pb-2">Tarefas com Prazo</h6>
+                            {% for card in cards_with_deadline %}
+                            <div class="kanban-card">
+                                <h3>{{ card.title }}</h3>
+                                <p class="deadline">{{ card.deadline.strftime('%d/%m/%Y') }}</p>
+                                <p class="description">{{ card.description[:100] }}{% if card.description|length > 100 %}...{% endif %}</p>
+                                {% if card.tags %}
+                                <div class="card-tags">
+                                    {% for tag in card.tags %}
+                                    <span class="card-tag" style="background-color: {{ tag.color }}">{{ tag.name }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Tarefas sem Deadline -->
+                        <div>
+                            <h6 class="border-bottom pb-2">Tarefas sem Prazo</h6>
+                            {% for card in cards_without_deadline %}
+                            <div class="kanban-card">
+                                <h3>{{ card.title }}</h3>
+                                <p class="description">{{ card.description[:100] }}{% if card.description|length > 100 %}...{% endif %}</p>
+                                {% if card.tags %}
+                                <div class="card-tags">
+                                    {% for tag in card.tags %}
+                                    <span class="card-tag" style="background-color: {{ tag.color }}">{{ tag.name }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/pt-br.js'></script>
+    <script>
+        // Definir eventos iniciais para o calendário
+        const initialEvents = [
+            {% for card in cards_with_deadline %}
+            {
+                title: '{{ card.title }}',
+                start: '{{ card.deadline.strftime("%Y-%m-%d") }}',
+                description: '{{ card.description|replace("\n", " ")|replace("'", "\\'") }}',
+                backgroundColor: '{{ card.tags[0].color if card.tags else "#1a73e8" }}',
+                borderColor: '{{ card.tags[0].color if card.tags else "#1a73e8" }}',
+                textColor: '#ffffff'
+            },
+            {% endfor %}
+        ];
+    </script>
+    <script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
+
+    <footer class="footer">
+        © 2024 GrittiCorp. All rights reserved.
+    </footer>
+</body>
+</html>
