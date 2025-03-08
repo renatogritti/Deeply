@@ -1,0 +1,159 @@
+.docs-container {
+    padding: 0 20px 20px 20px; /* Remove padding-top pois agora é controlado pelo header-content */
+    height: calc(100vh - 180px);
+    margin-left: 80px; /* Adiciona margem para o sidebar */
+}
+
+.header-content {
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 15px;
+    margin-top: 80px; /* Adiciona margem superior para evitar sobreposição com o header */
+}
+
+.project-select {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    position: relative; /* Garante posicionamento correto */
+    z-index: 1; /* Garante que fique acima de outros elementos */
+}
+
+.project-select label {
+    font-weight: 500;
+    color: #333;
+    white-space: nowrap;
+}
+
+.project-select select {
+    flex: 1;
+    max-width: 300px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+    font-size: 14px;
+    color: #333;
+}
+
+.docs-content {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 20px;
+    height: 100%;
+}
+
+.docs-tree, .docs-files {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 15px;
+}
+
+.tree-header, .files-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.folder-item {
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.folder-item:hover {
+    background: #f5f5f5;
+}
+
+.folder-item.active {
+    background: #e9ecef;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.file-item:hover {
+    background: #f8f9fa;
+}
+
+.file-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-upload, .btn-new-folder {
+    background: #8A05BE;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-upload:hover, .btn-new-folder:hover {
+    background: #7004a1;
+}
+
+.file-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.file-controls button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: opacity 0.2s;
+}
+
+.file-controls button:hover {
+    opacity: 0.9;
+}
+
+.file-controls button svg {
+    margin-right: 4px;
+}
+
+.btn-download {
+    background: #28a745;
+    color: white;
+}
+
+.btn-delete {
+    background: #dc3545;
+    color: white;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+    .docs-container {
+        margin-left: 0;
+        padding: 15px;
+    }
+
+    .docs-content {
+        grid-template-columns: 1fr;
+    }
+
+    .docs-tree, .docs-files {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+}

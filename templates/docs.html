@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documents - Kanban Board</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/docs.css') }}">
+    <meta name="theme-color" content="#8A05BE">
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <svg class="logo" viewBox="0 0 24 24">
+                <path d="M14,17H7V15H14M17,13H7V11H17M17,9H7V7H17M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3Z"/>
+            </svg>
+            <h1>Documents</h1>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <button class="sidebar-button" onclick="window.location.href='/kanban'">
+            <svg viewBox="0 0 24 24">
+                <path fill="currentColor" d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M19,5V19H5V5H19Z"/>
+            </svg>
+            <span>Back to Kanban</span>
+        </button>
+    </div>
+
+    <div class="container-fluid mt-4">
+        <div class="docs-container">
+            <div class="header-content">
+                <div class="project-select">
+                    <label>Select Project:</label>
+                    <select id="projectFilter" onchange="loadProjectDocs(this.value)">
+                        <option value="">All Projects</option>
+                        {% for project in projects %}
+                            <option value="{{ project.id }}">{{ project.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="docs-content">
+                <div class="docs-tree">
+                    <div class="tree-header">
+                        <h3>Documents</h3>
+                        <button onclick="createFolder()" class="btn-new-folder">New Folder</button>
+                    </div>
+                    <div id="folderTree"></div>
+                </div>
+
+                <div class="docs-files">
+                    <div class="files-header">
+                        <h3>Files</h3>
+                        <div class="file-actions">
+                            <input type="file" id="fileUpload" style="display: none" multiple>
+                            <button onclick="document.getElementById('fileUpload').click()" class="btn-upload">
+                                Upload Files
+                            </button>
+                        </div>
+                    </div>
+                    <div id="filesList" class="files-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="createFolderModal" class="modal">
+        <div class="modal-content">
+            <h3>Create New Folder</h3>
+            <input type="text" id="folderName" placeholder="Folder Name">
+            <div class="modal-buttons">
+                <button onclick="confirmCreateFolder()">Create</button>
+                <button onclick="closeModal('createFolderModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        © 2024 GrittiCorp. All rights reserved.
+    </footer>
+    
+    <script src="{{ url_for('static', filename='js/docs.js') }}"></script>
+</body>
+</html>
