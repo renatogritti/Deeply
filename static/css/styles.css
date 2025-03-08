@@ -1793,7 +1793,69 @@ textarea.form-input {
     cursor: pointer;
 }
 
-/* ...existing code... */
+/* Pomodoro Widget Styles */
+.pomodoro-widget {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #fff;
+    padding: 2px 8px; /* Reduzido ainda mais o padding vertical */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 0 20px;
+}
+
+.timer-display {
+    font-size: 16px; /* Reduzido ainda mais o tamanho da fonte */
+    font-weight: bold;
+    color: #8A05BE;
+    font-family: monospace;
+    line-height: 1;
+}
+
+.timer-controls {
+    display: flex;
+    gap: 2px;
+    margin: 1px 0; /* Reduzido margin vertical */
+}
+
+.timer-button {
+    padding: 1px; /* Reduzido padding */
+    background: none;
+    border: none; /* Removida a borda */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.timer-button svg {
+    width: 12px; /* Reduzido tamanho do ícone */
+    height: 12px;
+    color: #8A05BE;
+}
+
+.timer-mode {
+    display: flex;
+    gap: 2px;
+}
+
+.mode-button {
+    padding: 1px 4px; /* Reduzido padding */
+    font-size: 10px; /* Reduzido tamanho da fonte */
+    background: none;
+    border: none; /* Removida a borda */
+    color: #666;
+    cursor: pointer;
+}
+
+.mode-button.active {
+    background: rgba(138, 5, 190, 0.1);
+    color: #8A05BE;
+    border-radius: 8px;
+}
+
+/* ...rest of existing code... */
 
 .compact-textarea {
     max-width: 300px !important;  /* Força uma largura máxima */
