@@ -12,21 +12,19 @@ from flask_session import Session
 
 app = Flask(__name__)
 app.secret_key = "uma_chave_muito_segura_aqui"  # Troque por uma chave segura!
-app.config['SESSION_TYPE'] = 'filesystem'  # Outras opções: redis, mongodb, sql
-Session(app)
-
-
 
 # Configuração do Banco de Dados
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///kanban.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Configuração da Sessão
+app.config['SESSION_TYPE'] = 'filesystem'
+Session(app)
+
 # Configuração do Email
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-
-# Configuração do Usuario Master
 app.config['MAIL_USERNAME'] = 'seu-email@gmail.com'  # Substitua pelo seu email
 app.config['MAIL_PASSWORD'] = 'sua-senha-de-app'     # Substitua pela sua senha de app do Gmail
 

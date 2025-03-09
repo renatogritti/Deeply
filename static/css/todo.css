@@ -1,0 +1,226 @@
+.todo-container {
+    padding: 20px;
+    margin: 84px 20px 20px 100px;
+}
+
+.todo-lists {
+    display: flex;
+    gap: 24px;
+    padding: 20px;
+    overflow-x: auto;
+}
+
+.todo-list {
+    background: white;
+    border-radius: 12px;
+    min-width: 300px;
+    max-width: 300px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 20px;
+}
+
+.list-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--primary-lighter);
+}
+
+.list-header h3 {
+    margin: 0;
+    font-size: 20px;
+    color: var(--primary-color);
+    font-weight: 600;
+    text-align: center;
+    width: 100%;
+}
+
+.list-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    width: 100%;
+}
+
+.list-actions button,
+.task-actions button,
+.new-list-button {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    transition: all 0.2s ease;
+    background: white;
+    border: 1px solid #dadce0;
+    color: var(--primary-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.list-actions button svg,
+.task-actions button svg {
+    width: 16px;
+    height: 16px;
+}
+
+.list-actions button:hover,
+.task-actions button:hover,
+.new-list-button:hover {
+    background-color: var(--primary-lighter);
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 4px rgba(138, 5, 190, 0.2);
+}
+
+button[onclick*="create"],
+button[onclick*="add"],
+.new-list-button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+}
+
+button[onclick*="create"]:hover,
+button[onclick*="add"]:hover,
+.new-list-button:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(138, 5, 190, 0.2);
+}
+
+button[onclick*="delete"] {
+    color: var(--primary-color);
+    border-color: #dadce0;
+}
+
+button[onclick*="delete"]:hover {
+    background: var(--primary-lighter);
+}
+
+.task {
+    background: var(--primary-lighter);
+    border-radius: 8px;
+    padding: 16px 16px 16px 48px; /* Aumentado padding esquerdo para o checkbox */
+    margin-bottom: 12px;
+    cursor: move;
+    transition: all 0.2s ease;
+    position: relative;
+    border: 1px solid transparent;
+}
+
+.task:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(138, 5, 190, 0.15);
+    border-color: var(--primary-color);
+}
+
+.task.completed {
+    opacity: 0.7;
+    background: #f8f9fa;
+}
+
+.task.completed .task-title {
+    text-decoration: line-through;
+    color: var(--text-secondary);
+}
+
+.task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.task-title {
+    font-weight: 500;
+    color: var(--primary-color);
+    margin-right: 8px;
+}
+
+.task-checkbox {
+    position: absolute;
+    top: 50%;
+    left: 16px;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    opacity: 0;
+    z-index: 2;
+}
+
+.task-checkbox + label {
+    position: absolute;
+    top: 50%;
+    left: 16px;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    background: white;
+    border: 2px solid var(--primary-color);
+    border-radius: 50%; /* Deixa o checkbox circular */
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.task-checkbox:checked + label {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.task-checkbox:checked + label:after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
+}
+
+.priority-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    color: white;
+}
+
+.priority-Alta { background-color: #dc3545; }
+.priority-Media { background-color: #ffc107; }
+.priority-Baixa { background-color: #28a745; }
+
+.task.dragging {
+    opacity: 0.5;
+    box-shadow: 0 8px 16px rgba(138, 5, 190, 0.2);
+}
+
+.new-list-button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-right: 20px;
+    transition: all 0.2s ease;
+}
+
+.new-list-button:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(138, 5, 190, 0.2);
+}
+
+.task-actions {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.task:hover .task-actions {
+    opacity: 1;
+}

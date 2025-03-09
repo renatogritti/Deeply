@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TODO Lists - Kanban Board</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/todo.css') }}">
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/kanban" class="back-button">
+                <svg viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"/>
+                </svg>
+                Back to Board
+            </a>
+            <h1>My TODO Lists</h1>
+        </div>
+        <button class="new-list-button" onclick="openNewListModal()">New List</button>
+    </div>
+
+    <div class="todo-container">
+        <div id="todoLists" class="todo-lists"></div>
+    </div>
+
+    <!-- Modal para Nova Lista -->
+    <div id="newListModal" class="modal">
+        <div class="modal-content">
+            <h3>Create New List</h3>
+            <input type="text" id="listName" placeholder="List Name" required>
+            <textarea id="listDescription" placeholder="Description (optional)"></textarea>
+            <div class="modal-buttons">
+                <button onclick="createList()">Create</button>
+                <button onclick="closeModal('newListModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Nova Tarefa -->
+    <div id="newTaskModal" class="modal">
+        <div class="modal-content">
+            <h3>Create New Task</h3>
+            <input type="text" id="taskTitle" placeholder="Task Title" required>
+            <textarea id="taskDescription" placeholder="Description (optional)"></textarea>
+            <select id="taskPriority">
+                <option value="Alta">Alta</option>
+                <option value="Media" selected>Media</option>
+                <option value="Baixa">Baixa</option>
+            </select>
+            <input type="hidden" id="currentListId">
+            <div class="modal-buttons">
+                <button onclick="createTask()">Create</button>
+                <button onclick="closeModal('newTaskModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/todo.js') }}"></script>
+</body>
+</html>

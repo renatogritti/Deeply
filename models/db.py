@@ -9,10 +9,9 @@ It includes models for Kanban cards, teams, tags, and projects.
 
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from app import *
 import hashlib
 
-db = SQLAlchemy(app)
+db = SQLAlchemy()
 
 # Adicione esta nova tabela de associação após as importações existentes
 card_users = db.Table('card_users',
@@ -227,4 +226,45 @@ class Share(db.Model):
             'email': self.email,
             'message': self.message,
             'created_at': self.created_at.isoformat()
+        }
+
+class TodoList(db.Model):
+    """Lista de tarefas do usuário"""
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    order = db.Column(db.Integer, default=0)  # Para ordenação das listas
+    user_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    tasks = db.relationship('TodoTask', backref='list', lazy=True, cascade='all, delete-orphan')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'order': self.order,
+            'tasks': [task.to_dict() for task in self.tasks]
+        }
+
+class TodoTask(db.Model):
+    """Tarefas da lista"""
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    priority = db.Column(db.String(10), default='Media')  # Alta, Media, Baixa
+    completed = db.Column(db.Boolean, default=False)
+    order = db.Column(db.Integer, default=0)  # Para ordenação dentro da lista
+    list_id = db.Column(db.Integer, db.ForeignKey('todo_list.id', ondelete='CASCADE'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'description': self.description,
+            'priority': self.priority,
+            'completed': self.completed,
+            'order': self.order,
+            'list_id': self.list_id
         }
