@@ -4,17 +4,53 @@ from datetime import datetime
 import json
 import os
 from dotenv import load_dotenv
+import hashlib, secrets
+from functools import wraps
 
 from auth.authorization import login_required  # Importa o decorador de autenticação
 
 from app import *
 from models.db import *
 
+# Dicionário para controlar tentativas de login
+login_attempts = {}
+MAX_ATTEMPTS = 3
+BLOCK_TIME = 300  # 5 minutos em segundos
 
+def check_brute_force(ip):
+    """Verifica tentativas de força bruta"""
+    current_time = datetime.now().timestamp()
+    if ip in login_attempts:
+        attempts, blocked_until = login_attempts[ip]
+        if blocked_until and current_time < blocked_until:
+            return False
+        if attempts >= MAX_ATTEMPTS:
+            login_attempts[ip] = (attempts, current_time + BLOCK_TIME)
+            return False
+    return True
 
 load_dotenv()
 
+def regenerate_session():
+    """Regenera a sessão de forma segura"""
+    old_session = dict(session)
+    session.clear()
+    session.update(old_session)
+    session.modified = True
+
 def init_app(app):
+    @app.before_request
+    def check_session_timeout():
+        if 'usuario' in session:
+            last_activity = session.get('last_activity', 0)
+            now = datetime.now().timestamp()
+            
+            if now - last_activity > 1800:  # 30 minutos
+                session.clear()
+                return redirect(url_for('index'))
+            
+            session['last_activity'] = now
+
     @app.route('/')
     def index():
         """Render the login page"""
@@ -23,15 +59,43 @@ def init_app(app):
     @app.route('/validate_login', methods=['POST'])
     def validate_login():
         """Validate login credentials"""
+        ip = request.remote_addr
+        
+        if not check_brute_force(ip):
+            return jsonify({
+                "success": False, 
+                "message": "Muitas tentativas. Tente novamente em 5 minutos."
+            }), 429
+
         data = request.json
+        if not data or 'username' not in data or 'password' not in data:
+            return jsonify({"success": False, "message": "Dados inválidos"}), 400
+
+        # Hash da senha para comparação
+        password_hash = hashlib.sha256(data['password'].encode()).hexdigest()
+
+        
         if (data['username'] == os.getenv('ADMIN_USER') and 
-            data['password'] == os.getenv('ADMIN_PASSWORD')):
-            # Se as credenciais estão corretas, devemos:
+            password_hash == os.getenv('ADMIN_PASSWORD_HASH')):
+            
+            # Limpa tentativas anteriores
+            if ip in login_attempts:
+                del login_attempts[ip]
+                
+            # Regenera a sessão de forma segura
+            regenerate_session()
+            
             session['usuario'] = 'admin'
-            session['csrf_token'] = os.urandom(16).hex()
+            session['csrf_token'] = secrets.token_hex(32)
+            session['last_activity'] = datetime.now().timestamp()
+            
             return jsonify({"success": True})
-        # Se as credenciais estão incorretas:
-        return jsonify({"success": False, "message": "Usuário ou senha inválidos"})
+        
+        # Incrementa contador de tentativas
+        attempts, _ = login_attempts.get(ip, (0, None))
+        login_attempts[ip] = (attempts + 1, None)
+        
+        return jsonify({"success": False, "message": "Usuário ou senha inválidos"}), 401
 
     @app.route('/kanban')
     @login_required
