@@ -10,6 +10,7 @@ It includes models for Kanban cards, teams, tags, and projects.
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from app import *
+import hashlib
 
 db = SQLAlchemy(app)
 
@@ -31,6 +32,8 @@ class Team(db.Model):
         name (str): Team name, must be unique
         description (str): Team description
         created_at (datetime): Team creation timestamp
+        email (str): Team email, must be unique
+        password_hash (str): Hashed password for the team
         cards (relationship): Relationship with KanbanCard model
     """
     
@@ -38,6 +41,8 @@ class Team(db.Model):
     name = db.Column(db.String(100), nullable=False, unique=True)
     description = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    email = db.Column(db.String(100), nullable=False, unique=True)  # Adicionado campo email
+    password_hash = db.Column(db.String(256))  # Adicionado campo password_hash
     cards = db.relationship('KanbanCard', backref='team', lazy=True)
 
     def to_dict(self):
@@ -45,8 +50,14 @@ class Team(db.Model):
         return {
             'id': self.id,
             'name': self.name,
+            'email': self.email,  # Incluído email no retorno
             'description': self.description
         }
+    
+    def verify_password(self, password):
+        """Verifica se a senha fornecida corresponde ao hash armazenado"""
+        provided_hash = hashlib.sha256(password.encode()).hexdigest()
+        return provided_hash == self.password_hash
 
 class Project(db.Model):
     """

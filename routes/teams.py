@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import json
+import hashlib
 
 
 from app import *
@@ -39,9 +40,15 @@ def init_app(app):
     def create_team():
         try:
             data = request.json
+            # Gerar hash da senha padrão 'admin'
+            default_password = 'admin'
+            password_hash = hashlib.sha256(default_password.encode()).hexdigest()
+            
             team = Team(
                 name=data['name'],
-                description=data.get('description', '')
+                email=data.get('email', ''),  # Tornar email obrigatório
+                description=data.get('description', ''),
+                password_hash=password_hash  # Adicionar o hash da senha
             )
             db.session.add(team)
             db.session.commit()

@@ -68,29 +68,46 @@ def init_app(app):
             }), 429
 
         data = request.json
+        print("Dados recebidos:", data)  # Debug: mostra os dados recebidos
+        
         if not data or 'username' not in data or 'password' not in data:
             return jsonify({"success": False, "message": "Dados inválidos"}), 400
 
-        # Hash da senha para comparação
+        # Primeiro tenta login como admin master
         password_hash = hashlib.sha256(data['password'].encode()).hexdigest()
-
-        
         if (data['username'] == os.getenv('ADMIN_USER') and 
             password_hash == os.getenv('ADMIN_PASSWORD_HASH')):
             
-            # Limpa tentativas anteriores
             if ip in login_attempts:
                 del login_attempts[ip]
-                
-            # Regenera a sessão de forma segura
-            regenerate_session()
             
+            regenerate_session()
             session['usuario'] = 'admin'
             session['csrf_token'] = secrets.token_hex(32)
             session['last_activity'] = datetime.now().timestamp()
             
             return jsonify({"success": True})
         
+        # Se não for admin, tenta login como usuário normal
+        try:
+            user = Team.query.filter_by(email=data['username']).first()
+            
+            if user and user.verify_password(data['password']):
+                if ip in login_attempts:
+                    del login_attempts[ip]
+                
+                regenerate_session()
+                session['usuario'] = user.email
+                session['user_id'] = user.id
+                session['csrf_token'] = secrets.token_hex(32)
+                session['last_activity'] = datetime.now().timestamp()
+                
+                return jsonify({"success": True})
+        except Exception as e:
+            print(f"Erro ao verificar usuário: {str(e)}")
+            db.session.rollback()  # Adiciona rollback em caso de erro
+            return jsonify({"success": False, "message": f"Erro ao verificar usuário: {str(e)}"}), 500
+
         # Incrementa contador de tentativas
         attempts, _ = login_attempts.get(ip, (0, None))
         login_attempts[ip] = (attempts + 1, None)
