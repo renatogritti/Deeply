@@ -593,11 +593,17 @@ button[onclick*="cancel"]:hover {
 .frames-container {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 80px);
-    margin-left: 220px;
-    width: calc(100% - 220px);
-    padding: 0 20px;
-    margin-top: 64px; /* Espaço para o header fixo */
+    height: calc(100vh - 64px); /* Ajustado para considerar apenas o header */
+    margin-top: 48px; /* Reduzido de 64px para 48px */
+    margin-left: 80px;
+    width: calc(100% - 80px);
+    padding: 20px;
+    transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+.sidebar:hover + .frames-container {
+    margin-left: 200px;
+    width: calc(100% - 200px);
 }
 
 /* Estilos para a lista de tags */
@@ -1437,7 +1443,7 @@ button[onclick*="cancel"]:hover {
 /* Estilos para a página de projetos */
 .projects-container {
     padding: 24px;
-    margin-top: 64px;
+    margin-top: 48px; /* Reduzido de 64px para 48px */
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 24px;
@@ -1627,7 +1633,7 @@ textarea.form-input {
 
 .teams-container {
     padding: 24px;
-    margin-top: 64px;
+    margin-top: 48px; /* Reduzido de 64px para 48px */
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 24px;
@@ -1948,5 +1954,102 @@ textarea.form-input {
     .project-filter {
         width: 100%;
         margin-top: 8px;
+    }
+}
+
+/* Ajustes de frames e containers */
+.frames-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 80px);
+    margin-left: 80px; /* Reduzido para largura do sidebar compacto */
+    width: calc(100% - 80px);
+    padding: 20px;
+    margin-top: 64px;
+    transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+.sidebar:hover + .frames-container {
+    margin-left: 200px;
+    width: calc(100% - 200px);
+}
+
+/* Ajustes de responsividade */
+@media (max-width: 768px) {
+    .frames-container {
+        margin-left: 0;
+        width: 100%;
+        padding: 10px;
+    }
+
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .header {
+        z-index: 1400;
+    }
+
+    .header h1 {
+        font-size: 20px;
+    }
+
+    .mobile-menu-toggle {
+        display: block;
+    }
+}
+
+/* Ajustes dos containers específicos */
+.teams-container,
+.projects-container,
+.docs-container {
+    padding: 24px;
+    margin-top: 48px; /* Reduzido de 64px para 48px */
+    margin-left: 80px; /* Alinhado com o sidebar compacto */
+    margin-right: 24px; /* Novo espaçamento à direita */
+    width: calc(100% - 104px); /* 80px do sidebar + 24px da margem direita */
+    transition: margin-left 0.3s ease, width 0.3s ease;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.sidebar:hover ~ .teams-container,
+.sidebar:hover ~ .projects-container,
+.sidebar:hover ~ .docs-container {
+    margin-left: 200px;
+    width: calc(100% - 224px); /* 200px do sidebar expandido + 24px da margem direita */
+}
+
+/* Ajuste específico para o container do messenger */
+.messenger-container {
+    margin-right: 24px; /* Novo espaçamento à direita */
+    width: calc(100% - 104px); /* 80px do sidebar + 24px da margem direita */
+}
+
+.sidebar:hover ~ .frames-container .messenger-container {
+    width: calc(100% - 224px); /* 200px do sidebar expandido + 24px da margem direita */
+}
+
+@media (max-width: 1024px) {
+    .teams-container,
+    .projects-container,
+    .docs-container {
+        grid-template-columns: 1fr;
+        padding: 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .teams-container,
+    .projects-container,
+    .docs-container {
+        margin-left: 0;
+        width: 100%;
+        padding: 10px;
     }
 }

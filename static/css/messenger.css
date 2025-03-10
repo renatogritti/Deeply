@@ -1,7 +1,10 @@
+/* Ajuste do container principal */
 .messenger-container {
     display: flex;
-    height: calc(100vh - 64px);
-    margin-top: 64px;
+    height: calc(100vh - 104px); /* Reduzido de 84px para um visual mais compacto */
+    margin-top: -20px; /* Compensa o padding do frames-container */
+    margin-left: -20px; /* Compensa o padding lateral do frames-container */
+    margin-right: -20px; /* Compensa o padding lateral do frames-container */
 }
 
 .channels-sidebar {
@@ -297,6 +300,7 @@
 @media (max-width: 768px) {
     .messenger-container {
         flex-direction: column;
+        height: calc(100vh - 124px); /* Ajustado proporcionalmente */
     }
 
     .channels-sidebar {

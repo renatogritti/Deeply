@@ -3,25 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tag Management - Kanban Board</title>
+    <title>Manage Tags - Kanban Board</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <script src="{{ url_for('static', filename='js/tags.js') }}" defer></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tags.css') }}">
 </head>
 <body>
     <div class="header">
         <div class="header-left">
-            <a href="/kanban" class="back-button">
-                <svg viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"/>
-                </svg>
-                Back to Board
-            </a>
-            <h1>Tag Management</h1>
+            <svg class="logo" viewBox="0 0 24 24">
+                <path fill="currentColor" d="M5.5,9A1.5,1.5 0 0,0 7,7.5A1.5,1.5 0 0,0 5.5,6A1.5,1.5 0 0,0 4,7.5A1.5,1.5 0 0,0 5.5,9M17.41,11.58C17.77,11.94 18,12.44 18,13C18,13.55 17.78,14.05 17.41,14.41L12.41,19.41C12.05,19.77 11.55,20 11,20C10.45,20 9.95,19.78 9.58,19.41L2.59,12.42C2.22,12.05 2,11.55 2,11V6C2,4.89 2.89,4 4,4H9C9.55,4 10.05,4.22 10.41,4.58L17.41,11.58M13.54,5.71L14.54,4.71L21.41,11.58C21.78,11.94 22,12.45 22,13C22,13.55 21.78,14.05 21.42,14.41L16.04,19.79L15.04,18.79L20.75,13L13.54,5.71Z"/>
+            </svg>
+            <h1>Manage Tags</h1>
         </div>
     </div>
 
+    <div class="sidebar">
+        <a href="/kanban" class="back-button">
+            <svg viewBox="0 0 24 24">
+                <path fill="currentColor" d="M4 3C2.89 3 2 3.89 2 5V19C2 20.11 2.89 21 4 21H20C21.11 21 22 20.11 22 19V5C22 3.89 21.11 3 20 3H4M4 5H20V19H4V5M6 7V17H10V7H6M12 7V11H16V7H12M12 13V17H16V13H12Z"/>
+            </svg>
+            <span class="back-text">Back to Kanban</span>
+        </a>
+    </div>
+
     <div class="teams-container">
-        <!-- Form para criar nova tag (à esquerda) -->
+        <!-- Form para criar nova tag -->
         <div class="new-team-form">
             <h2>Create New Tag</h2>
             <form id="tagForm">
@@ -33,24 +39,31 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="tagColor">Color*</label>
-                    <div class="form-input-wrapper">
-                        <input type="color" id="tagColor" class="form-input color-input" value="#1a73e8" required>
+                    <label for="tagColor">Color</label>
+                    <div class="form-input-wrapper color-input-wrapper">
+                        <input type="color" id="tagColor" class="color-input" value="#8A05BE">
                         <small>Click to choose a color</small>
                     </div>
                 </div>
                 
+                <div class="tag-preview-container">
+                    <label>Preview:</label>
+                    <div id="tagPreview" class="tag-preview">&nbsp;</div>
+                </div>
+                
                 <div class="form-actions">
-                    <button type="submit" class="primary-button">Add Tag</button>
+                    <button type="submit" class="primary-button">Create Tag</button>
                 </div>
             </form>
         </div>
 
-        <!-- Lista de tags existentes (à direita) -->
-        <div class="teams-list">
+        <!-- Lista de tags existentes -->
+        <div class="tags-list">
             <h2>Existing Tags</h2>
-            <div id="tagsList" class="tags-list-container"></div>
+            <div class="tags-list-container" id="tagsList"></div>
         </div>
     </div>
+
+    <script src="{{ url_for('static', filename='js/tags.js') }}" defer></script>
 </body>
 </html>

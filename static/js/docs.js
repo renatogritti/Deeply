@@ -2,17 +2,35 @@ let currentProject = null;
 let currentPath = '';
 let selectedFolder = ''; // Nova variável para controlar a pasta selecionada
 
+document.addEventListener('DOMContentLoaded', function() {
+    const projectFilter = document.getElementById('projectFilter');
+    if (projectFilter && projectFilter.value) {
+        loadProjectDocs(projectFilter.value);
+    }
+});
+
 function loadProjectDocs(projectId) {
-    if (!projectId) return;
+    if (!projectId) {
+        currentProject = null;
+        currentPath = '';
+        document.getElementById('folderTree').innerHTML = '';
+        document.getElementById('filesList').innerHTML = '';
+        return;
+    }
+
     currentProject = projectId;
     currentPath = `Docs/Projects/${projectId}`;
-    selectedFolder = ''; // Reset da pasta selecionada
+    selectedFolder = '';
     
     fetch(`/api/docs/${projectId}/structure`)
         .then(response => response.json())
         .then(data => {
             renderFolderTree(data.folders);
             renderFiles(data.files);
+        })
+        .catch(error => {
+            console.error('Error loading project docs:', error);
+            alert('Error loading project documents');
         });
 }
 
@@ -203,4 +221,16 @@ function deleteFile(path) {
         console.error('Error deleting file:', error);
         alert('Error deleting file');
     });
+}
+
+function updateFolderTree(folders) {
+    const folderTree = document.getElementById('folderTree');
+    folderTree.innerHTML = folders.map(folder => `
+        <div class="folder-item" onclick="selectFolder(${folder.id})">
+            <svg viewBox="0 0 24 24" width="24" height="24">
+                <path fill="currentColor" d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/>
+            </svg>
+            <span>${folder.name}</span>
+        </div>
+    `).join('');
 }

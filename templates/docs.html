@@ -16,6 +16,16 @@
             </svg>
             <h1>Documents</h1>
         </div>
+        <div class="search-wrapper">
+            <div class="project-filter">
+                <select id="projectFilter" onchange="loadProjectDocs(this.value)">
+                    <option value="">All Projects</option>
+                    {% for project in projects %}
+                    <option value="{{ project.id }}">{{ project.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
     </div>
 
     <div class="sidebar">
@@ -27,41 +37,37 @@
         </a>
     </div>
 
-    <div class="container-fluid mt-4">
-        <div class="docs-container">
-            <div class="header-content">
-                <div class="project-select">
-                    <label>Select Project:</label>
-                    <select id="projectFilter" onchange="loadProjectDocs(this.value)">
-                        <option value="">All Projects</option>
-                        {% for project in projects %}
-                            <option value="{{ project.id }}">{{ project.name }}</option>
-                        {% endfor %}
-                    </select>
+    <div class="frames-container">
+        <div class="docs-layout">
+            <!-- Coluna da Árvore de Pastas -->
+            <div class="folders-column">
+                <div class="column-header">
+                    <h2>Folders</h2>
+                    <button onclick="createFolder()" class="new-folder-btn">
+                        <svg viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+                        </svg>
+                        New Folder
+                    </button>
                 </div>
+                <div id="folderTree" class="folder-tree"></div>
             </div>
 
-            <div class="docs-content">
-                <div class="docs-tree">
-                    <div class="tree-header">
-                        <h3>Documents</h3>
-                        <button onclick="createFolder()" class="btn-new-folder">New Folder</button>
+            <!-- Coluna dos Arquivos -->
+            <div class="files-column">
+                <div class="column-header">
+                    <h2>Files</h2>
+                    <div class="file-actions">
+                        <input type="file" id="fileUpload" multiple hidden>
+                        <button onclick="document.getElementById('fileUpload').click()" class="upload-btn">
+                            <svg viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
+                            </svg>
+                            Upload Files
+                        </button>
                     </div>
-                    <div id="folderTree"></div>
                 </div>
-
-                <div class="docs-files">
-                    <div class="files-header">
-                        <h3>Files</h3>
-                        <div class="file-actions">
-                            <input type="file" id="fileUpload" style="display: none" multiple>
-                            <button onclick="document.getElementById('fileUpload').click()" class="btn-upload">
-                                Upload Files
-                            </button>
-                        </div>
-                    </div>
-                    <div id="filesList" class="files-content"></div>
-                </div>
+                <div id="filesList" class="files-list"></div>
             </div>
         </div>
     </div>
