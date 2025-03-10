@@ -64,9 +64,13 @@ body {
 .header-left {
     display: flex;
     align-items: center;
-    gap: 12px;
-    flex: 0 0 auto;
-    padding-left: 0; /* Remove padding à esquerda */
+    gap: 16px;
+}
+
+.header-left .logo {
+    width: 32px;
+    height: 32px;
+    fill: white;
 }
 
 .header-right {
@@ -1591,20 +1595,32 @@ textarea.form-input {
 .back-button {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     color: white;
     text-decoration: none;
-    padding: 8px;
-    border-radius: 4px;
-}
-
-.back-button:hover {
-    background: rgba(255,255,255,0.1);
+    padding: 12px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
 }
 
 .back-button svg {
     width: 24px;
     height: 24px;
+    flex-shrink: 0;
+}
+
+.back-button .back-text {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    white-space: nowrap;
+}
+
+.sidebar:hover .back-button .back-text {
+    opacity: 1;
+}
+
+.sidebar:hover .back-button .back-text {
+    opacity: 1;
 }
 
 /* Adicione ao final do arquivo */
@@ -1864,3 +1880,73 @@ textarea.form-input {
 }
 
 /* ...rest of existing code... */
+
+/* Responsividade Global */
+@media (max-width: 768px) {
+    .frames-container {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 1600;
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .header {
+        padding: 8px;
+    }
+
+    .header-left {
+        gap: 8px;
+    }
+
+    .header h1 {
+        font-size: 20px;
+    }
+
+    .logo {
+        width: 24px;
+        height: 24px;
+    }
+
+    /* Menu hamburger para mobile */
+    .mobile-menu-toggle {
+        display: block;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        background: var(--primary-color);
+        border-radius: 50%;
+        z-index: 1601;
+        border: none;
+        color: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+}
+
+/* Ajustes específicos por breakpoint */
+@media (max-width: 480px) {
+    .modal-content {
+        width: 95%;
+        margin: 10px;
+        padding: 16px;
+    }
+
+    .search-box {
+        min-width: auto;
+        width: 100%;
+    }
+
+    .project-filter {
+        width: 100%;
+        margin-top: 8px;
+    }
+}

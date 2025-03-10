@@ -10,19 +10,27 @@
 <body>
     <div class="header">
         <div class="header-left">
-            <a href="/kanban" class="back-button">
-                <svg viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"/>
-                </svg>
-                Back to Board
-            </a>
+            <svg class="logo" viewBox="0 0 24 24">
+                <path d="M19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,5V19H5V5H19M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9" />
+            </svg>
             <h1>My TODO Lists</h1>
         </div>
         <button class="new-list-button" onclick="openNewListModal()">New List</button>
     </div>
 
-    <div class="todo-container">
-        <div id="todoLists" class="todo-lists"></div>
+    <div class="sidebar">
+        <a href="/kanban" class="back-button">
+            <svg viewBox="0 0 24 24">
+                <path fill="currentColor" d="M4 3C2.89 3 2 3.89 2 5V19C2 20.11 2.89 21 4 21H20C21.11 21 22 20.11 22 19V5C22 3.89 21.11 3 20 3H4M4 5H20V19H4V5M6 7V17H10V7H6M12 7V11H16V7H12M12 13V17H16V13H12Z"/>
+            </svg>
+            <span class="back-text">Back to Kanban</span>
+        </a>
+    </div>
+
+    <div class="frames-container">
+        <div class="todo-container">
+            <div id="todoLists" class="todo-lists"></div>
+        </div>
     </div>
 
     <!-- Modal para Nova Lista -->

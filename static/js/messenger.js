@@ -166,24 +166,28 @@ function createChannel() {
         return;
     }
 
+    // Inclui o usuário atual na lista de membros se não estiver
+    if (!selectedMembers.includes(currentUserId)) {
+        selectedMembers.push(currentUserId);
+    }
+
     const data = {
         name: name,
         description: description,
-        is_private: false, // Canal sempre será público
+        is_private: false,
         member_ids: selectedMembers
     };
 
     fetch('/api/channels', {
         method: 'POST',
         headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            return response.json().then(err => { throw new Error(err.error || 'Error creating channel') });
         }
         return response.json();
     })
@@ -191,14 +195,12 @@ function createChannel() {
         if (data.success) {
             closeModal();
             loadChannels();
-            selectChannel(data.channel.id);  // Seleciona o novo canal automaticamente
-        } else {
-            alert(data.error || 'Error creating channel');
+            selectChannel(data.channel.id);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Error creating channel: ' + error.message);
+        alert(error.message);
     });
 }
 

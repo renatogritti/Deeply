@@ -2,7 +2,6 @@
     display: flex;
     height: calc(100vh - 64px);
     margin-top: 64px;
-    margin-left: 80px;
 }
 
 .channels-sidebar {
@@ -264,4 +263,58 @@
 .modal-content textarea {
     width: 100%;
     box-sizing: border-box;
+}
+
+/* Padronização do Back Button */
+.back-button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: white;
+    text-decoration: none;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+    border-radius: 8px;
+    margin: 8px;
+}
+
+.back-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.back-button svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Ajuste de fonte global */
+* {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+@media (max-width: 768px) {
+    .messenger-container {
+        flex-direction: column;
+    }
+
+    .channels-sidebar {
+        width: 100%;
+        max-height: 200px;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .messages-container {
+        height: calc(100vh - 264px);
+    }
+
+    .message {
+        max-width: 90%;
+    }
+
+    .message-input-container {
+        padding: 8px;
+    }
 }

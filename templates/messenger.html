@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>Messenger - Kanban Board</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/messenger.css') }}">
@@ -10,29 +10,43 @@
 <body>
     <div class="header">
         <div class="header-left">
-            <a href="/kanban" class="back-button">
-                <svg viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"/>
-                </svg>
-                Back to Board
-            </a>
+            <svg class="logo" viewBox="0 0 24 24">
+                <path d="M20,2H4A2,2 0 0,0 2,4V22L6,18H20A2,2 0 0,0 22,16V4A2,2 0 0,0 20,2M6,9H18V11H6M14,14H6V12H14M18,8H6V6H18" />
+            </svg>
             <h1>Messenger</h1>
         </div>
         <button class="new-channel-button" onclick="openNewChannelModal()">New Channel</button>
     </div>
 
-    <div class="messenger-container">
-        <div class="channels-sidebar">
-            <div class="channels-header">
-                <h2>Channels</h2>
+    <button class="mobile-menu-toggle" onclick="toggleSidebar()">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+            <path fill="currentColor" d="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z"/>
+        </svg>
+    </button>
+
+    <div class="sidebar">
+        <a href="/kanban" class="back-button">
+            <svg viewBox="0 0 24 24">
+                <path fill="currentColor" d="M4 3C2.89 3 2 3.89 2 5V19C2 20.11 2.89 21 4 21H20C21.11 21 22 20.11 22 19V5C22 3.89 21.11 3 20 3H4M4 5H20V19H4V5M6 7V17H10V7H6M12 7V11H16V7H12M12 13V17H16V13H12Z"/>
+            </svg>
+            <span class="back-text">Back to Kanban</span>
+        </a>
+    </div>
+
+    <div class="frames-container">
+        <div class="messenger-container">
+            <div class="channels-sidebar">
+                <div class="channels-header">
+                    <h2>Channels</h2>
+                </div>
+                <div id="channelsList" class="channels-list"></div>
             </div>
-            <div id="channelsList" class="channels-list"></div>
-        </div>
-        <div class="messages-container">
-            <div id="messagesContainer" class="messages-list"></div>
-            <div class="message-input-container">
-                <textarea id="messageInput" placeholder="Type your message..."></textarea>
-                <button onclick="sendMessage()">Send</button>
+            <div class="messages-container">
+                <div id="messagesContainer" class="messages-list"></div>
+                <div class="message-input-container">
+                    <textarea id="messageInput" placeholder="Type your message..."></textarea>
+                    <button onclick="sendMessage()">Send</button>
+                </div>
             </div>
         </div>
     </div>
@@ -74,6 +88,10 @@
     <script>
         // Adicione esta variável global
         const currentUserId = {{ user_id }};
+
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('active');
+        }
     </script>
     <script src="{{ url_for('static', filename='js/messenger.js') }}"></script>
 </body>

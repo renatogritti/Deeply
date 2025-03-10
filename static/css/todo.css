@@ -1,6 +1,7 @@
 .todo-container {
     padding: 20px;
-    margin: 84px 20px 20px 100px;
+    margin-top: 84px;
+    /* Removido margin-left para seguir o padrão */
 }
 
 .todo-lists {
@@ -223,4 +224,33 @@ button[onclick*="delete"]:hover {
 
 .task:hover .task-actions {
     opacity: 1;
+}
+
+/* Padronização do Back Button */
+.back-button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: white;
+    text-decoration: none;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+    border-radius: 8px;
+    margin: 8px;
+}
+
+.back-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.back-button svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Ajuste de fonte global */
+* {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
