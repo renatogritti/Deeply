@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messenger - Kanban Board</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/messenger.css') }}">
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/kanban" class="back-button">
+                <svg viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"/>
+                </svg>
+                Back to Board
+            </a>
+            <h1>Messenger</h1>
+        </div>
+        <button class="new-channel-button" onclick="openNewChannelModal()">New Channel</button>
+    </div>
+
+    <div class="messenger-container">
+        <div class="channels-sidebar">
+            <div class="channels-header">
+                <h2>Channels</h2>
+            </div>
+            <div id="channelsList" class="channels-list"></div>
+        </div>
+        <div class="messages-container">
+            <div id="messagesContainer" class="messages-list"></div>
+            <div class="message-input-container">
+                <textarea id="messageInput" placeholder="Type your message..."></textarea>
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Novo Canal -->
+    <div id="newChannelModal" class="modal">
+        <div class="modal-content">
+            <h3>Create New Channel</h3>
+            <input type="text" id="channelName" placeholder="Channel Name" required>
+            <textarea id="channelDescription" placeholder="Channel Description"></textarea>
+            <div class="member-selection">
+                <h4>Add Members</h4>
+                <div id="membersList" class="members-list"></div>
+            </div>
+            <div class="modal-buttons">
+                <button onclick="createChannel()">Create</button>
+                <button onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Editar Canal -->
+    <div id="editChannelModal" class="modal">
+        <div class="modal-content">
+            <h3>Edit Channel</h3>
+            <input type="text" id="editChannelName" placeholder="Channel Name" required>
+            <textarea id="editChannelDescription" placeholder="Channel Description"></textarea>
+            <div class="member-selection">
+                <h4>Members</h4>
+                <div id="editMembersList" class="members-list"></div>
+            </div>
+            <div class="modal-buttons">
+                <button onclick="updateChannel()">Update</button>
+                <button onclick="closeEditModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Adicione esta variável global
+        const currentUserId = {{ user_id }};
+    </script>
+    <script src="{{ url_for('static', filename='js/messenger.js') }}"></script>
+</body>
+</html>

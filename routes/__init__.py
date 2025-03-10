@@ -5,7 +5,8 @@ from routes import (
     tags,
     projects,
     cards,
-    todo
+    todo,
+    messenger
 )
 
 def init_app(app):
@@ -21,5 +22,6 @@ def init_app(app):
     projects.init_app(app)
     cards.init_app(app)
     todo.init_app(app)
+    messenger.init_app(app)
 
     return app

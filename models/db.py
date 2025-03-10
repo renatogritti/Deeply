@@ -268,3 +268,54 @@ class TodoTask(db.Model):
             'order': self.order,
             'list_id': self.list_id
         }
+
+class Channel(db.Model):
+    """Canal de comunicação"""
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    is_private = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_by = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=False)
+    members = db.relationship('Team', secondary='channel_members', lazy='subquery',
+                            backref=db.backref('channels', lazy=True))
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'is_private': self.is_private,
+            'created_at': self.created_at.isoformat(),
+            'created_by': self.created_by,
+            'members': [member.to_dict() for member in self.members]
+        }
+
+class Message(db.Model):
+    """Mensagens nos canais"""
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.Text, nullable=False)
+    channel_id = db.Column(db.Integer, db.ForeignKey('channel.id', ondelete='CASCADE'))
+    user_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
+    
+    # Adiciona relacionamento com o usuário
+    user = db.relationship('Team', backref='messages')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'content': self.content,
+            'channel_id': self.channel_id,
+            'user_id': self.user_id,
+            'user_name': self.user.name,  # Agora podemos acessar o nome do usuário diretamente
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
+
+# Tabela de associação entre canais e membros
+channel_members = db.Table('channel_members',
+    db.Column('channel_id', db.Integer, db.ForeignKey('channel.id'), primary_key=True),
+    db.Column('team_id', db.Integer, db.ForeignKey('team.id'), primary_key=True)
+)
