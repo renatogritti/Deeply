@@ -24,6 +24,22 @@ class PomodoroTimer {
         
         // Adicionar estado do modo atual
         this.isBreakMode = false;
+
+        // Atualiza a inicialização do som ambiente
+        this.ambientSound = new Audio('/static/audio/rain.wav');
+        this.ambientSound.loop = true;
+        this.ambientButton = document.createElement('button');
+        this.ambientButton.className = 'ambient-sound-button';
+        this.ambientButton.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12,3V12.26C11.5,12.09 11,12 10.5,12C8.56,12 7,13.56 7,15.5C7,17.44 8.56,19 10.5,19C12.44,19 14,17.44 14,15.5V6H18V3H12Z" /></svg>';
+        
+        document.querySelector('.timer-controls').appendChild(this.ambientButton);
+        
+        this.isAmbientPlaying = false;
+        this.ambientButton.addEventListener('click', () => this.toggleAmbientSound());
+        
+        // Pré-carrega o som ambiente
+        this.ambientSound.load();
+        this.ambientSound.volume = 0.5; // Volume reduzido para 50%
     }
 
     initializeListeners() {
@@ -124,6 +140,30 @@ class PomodoroTimer {
                 body: this.isBreakMode ? 'Break time is up! Time to work!' : 'Work time is up! Time for a break!',
                 icon: '/static/img/logo.png'
             });
+        }
+    }
+
+    toggleAmbientSound() {
+        try {
+            if (this.isAmbientPlaying) {
+                this.ambientSound.pause();
+                this.ambientButton.classList.remove('active');
+            } else {
+                const playPromise = this.ambientSound.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise
+                        .then(() => {
+                            this.ambientButton.classList.add('active');
+                        })
+                        .catch(error => {
+                            console.error('Erro ao tocar som ambiente:', error);
+                        });
+                }
+            }
+            this.isAmbientPlaying = !this.isAmbientPlaying;
+        } catch (error) {
+            console.error('Erro ao manipular som ambiente:', error);
         }
     }
 }

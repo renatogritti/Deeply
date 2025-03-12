@@ -1177,14 +1177,18 @@ button[onclick*="cancel"]:hover {
     display: flex;
     align-items: center;
     padding: 4px 16px;
-    margin-right: auto;
+    margin-right: 240px; /* Adicionado espaço para o filtro de projetos */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 /* Dropdown de projetos à direita */
 .project-filter {
+    position: absolute;
+    right: 40px; /* Aumentado para dar mais espaço da borda */
+    top: 50%;
+    transform: translateY(-50%);
     width: 200px;
-    margin-left: auto;
+    z-index: 10; /* Garante que fique acima de outros elementos */
 }
 
 .project-filter select {
@@ -1814,64 +1818,72 @@ textarea.form-input {
 
 /* Pomodoro Widget Styles */
 .pomodoro-widget {
+    position: absolute;
+    right: 20px; /* Reduzido de 180px para 20px */
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
-    flex-direction: column;
     align-items: center;
-    background: #fff;
-    padding: 2px 8px; /* Reduzido ainda mais o padding vertical */
-    border-radius: 8px;
+    gap: 8px;
+    background: white;
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 20px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin: 0 20px;
 }
 
 .timer-display {
-    font-size: 16px; /* Reduzido ainda mais o tamanho da fonte */
-    font-weight: bold;
-    color: #8A05BE;
-    font-family: monospace;
-    line-height: 1;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--primary-color);
+    min-width: 70px;
+    text-align: center;
 }
 
 .timer-controls {
     display: flex;
-    gap: 2px;
-    margin: 1px 0; /* Reduzido margin vertical */
+    align-items: center;
+    gap: 6px;
 }
 
-.timer-button {
-    padding: 1px; /* Reduzido padding */
-    background: none;
-    border: none; /* Removida a borda */
+.timer-button, .mode-button, .ambient-sound-button {
+    width: 32px;
+    height: 32px;
+    border-radius: 16px; /* Botões mais arredondados */
+    border: none;
+    background: var(--primary-lighter);
+    color: var(--primary-color);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.2s ease;
 }
 
-.timer-button svg {
-    width: 12px; /* Reduzido tamanho do ícone */
-    height: 12px;
-    color: #8A05BE;
+.timer-button:hover, .mode-button:hover, .ambient-sound-button:hover {
+    background: var(--primary-color);
+    color: white;
 }
 
 .timer-mode {
     display: flex;
-    gap: 2px;
+    gap: 4px;
 }
 
 .mode-button {
-    padding: 1px 4px; /* Reduzido padding */
-    font-size: 10px; /* Reduzido tamanho da fonte */
-    background: none;
-    border: none; /* Removida a borda */
-    color: #666;
-    cursor: pointer;
+    width: auto;
+    padding: 0 12px;
+    font-size: 12px;
 }
 
 .mode-button.active {
-    background: rgba(138, 5, 190, 0.1);
-    color: #8A05BE;
-    border-radius: 8px;
+    background: var(--primary-color);
+    color: white;
+}
+
+/* Ajusta a ordem dos botões no timer-controls */
+.ambient-sound-button {
+    order: 999; /* Força o botão de som a ser o último */
 }
 
 /* ...rest of existing code... */
@@ -2104,4 +2116,36 @@ textarea.form-input {
     gap: 24px;
     padding: 0 24px;
     height: calc(100% - 100px); /* Ajusta altura considerando o filtro */
+}
+
+/* Dropdown de projetos */
+.project-filter {
+    position: absolute; /* Posicionamento absoluto */
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 200px;
+    z-index: 1501; /* Garante ficar acima do header */
+}
+
+.project-filter select {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: white;
+    border: 1px solid var(--border-color);
+    color: var(--primary-color);
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.project-filter select:hover {
+    border-color: var(--primary-light);
+    box-shadow: 0 4px 8px rgba(138, 5, 190, 0.2);
+}
+
+.project-filter select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(138, 5, 190, 0.1);
 }
