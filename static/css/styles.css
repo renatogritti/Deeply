@@ -82,10 +82,7 @@ body {
 
 /* Estilo para os filtros no header */
 .header-filters {
-    display: flex;
-    gap: 10px;
-    margin-left: auto; /* Isso empurra os filtros para a direita */
-    padding-right: 20px; /* Espaço à direita dos filtros */
+    display: none;
 }
 
 .header-filters select {
@@ -2052,4 +2049,59 @@ textarea.form-input {
         width: 100%;
         padding: 10px;
     }
+}
+
+/* Novo frame para filtro */
+.filter-frame {
+    display: none;
+}
+
+/* Novo frame do filtro */
+.filter-header {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background-color: var(--background-color);
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    margin-left: 80px;
+    width: calc(100% - 80px);
+    transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+.filter-content {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 0 24px;
+    width: 100%;
+}
+
+.project-select {
+    min-width: 200px;
+    max-width: 300px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: white;
+    color: var(--text-primary);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+/* Ajuste a margem superior do frames-container */
+.frames-container {
+    margin-top: 128px; /* 64px do header + 64px do filter-header */
+}
+
+/* Ajuste do kanban-board */
+.kanban-board {
+    display: flex;
+    gap: 24px;
+    padding: 0 24px;
+    height: calc(100% - 100px); /* Ajusta altura considerando o filtro */
 }
