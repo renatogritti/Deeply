@@ -6,7 +6,8 @@ from routes import (
     projects,
     cards,
     todo,
-    messenger
+    messenger,
+    pomodoro  # Adiciona importação do pomodoro
 )
 
 def init_app(app):
@@ -23,5 +24,6 @@ def init_app(app):
     cards.init_app(app)
     todo.init_app(app)
     messenger.init_app(app)
+    pomodoro.init_app(app)  # Registra as rotas do pomodoro
 
     return app

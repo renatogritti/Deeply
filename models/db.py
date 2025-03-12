@@ -319,3 +319,24 @@ channel_members = db.Table('channel_members',
     db.Column('channel_id', db.Integer, db.ForeignKey('channel.id'), primary_key=True),
     db.Column('team_id', db.Integer, db.ForeignKey('team.id'), primary_key=True)
 )
+
+class PomodoroLog(db.Model):
+    """Registros do Pomodoro Timer"""
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False)
+    end_time = db.Column(db.DateTime, nullable=False)
+    duration = db.Column(db.Integer, nullable=False)  # duração em segundos
+    timer_type = db.Column(db.String(10), nullable=False)  # 'work' ou 'break'
+    completed = db.Column(db.Boolean, default=False)
+
+    def to_dict(self):
+        """Convert log object to dictionary for JSON serialization."""
+        return {
+            'id': self.id,
+            'start_time': self.start_time.isoformat(),
+            'end_time': self.end_time.isoformat(),
+            'duration': self.duration,
+            'timer_type': self.timer_type,
+            'completed': self.completed
+        }

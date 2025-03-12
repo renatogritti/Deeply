@@ -40,6 +40,9 @@ class PomodoroTimer {
         // Pré-carrega o som ambiente
         this.ambientSound.load();
         this.ambientSound.volume = 0.5; // Volume reduzido para 50%
+
+        this.startTime = null; // Adiciona controle do tempo inicial
+        this.timerType = 'work'; // Tipo padrão é work
     }
 
     initializeListeners() {
@@ -66,6 +69,7 @@ class PomodoroTimer {
     }
 
     startTimer() {
+        this.startTime = new Date(); // Registra o tempo inicial
         this.isRunning = true;
         this.timer = setInterval(() => {
             this.timeLeft--;
@@ -78,8 +82,11 @@ class PomodoroTimer {
     }
 
     pauseTimer() {
-        this.isRunning = false;
-        clearInterval(this.timer);
+        if (this.isRunning && this.startTime) {
+            this.isRunning = false;
+            clearInterval(this.timer);
+            this.logPomodoroSession(false); // Registra sessão pausada
+        }
     }
 
     resetTimer() {
@@ -105,6 +112,7 @@ class PomodoroTimer {
 
     timerComplete() {
         this.pauseTimer();
+        this.logPomodoroSession(true); // Registra sessão completa
         this.resetTimer();
         
         // Melhor tratamento para tocar o som
@@ -141,6 +149,36 @@ class PomodoroTimer {
                 icon: '/static/img/logo.png'
             });
         }
+    }
+
+    logPomodoroSession(completed) {
+        if (!this.startTime) return;
+        
+        const endTime = new Date();
+        const duration = Math.round((this.initialTime - this.timeLeft)); // Tempo decorrido em segundos
+
+        fetch('/api/pomodoro/log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                start_time: this.startTime.toISOString(),
+                end_time: endTime.toISOString(),
+                duration: duration,
+                timer_type: this.timerType,
+                completed: completed
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                console.error('Error logging pomodoro session:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+
+        this.startTime = null; // Reset startTime
     }
 
     toggleAmbientSound() {
