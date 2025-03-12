@@ -590,8 +590,8 @@ button[onclick*="cancel"]:hover {
 .frames-container {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 64px); /* Ajustado para considerar apenas o header */
-    margin-top: 48px; /* Reduzido de 64px para 48px */
+    height: calc(100vh - 64px); /* Mantém o ajuste para o header */
+    margin-top: 0; /* Removido margin-top */
     margin-left: 80px;
     width: calc(100% - 80px);
     padding: 20px;
@@ -2107,7 +2107,7 @@ textarea.form-input {
 
 /* Ajuste a margem superior do frames-container */
 .frames-container {
-    margin-top: 128px; /* 64px do header + 64px do filter-header */
+    margin-top: 64px; /* 64px do header + 64px do filter-header */
 }
 
 /* Ajuste do kanban-board */

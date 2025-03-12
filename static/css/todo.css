@@ -1,7 +1,9 @@
 .todo-container {
     padding: 20px;
-    margin-top: 84px;
-    /* Removido margin-left para seguir o padrão */
+    margin-top: 0; /* Removido margin-top para alinhar ao topo */
+    margin-left: -20px; /* Compensa o padding do frames-container */
+    margin-right: -20px; /* Compensa o padding do frames-container */
+    width: calc(100% + 40px); /* Ajusta largura considerando as margens negativas */
 }
 
 .todo-lists {

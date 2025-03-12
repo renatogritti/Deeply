@@ -136,14 +136,6 @@
                     <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">
                             <h5 class="card-title mb-0">Calendário de Tarefas</h5>
-                            <div class="project-filter">
-                                <select id="projectFilter" onchange="filterCalendarEvents(this.value)">
-                                    <option value="">Todos os Projetos</option>
-                                    {% for project in projects %}
-                                        <option value="{{ project.id }}">{{ project.name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
                         </div>
                     </div>
                     <div class="card-body">

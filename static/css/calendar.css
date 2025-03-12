@@ -1,7 +1,9 @@
+/* Container do calendário */
 .container-fluid {
-    padding-left: 80px;
-    height: calc(100vh - 120px);
+    padding-left: 80px; /* Ajuste para o sidebar */
+    height: calc(100vh - 120px); /* Altura total menos header e footer */
     overflow: hidden;
+    margin-top: 16px; /* Reduzido para manter padrão dos outros componentes */
 }
 
 .row {
