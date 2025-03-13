@@ -31,17 +31,43 @@ function loadUsers() {
         });
 }
 
+function getCategoryIcon(category) {
+    const icons = {
+        'reconhecimento': '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M20 6H4V4H20V6M20 12H4V10H20V12M20 18H4V16H20V18Z"/></svg>',
+        'premio': '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M20 6.91L17.09 4H12V2H22V12H20V6.91M18 13L21 16V22H3V16L6 13H18M11 18.5C11 19.33 10.33 20 9.5 20S8 19.33 8 18.5 8.67 17 9.5 17 11 17.67 11 18.5M16 18.5C16 19.33 15.33 20 14.5 20S13 19.33 13 18.5 13.67 17 14.5 17 16 17.67 16 18.5Z"/></svg>',
+        'mensagem': '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M20,2H4A2,2 0 0,0 2,4V22L6,18H20A2,2 0 0,0 22,16V4A2,2 0 0,0 20,2M20,16H5.17L4,17.17V4H20V16Z"/></svg>'
+    };
+    return icons[category] || '';
+}
+
+function getTypeIcon(type) {
+    const icons = {
+        'trabalho_equipe': '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12,5.5A3.5,3.5 0 0,1 15.5,9A3.5,3.5 0 0,1 12,12.5A3.5,3.5 0 0,1 8.5,9A3.5,3.5 0 0,1 12,5.5M5,8C5.56,8 6.08,8.15 6.53,8.42C6.38,9.85 6.8,11.27 7.66,12.38C7.16,13.34 6.16,14 5,14A3,3 0 0,1 2,11A3,3 0 0,1 5,8M19,8A3,3 0 0,1 22,11A3,3 0 0,1 19,14C17.84,14 16.84,13.34 16.34,12.38C17.2,11.27 17.62,9.85 17.47,8.42C17.92,8.15 18.44,8 19,8M5.5,18.25C5.5,16.18 8.41,14.5 12,14.5C15.59,14.5 18.5,16.18 18.5,18.25V20H5.5V18.25M0,20V18.5C0,17.11 1.89,15.94 4.45,15.6C3.86,16.28 3.5,17.22 3.5,18.25V20H0M24,20H20.5V18.25C20.5,17.22 20.14,16.28 19.55,15.6C22.11,15.94 24,17.11 24,18.5V20Z"/></svg>',
+        'inovacao': '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12,2A7,7 0 0,1 19,9C19,11.38 17.81,13.47 16,14.74V17A1,1 0 0,1 15,18H9A1,1 0 0,1 8,17V14.74C6.19,13.47 5,11.38 5,9A7,7 0 0,1 12,2M9,21V20H15V21A1,1 0 0,1 14,22H10A1,1 0 0,1 9,21M12,4A5,5 0 0,0 7,9C7,11.05 8.23,12.81 10,13.58V16H14V13.58C15.77,12.81 17,11.05 17,9A5,5 0 0,0 12,4Z"/></svg>',
+        'ajuda': '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12,1C7,1 3,5 3,10C3,14.1 5.2,17.7 8.8,19.4C9.8,19.8 10,20.3 10,20.8V22H14V20.8C14,20.3 14.2,19.8 15.2,19.4C18.8,17.7 21,14.1 21,10C21,5 17,1 12,1M12,3C15.9,3 19,6.1 19,10C19,13.1 17.2,15.8 14.5,17.1C13.8,17.4 13.3,17.7 12.9,18H11.1C10.7,17.7 10.2,17.4 9.5,17.1C6.8,15.8 5,13.1 5,10C5,6.1 8.1,3 12,3M14,16L12,14L10,16L9,15L11,13L9,11L10,10L12,12L14,10L15,11L13,13L15,15L14,16Z"/></svg>'
+    };
+    return icons[type] || '';
+}
+
 function createKudoCard(kudo) {
     const card = document.createElement('div');
     card.className = 'kudo-card';
     card.innerHTML = `
         <div class="kudo-header">
-            <div>
+            <div class="kudo-info">
                 <strong>${kudo.sender.name}</strong> → <strong>${kudo.receiver.name}</strong>
                 <div class="kudo-meta">
                     ${formatDate(kudo.created_at)}
-                    <span class="kudo-category">${kudo.category}</span>
-                    <span class="kudo-type">${kudo.type}</span>
+                    <div class="kudo-badges">
+                        <span class="kudo-badge category-badge">
+                            ${getCategoryIcon(kudo.category)}
+                            ${kudo.category}
+                        </span>
+                        <span class="kudo-badge type-badge">
+                            ${getTypeIcon(kudo.type)}
+                            ${kudo.type}
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>

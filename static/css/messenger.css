@@ -3,8 +3,8 @@
     display: flex;
     height: calc(100vh - 104px); /* Reduzido de 84px para um visual mais compacto */
     margin-top: -20px; /* Compensa o padding do frames-container */
-    margin-left: -20px; /* Compensa o padding lateral do frames-container */
-    margin-right: -20px; /* Compensa o padding lateral do frames-container */
+    margin-left: 40px; /* Compensa o padding lateral do frames-container */
+    margin-right: 40px; /* Compensa o padding lateral do frames-container */
 }
 
 .channels-sidebar {
