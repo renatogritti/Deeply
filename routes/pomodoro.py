@@ -10,7 +10,7 @@ def init_app(app):
         try:
             data = request.json
             # Usando 'usuario' ao invés de 'user_id' para corresponder ao nome da sessão
-            user_id = session.get('usuario')
+            user_id = session.get('user_id')
             
             if not user_id:
                 raise ValueError('User not authenticated')

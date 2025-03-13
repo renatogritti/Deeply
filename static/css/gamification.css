@@ -1,0 +1,158 @@
+.badges-button {
+    background: transparent;
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.badges-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.badges-button svg {
+    width: 24px;
+    height: 24px;
+}
+
+.badge-count {
+    font-size: 18px;
+}
+
+.gamification-container {
+    padding: 24px;
+    max-width: 1600px; /* Aumentado de 1200px para 1600px */
+    margin: 0 auto;
+}
+
+.stats-section {
+    background: white;
+    border-radius: 16px;
+    padding: 32px; /* Aumentado de 24px para 32px para melhor espaçamento interno */
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    width: 95%; /* Adicionado para garantir que use quase toda a largura disponível */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.chart-container {
+    height: 500px; /* Aumentado de 400px para 500px para melhor visualização */
+    margin: 24px 0; /* Aumentado de 20px para 24px */
+}
+
+.stats-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.stats-title {
+    font-size: 20px;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.period-selector {
+    display: flex;
+    gap: 12px;
+}
+
+.period-button {
+    padding: 8px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    background: white;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.period-button.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.ranking-section {
+    margin-top: 24px;
+}
+
+.ranking-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.ranking-item {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    background: var(--primary-lighter);
+    border-radius: 12px;
+    transition: transform 0.2s ease;
+    justify-content: space-between; /* Ajustado para alinhar medalha à direita */
+}
+
+.ranking-item:hover {
+    transform: translateY(-2px);
+}
+
+.ranking-position {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    margin-right: 16px;
+    font-weight: bold;
+}
+
+.ranking-info {
+    flex: 1;
+}
+
+.ranking-name {
+    font-weight: 500;
+    color: var(--primary-color);
+    font-size: 16px;
+}
+
+.ranking-minutes {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+/* Novo estilo para medalhas */
+.medal-icon {
+    width: 24px;
+    height: 24px;
+    margin-left: 16px;
+}
+
+.medal-gold {
+    color: #FFD700;
+}
+
+.medal-silver {
+    color: #C0C0C0;
+}
+
+.medal-bronze {
+    color: #CD7F32;
+}
+
+.medal-none {
+    color: #E0E0E0;
+}

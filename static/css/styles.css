@@ -55,7 +55,7 @@ body {
 .header-content {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start; /* Mudado de space-between para flex-start */
     flex: 1;
     padding: 0 24px;
     gap: 24px;
@@ -1162,7 +1162,7 @@ button[onclick*="cancel"]:hover {
 .header-content {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start; /* Mudado de space-between para flex-start */
     flex: 1;
     padding: 0 24px;
     gap: 24px;
@@ -1818,10 +1818,7 @@ textarea.form-input {
 
 /* Pomodoro Widget Styles */
 .pomodoro-widget {
-    position: absolute;
-    right: 20px; /* Reduzido de 180px para 20px */
-    top: 50%;
-    transform: translateY(-50%);
+    position: relative; /* Mudado de absolute para relative */
     display: flex;
     align-items: center;
     gap: 8px;
@@ -1830,6 +1827,7 @@ textarea.form-input {
     padding: 0 12px;
     border-radius: 20px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-left: 16px; /* Adicionado margem à esquerda */
 }
 
 .timer-display {
@@ -2148,4 +2146,39 @@ textarea.form-input {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px rgba(138, 5, 190, 0.1);
+}
+
+/* Adicione estes novos estilos ao arquivo styles.css */
+
+.badges-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    border: none;
+    border-radius: 20px;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(138, 5, 190, 0.3);
+}
+
+.badges-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(138, 5, 190, 0.4);
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+}
+
+.badges-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+.badge-count {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 14px;
 }
