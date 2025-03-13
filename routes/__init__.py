@@ -7,7 +7,8 @@ from routes import (
     cards,
     todo,
     messenger,
-    pomodoro  # Adiciona importação do pomodoro
+    pomodoro,
+    kudos  # Adiciona importação do kudos
 )
 
 def init_app(app):
@@ -24,6 +25,7 @@ def init_app(app):
     cards.init_app(app)
     todo.init_app(app)
     messenger.init_app(app)
-    pomodoro.init_app(app)  # Registra as rotas do pomodoro
+    pomodoro.init_app(app)
+    kudos.init_app(app)  # Registra as rotas do kudos
 
     return app

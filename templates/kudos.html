@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deeply - Kudos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/kudos.css') }}">
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <svg class="logo" viewBox="0 0 24 24">
+                <path d="M20 6H4V4H20V6M14.4 23L11.8 15L13.7 14.2L16.3 22.2L14.4 23M9.6 23L7.7 22.2L10.3 14.2L12.2 15L9.6 23M8 12H16V14H8V12M4 8H20V10H4V8Z"/>
+            </svg>
+            <h1>Kudos</h1>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <!-- Substituir o <a> por um <button> para manter o padrão -->
+        <button class="sidebar-button" onclick="window.location.href='/kanban'">
+            <svg viewBox="0 0 24 24">
+                <path fill="currentColor" d="M4 3C2.89 3 2 3.89 2 5V19C2 20.11 2.89 21 4 21H20C21.11 21 22 20.11 22 19V5C22 3.89 21.11 3 20 3H4M4 5H20V19H4V5M6 7V17H10V7H6M12 7V11H16V7H12M12 13V17H16V13H12Z"/>
+            </svg>
+            <span>Voltar ao Kanban</span>
+        </button>
+    </div>
+
+    <div class="frames-container">
+        <div class="kudos-container">
+            <!-- Cabeçalho com filtros e botão novo -->
+            <div class="kudos-header">
+                <div class="kudos-filters">
+                    <select id="filterCategory" onchange="filterKudos()">
+                        <option value="">Todas as Categorias</option>
+                        <option value="reconhecimento">Reconhecimento</option>
+                        <option value="premio">Prêmio</option>
+                        <option value="mensagem">Mensagem</option>
+                    </select>
+                    <select id="filterType" onchange="filterKudos()">
+                        <option value="">Todos os Tipos</option>
+                        <option value="trabalho_equipe">Trabalho em Equipe</option>
+                        <option value="inovacao">Inovação</option>
+                        <option value="ajuda">Ajuda</option>
+                    </select>
+                    <input type="date" id="filterDate" onchange="filterKudos()">
+                </div>
+            </div>
+
+            <!-- Feed de Kudos -->
+            <div id="kudosFeed" class="kudos-feed"></div>
+
+            <!-- Botão flutuante para novo Kudo -->
+            <button id="newKudoButton" class="new-kudo-button">
+                <svg viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal para criar novo Kudo -->
+    <div id="kudoModal" class="modal">
+        <div class="modal-content">
+            <h2>Novo Kudo</h2>
+            <form id="kudoForm" onsubmit="submitKudo(event)">
+                <div class="form-group">
+                    <label>Para quem?</label>
+                    <select name="receiver_id" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Categoria</label>
+                    <select name="category" required>
+                        <option value="reconhecimento">Reconhecimento</option>
+                        <option value="premio">Prêmio</option>
+                        <option value="mensagem">Mensagem</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tipo</label>
+                    <select name="type" required>
+                        <option value="trabalho_equipe">Trabalho em Equipe</option>
+                        <option value="inovacao">Inovação</option>
+                        <option value="ajuda">Ajuda</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Mensagem</label>
+                    <textarea name="message" required rows="4"></textarea>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit">Enviar</button>
+                    <button type="button" onclick="closeKudoModal()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/kudos.js') }}"></script>
+</body>
+</html>

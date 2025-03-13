@@ -340,3 +340,69 @@ class PomodoroLog(db.Model):
             'timer_type': self.timer_type,
             'completed': self.completed
         }
+
+class Kudos(db.Model):
+    """Kudos entre usuários"""
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=False)
+    receiver_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=False)
+    category = db.Column(db.String(50), nullable=False)  # reconhecimento, premio, mensagem
+    type = db.Column(db.String(50), nullable=False)      # trabalho_equipe, inovacao, ajuda
+    message = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    sender = db.relationship('Team', foreign_keys=[sender_id], backref='sent_kudos')
+    receiver = db.relationship('Team', foreign_keys=[receiver_id], backref='received_kudos')
+    comments = db.relationship('KudosComment', backref='kudo', lazy='dynamic')
+    reactions = db.relationship('KudosReaction', backref='kudo', lazy='dynamic')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'sender': self.sender.to_dict(),
+            'receiver': self.receiver.to_dict(),
+            'category': self.category,
+            'type': self.type,
+            'message': self.message,
+            'created_at': self.created_at.isoformat(),
+            'comments': [comment.to_dict() for comment in self.comments],
+            'reactions': [reaction.to_dict() for reaction in self.reactions]
+        }
+
+class KudosComment(db.Model):
+    """Comentários em Kudos"""
+    id = db.Column(db.Integer, primary_key=True)
+    kudo_id = db.Column(db.Integer, db.ForeignKey('kudos.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    parent_id = db.Column(db.Integer, db.ForeignKey('kudos_comment.id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    user = db.relationship('Team', backref='kudos_comments')
+    replies = db.relationship('KudosComment', backref=db.backref('parent', remote_side=[id]))
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'content': self.content,
+            'created_at': self.created_at.isoformat(),
+            'user': self.user.to_dict(),
+            'replies': [reply.to_dict() for reply in self.replies]
+        }
+
+class KudosReaction(db.Model):
+    """Reações em Kudos"""
+    id = db.Column(db.Integer, primary_key=True)
+    kudo_id = db.Column(db.Integer, db.ForeignKey('kudos.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=False)
+    reaction_type = db.Column(db.String(20), nullable=False)  # like, heart
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    user = db.relationship('Team', backref='kudos_reactions')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'reaction_type': self.reaction_type,
+            'user': self.user.to_dict()
+        }
