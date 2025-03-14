@@ -900,12 +900,13 @@ button[onclick*="cancel"]:hover {
 .search-box {
     position: relative;
     width: 100%;
-    max-width: 600px;
+    max-width: 1000px; /* Aumentado de 800px */
     background: white;
     border-radius: 24px;
     display: flex;
     align-items: center;
-    padding: 0 16px;
+    padding: 2px 16px;
+    margin-right: 120px; /* Reduzido de 240px para 120px */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
 }
@@ -991,23 +992,7 @@ button[onclick*="cancel"]:hover {
     transform: translateY(-50%);
 }
 
-.search-box {
-    flex: 1;
-    background: white;
-    border-radius: 24px;
-    display: flex;
-    align-items: center;
-    padding: 4px 16px;
-    min-width: 300px; /* Garante uma largura mínima */
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
 
-.search-box:hover,
-.search-box:focus-within {
-    box-shadow: 0 3px 8px rgba(138, 5, 190, 0.2);
-    transform: translateY(-1px);
-}
 
 .search-icon {
     width: 20px;
@@ -1169,17 +1154,7 @@ button[onclick*="cancel"]:hover {
 }
 
 /* Barra de busca expandida à esquerda */
-.search-box {
-    flex: 1;
-    max-width: 800px; /* Aumentado de 600px */
-    background: white;
-    border-radius: 24px;
-    display: flex;
-    align-items: center;
-    padding: 4px 16px;
-    margin-right: 240px; /* Adicionado espaço para o filtro de projetos */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
+
 
 /* Dropdown de projetos à direita */
 .project-filter {
@@ -2181,4 +2156,38 @@ textarea.form-input {
     padding: 4px 8px;
     border-radius: 12px;
     font-size: 14px;
+}
+
+.ai-button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 16px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    border: none;
+    border-radius: 20px;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(138, 5, 190, 0.3);
+    margin-right: 16px; /* Espaço entre o botão AI e o Gamification */
+}
+
+.ai-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(138, 5, 190, 0.4);
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+}
+
+.ai-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+.ai-model {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
 }

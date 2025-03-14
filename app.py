@@ -33,3 +33,7 @@ app.config['SESSION_COOKIE_NAME'] = 'kanban_session'
 app.config['SESSION_COOKIE_SECURE'] = True  # Apenas via HTTPS
 app.config['SESSION_COOKIE_HTTPONLY'] = True  # Apenas acessível via HTTP, não JS
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Proteção contra CSRF
+
+# Configuração da AI
+OLLAMA_API_BASE = "http://127.0.0.1:11434"
+OLLAMA_MODEL = "gemma3:1b"  # Alterado para Gemma 3B gemma3:1b

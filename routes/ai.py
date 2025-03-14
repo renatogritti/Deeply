@@ -1,0 +1,93 @@
+from flask import Blueprint, render_template, request, jsonify, current_app
+import requests
+from app import OLLAMA_API_BASE, OLLAMA_MODEL
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+from auth.authorization import login_required
+import re
+
+ai_bp = Blueprint('ai', __name__, url_prefix='/ai')
+
+# Configuração de retry para requests
+retry_strategy = Retry(
+    total=3,
+    backoff_factor=1,
+    status_forcelist=[500, 502, 503, 504]
+)
+adapter = HTTPAdapter(max_retries=retry_strategy)
+http = requests.Session()
+http.mount("http://", adapter)
+http.mount("https://", adapter)
+
+def format_response(text):
+    # Formata quebras de linha 
+    text = text.replace('\n•', '<br>•')  # Preserva bullets
+    text = text.replace('\n', '<br>')
+    
+    # Formata bullets para melhor visualização
+    text = text.replace('• ', '<br>• ')
+    
+    # Remove quebras extras no início
+    text = text.replace('<br>• ', '• ', 1)
+    
+    return text
+
+def init_app(app):
+    app.register_blueprint(ai_bp)
+
+@ai_bp.route('/')
+@login_required
+def ai_page():
+    return render_template('ai.html')
+
+@ai_bp.route('/chat', methods=['POST'])
+@login_required 
+def chat():
+    try:
+        data = request.json
+        message = data.get('message')
+        
+        if not message:
+            return jsonify({'error': 'Mensagem vazia'}), 400
+
+        response = http.post(
+            f"{OLLAMA_API_BASE}/api/generate",  # Alterado para generate em vez de chat
+            json={
+                "model": OLLAMA_MODEL,
+                "prompt": message,
+                "system": """Instruções:
+- Voce e Deeply, um assistente especializado em trabalho colaborativo, agilidade empresarial, social kudos e deep work.
+Seu foco e ajudar equipes a trabalharem melhor juntas, reconhecer conquistas e manter a produtividade profunda.
+- Responda sempre em português do Brasil
+- Seja direto e objetivo
+- Use frases curtas
+- Evite introduções desnecessárias
+- Use tópicos quando apropriado
+- Forneça exemplos práticos quando solicitado
+- Foque no essencial""",
+                "stream": False,
+                "options": {
+                    "temperature": 0.7,
+                    "top_k": 40,
+                    "top_p": 0.9,
+                    "repeat_penalty": 1.1
+                }
+            },
+            timeout=120
+        )
+        
+        if response.status_code == 200:
+            response_data = response.json()
+            bot_response = response_data.get('response', '').strip()
+            
+            if not bot_response:
+                return jsonify({'error': 'Resposta vazia do modelo'}), 500
+                
+            formatted_response = format_response(bot_response)
+            return jsonify({'response': formatted_response})
+            
+        return jsonify({'error': f"Erro na API: {response.status_code}"}), 500
+            
+    except Exception as e:
+        print(f"Erro: {str(e)}")
+        return jsonify({'error': str(e)}), 500

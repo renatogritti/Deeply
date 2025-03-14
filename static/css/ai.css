@@ -1,0 +1,172 @@
+.ai-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #00A67E 0%, #005F47 100%);
+    border: none;
+    border-radius: 20px;
+    color: white;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.ai-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 166, 126, 0.4);
+}
+
+.ai-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+.ai-model {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.model-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 14px;
+    margin-left: 16px;
+}
+
+.ai-container {
+    max-width: 1800px; /* Aumentado de 1400px para 1800px */
+    width: 95%; /* Garante que use 95% da largura disponível */
+    margin: 0 auto;
+    padding: 24px;
+    height: calc(100vh - 180px);
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.message {
+    max-width: 80%;
+    padding: 16px;
+    border-radius: 12px;
+    line-height: 1.5;
+}
+
+.user-message {
+    align-self: flex-end;
+    background: var(--primary-lighter);
+    color: var(--primary-color);
+}
+
+.ai-message {
+    align-self: flex-start;
+    background: var(--primary-lighter); /* Roxo claro do tema */
+    color: var(--primary-color); /* Roxo do tema */
+    font-size: 15px; /* Tamanho ligeiramente maior para melhor leitura */
+    box-shadow: 0 2px 6px rgba(138, 5, 190, 0.1); /* Sombra sutil em roxo */
+}
+
+.input-container {
+    display: flex;
+    gap: 16px;
+    padding: 24px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.input-container textarea {
+    flex: 1;
+    border: none;
+    resize: none;
+    padding: 8px;
+    font-size: 16px;
+    font-family: inherit;
+    min-height: 24px;
+}
+
+.input-container textarea:focus {
+    outline: none;
+}
+
+.input-container button {
+    background: var(--primary-color); /* Mudado para roxo */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.input-container button:hover {
+    background: var(--primary-dark); /* Hover também em roxo mais escuro */
+}
+
+.input-container button svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Adicione estes estilos de responsividade ao final do arquivo */
+@media (max-width: 1200px) {
+    .ai-container {
+        width: 98%;
+        padding: 16px;
+    }
+
+    .message {
+        max-width: 85%;
+    }
+}
+
+@media (max-width: 768px) {
+    .ai-container {
+        width: 100%;
+        padding: 12px;
+    }
+
+    .message {
+        max-width: 90%;
+        padding: 12px;
+    }
+
+    .input-container {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .chat-messages {
+        padding: 12px;
+    }
+
+    .message {
+        max-width: 95%;
+        padding: 10px;
+    }
+
+    .input-container button {
+        width: 36px;
+        height: 36px;
+    }
+
+    .input-container button svg {
+        width: 20px;
+        height: 20px;
+    }
+}
