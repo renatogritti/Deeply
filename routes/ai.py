@@ -20,15 +20,17 @@ http.mount("http://", adapter)
 http.mount("https://", adapter)
 
 def format_response(text):
-    # Formata quebras de linha 
-    text = text.replace('\n•', '<br>•')  # Preserva bullets
+    # Formata blocos de código
+    text = re.sub(r'```(\w+)?\n(.*?)\n```', r'<pre><code class="language-\1">\2</code></pre>', text, flags=re.DOTALL)
+    
+    # Formata texto em negrito
+    text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text)
+    
+    # Formata texto em itálico
+    text = re.sub(r'\*(.*?)\*', r'<em>\1</em>', text)
+    
+    # Converte quebras de linha em <br>
     text = text.replace('\n', '<br>')
-    
-    # Formata bullets para melhor visualização
-    text = text.replace('• ', '<br>• ')
-    
-    # Remove quebras extras no início
-    text = text.replace('<br>• ', '• ', 1)
     
     return text
 

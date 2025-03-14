@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', function() {
     • Métodos de trabalho profundo (Deep Work)
     • Práticas ágeis e colaborativas
     • Reconhecimento social (Kudos)
-    • Produtividade em equipe
     
     Como posso ajudar você hoje?`;
     
@@ -32,6 +31,14 @@ function sendMessage() {
     addMessage(message, 'user');
     input.value = '';
     
+    // Adiciona mensagem de loading
+    const loadingMessage = `<div class="loading-dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </div>`;
+    addMessage(loadingMessage, 'ai');
+    
     isProcessing = true;
     
     fetch('/ai/chat', {
@@ -39,30 +46,77 @@ function sendMessage() {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: message }) // Corrigido: 'prompt' para 'message'
+        body: JSON.stringify({ message: message })
     })
     .then(response => response.json())
     .then(data => {
         if (data.error) {
             throw new Error(data.error);
         }
-        addMessage(data.response, 'ai');
+        // Remove mensagem de loading
+        const messages = document.getElementById('chat-messages');
+        messages.removeChild(messages.lastChild);
+        
+        // Cria elemento para a resposta
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message ai-message';
+        messages.appendChild(messageDiv);
+        
+        // Inicia a animação de digitação
+        typeWriter(data.response, messageDiv, 0, 30);
     })
     .catch(error => {
+        const messages = document.getElementById('chat-messages');
+        messages.removeChild(messages.lastChild);
         addMessage('Erro ao processar mensagem: ' + error.message, 'error');
-        console.error('Erro detalhado:', error); // Adicionado log detalhado
+        console.error('Erro detalhado:', error);
     })
     .finally(() => {
         isProcessing = false;
     });
 }
 
+function typeWriter(text, element, index, speed) {
+    if (index < text.length) {
+        // Se encontrar uma tag HTML, pula até o fechamento
+        if (text.charAt(index) === '<') {
+            const endIndex = text.indexOf('>', index);
+            element.innerHTML = text.substring(0, endIndex + 1);
+            index = endIndex + 1;
+        } else {
+            element.innerHTML = text.substring(0, index + 1);
+            index++;
+        }
+        
+        // Ajusta velocidade para pausas naturais (reduzidas para 1/3)
+        let currentSpeed = speed;
+        if (text.charAt(index - 1) === '.') {
+            currentSpeed = speed * 1.6; // Era 5, agora 1.6
+        } else if (text.charAt(index - 1) === ',') {
+            currentSpeed = speed; // Era 3, agora 1
+        }
+        
+        // Mantém o scroll atualizado durante a digitação
+        const messages = document.getElementById('chat-messages');
+        messages.scrollTop = messages.scrollHeight;
+        
+        setTimeout(() => typeWriter(text, element, index, speed), currentSpeed);
+    }
+}
+
 function addMessage(content, type) {
     const messages = document.getElementById('chat-messages');
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${type}-message`;
-    // Use innerHTML em vez de textContent para interpretar HTML
-    messageDiv.innerHTML = content.replace(/\n/g, '<br>');
-    messages.appendChild(messageDiv);
+    
+    if (type === 'ai' && !content.includes('loading-dots')) {
+        messageDiv.innerHTML = ''; // Inicia vazio para animação
+        messages.appendChild(messageDiv);
+        typeWriter(content, messageDiv, 0, 10); // Reduzido de 30 para 10
+    } else {
+        messageDiv.innerHTML = content;
+        messages.appendChild(messageDiv);
+    }
+    
     messages.scrollTop = messages.scrollHeight;
 }
