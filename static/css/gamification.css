@@ -156,3 +156,44 @@
 .medal-none {
     color: #E0E0E0;
 }
+
+.medal-card {
+    text-align: center;
+    margin-bottom: 24px;
+    background: linear-gradient(135deg, rgba(138, 5, 190, 0.1) 0%, rgba(138, 5, 190, 0.05) 100%);
+    border: 2px solid var(--primary-lighter);
+}
+
+.medal-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 24px;
+}
+
+.big-medal {
+    width: 80px;
+    height: 80px;
+}
+
+.big-medal svg {
+    width: 100%;
+    height: 100%;
+}
+
+.medal-info {
+    text-align: left;
+}
+
+.medal-title {
+    color: var(--primary-color);
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.medal-text {
+    color: var(--text-primary);
+    font-size: 16px;
+    line-height: 1.4;
+}

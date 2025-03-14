@@ -70,6 +70,7 @@ def get_stats(period):
         if user:
             minutes = round(rank.total_duration / 60)
             ranking.append({
+                'id': user.id, # Adiciona o ID do usuário
                 'name': user.name,
                 'minutes': minutes
             })

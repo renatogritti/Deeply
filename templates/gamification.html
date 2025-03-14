@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/gamification.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
+<body data-user-id="{{ session.get('user_id') }}">
     <div class="header">
         <div class="header-left">
             <svg class="logo" viewBox="0 0 24 24">
@@ -29,6 +29,17 @@
 
     <div class="frames-container">
         <div class="gamification-container">
+            <!-- Novo card de medalha -->
+            <div id="medalCard" class="stats-section medal-card" style="display: none;">
+                <div class="medal-content">
+                    <div class="big-medal"></div>
+                    <div class="medal-info">
+                        <h2 class="medal-title">Parabéns!</h2>
+                        <p class="medal-text"></p>
+                    </div>
+                </div>
+            </div>
+
             <div class="stats-section">
                 <div class="stats-header">
                     <h2 class="stats-title">Tempo em Deep Work</h2>
