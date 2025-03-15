@@ -1,6 +1,19 @@
 """
-Kanban Board Application
+Deeply - Collaborative Work Management Platform
+============================================
 
+A comprehensive platform for managing collaborative work, featuring:
+- Kanban board for task management
+- Deep Work timer and statistics
+- Team recognition through Kudos
+- AI-powered assistance
+- Document management
+- Team chat
+
+Author: Renato Gritti
+Version: 1.0.0
+Created: 2024
+License: Proprietary
 """
 
 from app import app

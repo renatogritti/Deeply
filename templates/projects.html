@@ -46,27 +46,43 @@
                     </div>
                 </div>
                 
-                <div class="phases-section">
-                    <div class="phases-header">
-                        <h3>Phases</h3>
-                        <button type="button" onclick="addPhase()" class="add-phase-btn">
-                            <svg viewBox="0 0 24 24" width="16" height="16">
-                                <path fill="currentColor" d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
-                            </svg>
-                            Add Phase
-                        </button>
-                    </div>
-                    
-                    <div id="phasesList" class="phases-list">
-                        <div class="phase-item">
-                            <span class="drag-handle">⋮</span>
-                            <input type="text" class="phase-name" placeholder="Phase Name" required>
+                <div class="form-group">
+                    <label>Templates (opcional)</label>
+                    <select id="columnTemplate" class="form-input" onchange="fillColumns()">
+                        <option value="">Selecione um template ou crie manualmente</option>
+                        <option value="tecnologia">Tecnologia & Desenvolvimento</option>
+                        <option value="manufatura">Manufatura & Indústria</option>
+                        <option value="marketing">Marketing & Publicidade</option>
+                        <option value="saude">Saúde & Medicina</option>
+                        <option value="juridico">Jurídico & Advocacia</option>
+                        <option value="recursos_humanos">Recursos Humanos</option>
+                        <option value="construcao_civil">Construção Civil</option>
+                    </select>
+                </div>
+
+                <div id="phasesContainer" class="phases-container">
+                    <div class="phases-section">
+                        <div class="phases-header">
+                            <h3>Phases</h3>
+                            <button type="button" onclick="addPhase()" class="add-phase-btn">
+                                <svg viewBox="0 0 24 24" width="16" height="16">
+                                    <path fill="currentColor" d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+                                </svg>
+                                Add Phase
+                            </button>
                         </div>
-                    </div>
-                    
-                    <div class="phase-instructions">
-                        <small>* At least one phase is required</small>
-                        <small>* Drag phases to reorder them</small>
+                        
+                        <div id="phasesList" class="phases-list">
+                            <div class="phase-item">
+                                <span class="drag-handle">⋮</span>
+                                <input type="text" class="phase-name" placeholder="Phase Name" required>
+                            </div>
+                        </div>
+                        
+                        <div class="phase-instructions">
+                            <small>* At least one phase is required</small>
+                            <small>* Drag phases to reorder them</small>
+                        </div>
                     </div>
                 </div>
                 
@@ -234,6 +250,49 @@
         async function editProject(id) {
             // Implementar edição de projeto
             alert('Edit project feature coming soon!');
+        }
+
+        function fillColumns() {
+            const templates = {
+                'tecnologia': ['Backlog', 'Em Desenvolvimento', 'Code Review', 'Testes', 'Deploy', 'Concluído'],
+                'manufatura': ['Matéria-prima', 'Produção', 'Controle Qualidade', 'Embalagem', 'Expedição', 'Concluído'],
+                'marketing': ['Ideias', 'Planejamento', 'Criação', 'Revisão', 'Aprovação', 'Publicado'],
+                'saude': ['Triagem', 'Em Atendimento', 'Exames', 'Diagnóstico', 'Tratamento', 'Alta'],
+                'juridico': ['Novo Caso', 'Análise', 'Documentação', 'Audiências', 'Sentença', 'Arquivado'],
+                'recursos_humanos': ['Candidatos', 'Triagem', 'Entrevistas', 'Oferta', 'Contratação', 'Onboarding'],
+                'construcao_civil': ['Projeto', 'Licenças', 'Execução', 'Inspeção', 'Acabamento', 'Entrega']
+            };
+
+            const select = document.getElementById('columnTemplate');
+            const phasesList = document.getElementById('phasesList');
+            const template = select.value;
+
+            // Limpa a lista atual
+            phasesList.innerHTML = '';
+
+            // Se um template foi selecionado, adiciona as fases
+            if (template && templates[template]) {
+                templates[template].forEach(phase => {
+                    const div = document.createElement('div');
+                    div.className = 'phase-item';
+                    div.draggable = true;
+                    div.innerHTML = `
+                        <span class="drag-handle">⋮</span>
+                        <input type="text" class="phase-name" value="${phase}" required>
+                        <button type="button" class="remove-phase" onclick="this.parentElement.remove()">&times;</button>
+                    `;
+                    phasesList.appendChild(div);
+                });
+            } else {
+                // Adiciona uma fase vazia se nenhum template for selecionado
+                phasesList.innerHTML = `
+                    <div class="phase-item" draggable="true">
+                        <span class="drag-handle">⋮</span>
+                        <input type="text" class="phase-name" placeholder="Phase Name" required>
+                        <button type="button" class="remove-phase" onclick="this.parentElement.remove()">&times;</button>
+                    </div>
+                `;
+            }
         }
     </script>
 </body>
