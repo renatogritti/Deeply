@@ -4,7 +4,8 @@ let isProcessing = false;
 document.addEventListener('DOMContentLoaded', function() {
     // Verifica se tem parâmetros na URL para análise
     const params = new URLSearchParams(window.location.search);
-    if (params.get('acao') !== 'analise') {
+    acao = params.get('acao');
+    if ( acao !== 'analise' && acao !== 'report') {
         const welcomeMessage = `Olá! Sou Deeply, seu assistente especializado em trabalho colaborativo. 
         Posso ajudar com:
         • Métodos de trabalho profundo (Deep Work)

@@ -110,6 +110,49 @@
                     console.error('Erro ao processar JSON:', error);
                     addMessage('Erro ao processar dados do board para análise.', 'error');
                 }
+            } else if (params.acao === 'report') {
+                try {
+                    // Decodifica o JSON de base64
+                    const jsonData = atob(params.json);
+                    // Monta a mensagem de relatório
+                    const reportPrompt = "monte um status report em Portugues do Board com as atividades:1. a iniciar; 2. atividades em andamento; 3. atividades finalizadas; baseado no seguinte board: " + jsonData;
+                    
+                    // Adiciona mensagem de relatório em andamento
+                    addMessage("Analisando o Projeto...", 'ai');
+                    
+                    // Envia a mensagem sem mostrá-la na interface
+                    fetch('/ai/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ message: reportPrompt })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            throw new Error(data.error);
+                        }
+                        // Remove a mensagem "Gerando relatório do Projeto..."
+                        const messages = document.getElementById('chat-messages');
+                        messages.removeChild(messages.lastChild);
+                        
+                        // Adiciona a resposta do relatório
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = 'message ai-message';
+                        messages.appendChild(messageDiv);
+                        typeWriter(data.response, messageDiv, 0, 30);
+                    })
+                    .catch(error => {
+                        console.error('Erro:', error);
+                        const messages = document.getElementById('chat-messages');
+                        messages.removeChild(messages.lastChild);
+                        addMessage('Erro ao processar relatório: ' + error.message, 'error');
+                    });
+                } catch (error) {
+                    console.error('Erro ao processar JSON:', error);
+                    addMessage('Erro ao processar dados do board para relatório.', 'error');
+                }
             }
         }
 
