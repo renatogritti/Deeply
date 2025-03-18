@@ -227,20 +227,23 @@ body {
     font-size: 11px;
 }
 
-/* Board layout */
+/* Board layout - ajustado para ser flexível */
 .kanban-board {
     display: flex;
-    margin: 20px;
     gap: 24px;
-    height: 100%;
+    margin-top: 36px;
     padding: 24px;
+    min-height: calc(100vh - 200px); /* Altura mínima considerando header e filter */
+    height: auto; /* Permite crescimento automático */
 }
 
-/* Column styles */
+/* Column styles - ajustado para ser flexível */
 .kanban-column {
     flex: 1;
     min-width: 250px;
     max-width: 350px;
+    min-height: calc(120vh - 240px); /* Altura mínima da coluna considerando margens e padding */
+    height: fit-content; /* Ajusta à altura do conteúdo */
     background-color: var(--column-background);
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -590,12 +593,14 @@ button[onclick*="cancel"]:hover {
 .frames-container {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 64px); /* Mantém o ajuste para o header */
-    margin-top: 0; /* Removido margin-top */
+    min-height: calc(100vh - 80px);
+    height: auto;
     margin-left: 80px;
     width: calc(100% - 80px);
     padding: 20px;
+    margin-top: 64px;
     transition: margin-left 0.3s ease, width 0.3s ease;
+    overflow-y: auto; /* Permite scroll quando necessário */
 }
 
 .sidebar:hover + .frames-container {
@@ -1465,7 +1470,7 @@ button[onclick*="cancel"]:hover {
 }
 
 .form-input:hover {
-    border-color: var(--primary-light);
+    border-color: var (--primary-light);
 }
 
 .form-input:focus {
@@ -2238,7 +2243,7 @@ textarea.form-input {
     font-size: 14px;
     cursor: pointer;
     transition: all 0.3s ease;
-    margin-left: 48px;
+    margin-left: 30px;
     box-shadow: 0 2px 8px rgba(138, 5, 190, 0.3);
 }
 
