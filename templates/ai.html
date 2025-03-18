@@ -47,5 +47,76 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/ai.js') }}"></script>
+    <script>
+        // Função para auto-crescimento do textarea
+        function auto_grow(element) {
+            element.style.height = "24px";
+            element.style.height = (element.scrollHeight)+"px";
+        }
+
+        // Função para obter parâmetros da URL
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                acao: params.get('acao'),
+                json: params.get('json')
+            };
+        }
+
+        // Função para iniciar análise automática se necessário
+        function checkForAutoAnalysis() {
+            const params = getUrlParams();
+            if (params.acao === 'analise' && params.json) {
+                try {
+                    // Decodifica o JSON de base64
+                    const jsonData = atob(params.json);
+                    // Monta a mensagem de análise
+                    const analysisPrompt = "monte um relatorio de analise do kanban board, avaliando wip, gargalos, sobrealocacao de recursos e monte recomendacoes. segue o board: " + jsonData;
+                    
+                    // Adiciona mensagem de análise em andamento
+                    addMessage("Analisando o Projeto...", 'ai');
+                    
+                    // Envia a mensagem sem mostrá-la na interface
+                    fetch('/ai/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ message: analysisPrompt })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            throw new Error(data.error);
+                        }
+                        // Remove a mensagem "Analisando o Projeto..."
+                        const messages = document.getElementById('chat-messages');
+                        messages.removeChild(messages.lastChild);
+                        
+                        // Adiciona a resposta da análise
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = 'message ai-message';
+                        messages.appendChild(messageDiv);
+                        typeWriter(data.response, messageDiv, 0, 30);
+                    })
+                    .catch(error => {
+                        console.error('Erro:', error);
+                        const messages = document.getElementById('chat-messages');
+                        messages.removeChild(messages.lastChild);
+                        addMessage('Erro ao processar análise: ' + error.message, 'error');
+                    });
+
+                } catch (error) {
+                    console.error('Erro ao processar JSON:', error);
+                    addMessage('Erro ao processar dados do board para análise.', 'error');
+                }
+            }
+        }
+
+        // Executa a verificação quando o documento estiver carregado
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(checkForAutoAnalysis, 1000); // Aguarda 1s para garantir que tudo está inicializado
+        });
+    </script>
 </body>
 </html>

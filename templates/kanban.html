@@ -146,11 +146,11 @@
                     {% endfor %}
                 </select>
             </div>
-            <button id="exportProjectBtn" class="export-button" onclick="exportProjectData()"></button>
+            <button id="analyzeProjectBtn" class="analyze-button" onclick="analyzeProjectData()">
                 <svg viewBox="0 0 24 24" width="16" height="16">
-                    <path fill="currentColor" d="M14,3V7H17.59L7.76,16.83L9.17,18.24L19,8.41V12H23V3M19,19H5V5H11V3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V13H19V19Z"/>
+                    <path fill="currentColor" d="M19 3H5C3.89 3 3 3.89 3 5V19C3 20.11 3.89 21 5 21H19C20.11 21 21 20.11 21 19V5C21 3.89 20.11 3 19 3M19 19H5V5H19V19M11 7H13V13H11V7M11 15H13V17H11V15Z"/>
                 </svg>
-                Exportar JSON
+                Analisar Projeto
             </button>
         </div>
     </div>
@@ -1638,10 +1638,10 @@
             // Seu código de inicialização do drag and drop aqui
         }
 
-        function exportProjectData() {
+        function analyzeProjectData() {
             const projectId = document.getElementById('projectFilter').value;
             if (!projectId) {
-                alert('Por favor, selecione um projeto para exportar.');
+                alert('Por favor, selecione um projeto para analisar.');
                 return;
             }
 
@@ -1682,18 +1682,11 @@
                 projectData.columns.push(columnData);
             });
 
-            // Cria e faz download do arquivo JSON
-            const dataStr = JSON.stringify(projectData, null, 2);
-            const blob = new Blob([dataStr], { type: 'application/json' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = `project_${projectId}_export.json`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
+            // Codifica os dados em base64 para evitar problemas com caracteres especiais
+            const jsonData = btoa(JSON.stringify(projectData));
+            
+            // Redireciona para a página de AI com os parâmetros
+            window.location.href = `/ai?acao=analise&json=${jsonData}`;
         }
     </script>
     <footer class="footer">

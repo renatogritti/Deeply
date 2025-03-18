@@ -40,7 +40,11 @@ def init_app(app):
 @ai_bp.route('/')
 @login_required
 def ai_page():
-    return render_template('ai.html')
+    # Recebe os parâmetros da URL
+    acao = request.args.get('acao')
+    json_data = request.args.get('json')
+    
+    return render_template('ai.html', acao=acao, json_data=json_data)
 
 @ai_bp.route('/chat', methods=['POST'])
 @login_required 

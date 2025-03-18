@@ -2,15 +2,19 @@ let isProcessing = false;
 
 // Adiciona mensagem de boas-vindas quando carregar a página
 document.addEventListener('DOMContentLoaded', function() {
-    const welcomeMessage = `Olá! Sou Deeply, seu assistente especializado em trabalho colaborativo e produtividade. 
-    Posso ajudar com:
-    • Métodos de trabalho profundo (Deep Work)
-    • Práticas ágeis e colaborativas
-    • Reconhecimento social (Kudos)
-    
-    Como posso ajudar você hoje?`;
-    
-    addMessage(welcomeMessage, 'ai');
+    // Verifica se tem parâmetros na URL para análise
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('acao') !== 'analise') {
+        const welcomeMessage = `Olá! Sou Deeply, seu assistente especializado em trabalho colaborativo. 
+        Posso ajudar com:
+        • Métodos de trabalho profundo (Deep Work)
+        • Práticas ágeis e colaborativas
+        • Reconhecimento social (Kudos)
+        
+        Como posso ajudar você hoje?`;
+        
+        addMessage(welcomeMessage, 'ai');
+    }
 });
 
 document.getElementById('userInput').addEventListener('keydown', function(e) {
@@ -104,15 +108,29 @@ function typeWriter(text, element, index, speed) {
     }
 }
 
+// Atualiza a animação de loading para o caso de análise
 function addMessage(content, type) {
     const messages = document.getElementById('chat-messages');
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${type}-message`;
     
-    if (type === 'ai' && !content.includes('loading-dots')) {
-        messageDiv.innerHTML = ''; // Inicia vazio para animação
+    const params = new URLSearchParams(window.location.search);
+    
+    if (type === 'ai' && content === 'Analisando o Projeto...') {
+        messageDiv.innerHTML = `
+            <div class="analyzing-message">
+                <div class="analyzing-text">${content}</div>
+                <div class="analyzing-animation">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+            </div>`;
         messages.appendChild(messageDiv);
-        typeWriter(content, messageDiv, 0, 10); // Reduzido de 30 para 10
+    } else if (type === 'ai' && !content.includes('loading-dots')) {
+        messageDiv.innerHTML = '';
+        messages.appendChild(messageDiv);
+        typeWriter(content, messageDiv, 0, 10);
     } else {
         messageDiv.innerHTML = content;
         messages.appendChild(messageDiv);
