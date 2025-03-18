@@ -137,19 +137,23 @@
     </div>
 
     <div class="filter-header">
-        <div class="project-filter">
-            <select id="projectFilter" onchange="applyFilters()">
-            <option value="">All Projects</option>
-            {% for project in projects %}
-                <option value="{{ project.id }}">{{ project.name }}</option>
-            {% endfor %}
-            </select>
+        <div class="filter-content">
+            <div class="project-filter">
+                <select id="projectFilter" onchange="applyFilters()">
+                    <option value="">All Projects</option>
+                    {% for project in projects %}
+                        <option value="{{ project.id }}">{{ project.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button id="exportProjectBtn" class="export-button" onclick="exportProjectData()"></button>
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                    <path fill="currentColor" d="M14,3V7H17.59L7.76,16.83L9.17,18.24L19,8.41V12H23V3M19,19H5V5H11V3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V13H19V19Z"/>
+                </svg>
+                Exportar JSON
+            </button>
         </div>
     </div>
-
-    <script src="{{ url_for('static', filename='js/pomodoro.js') }}"></script>
-
-    <!-- ...rest of the code... -->
 
     <div class="frames-container">
         <div class="filter-frame">
@@ -163,7 +167,7 @@
             </div>
         </div>
 
-        <div class="kanban-board">
+        <div class="kanban-board"></div>
             <!-- As colunas serão geradas dinamicamente pelo JavaScript -->
         </div>
     </div>
@@ -1633,6 +1637,64 @@
         function initDragAndDrop() {
             // Seu código de inicialização do drag and drop aqui
         }
+
+        function exportProjectData() {
+            const projectId = document.getElementById('projectFilter').value;
+            if (!projectId) {
+                alert('Por favor, selecione um projeto para exportar.');
+                return;
+            }
+
+            // Cria o objeto para armazenar os dados do projeto
+            const projectData = {
+                projectId: projectId,
+                columns: []
+            };
+
+            // Coleta dados de todas as colunas e seus cards
+            document.querySelectorAll('.kanban-column').forEach(column => {
+                const columnData = {
+                    id: column.id,
+                    name: column.querySelector('h2').textContent,
+                    cards: []
+                };
+
+                // Coleta dados de todos os cards na coluna
+                column.querySelectorAll('.kanban-card').forEach(card => {
+                    const cardData = {
+                        id: card.id,
+                        title: card.querySelector('h3').textContent,
+                        description: card.getAttribute('data-description'),
+                        tempo: card.querySelector('p').textContent.replace('Tempo: ', ''),
+                        deadline: card.querySelector('.card-deadline')?.textContent.replace('Deadline: ', ''),
+                        team: card.querySelector('.team-tag')?.textContent,
+                        tags: Array.from(card.querySelectorAll('.card-tag')).map(tag => ({
+                            name: tag.textContent,
+                            color: tag.style.backgroundColor
+                        })),
+                        users: Array.from(card.querySelectorAll('.user-tag')).map(user => ({
+                            name: user.textContent
+                        }))
+                    };
+                    columnData.cards.push(cardData);
+                });
+
+                projectData.columns.push(columnData);
+            });
+
+            // Cria e faz download do arquivo JSON
+            const dataStr = JSON.stringify(projectData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `project_${projectId}_export.json`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
     </script>
     <footer class="footer">
         © 2024 GrittiCorp. All rights reserved.
@@ -1731,5 +1793,9 @@ document.addEventListener('DOMContentLoaded', setupSearch);
     transition: color 0.3s ease;
 }
 </style>
+
+<!-- Manter apenas esta referência ao script do Pomodoro -->
+<script src="{{ url_for('static', filename='js/pomodoro.js') }}"></script>
+
 </body>
 </html>
