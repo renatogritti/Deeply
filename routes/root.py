@@ -68,7 +68,7 @@ def init_app(app):
             }), 429
 
         data = request.json
-        print("Dados recebidos:", data)  # Debug: mostra os dados recebidos
+
         
         if not data or 'username' not in data or 'password' not in data:
             return jsonify({"success": False, "message": "Dados inválidos"}), 400
