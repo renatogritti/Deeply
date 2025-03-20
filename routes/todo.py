@@ -176,3 +176,18 @@ def init_app(app):
         except Exception as e:
             db.session.rollback()
             return jsonify({"success": False, "error": str(e)})
+
+    @app.route('/api/todo/tasks/<int:task_id>', methods=['GET'])
+    @login_required
+    def get_task(task_id):
+        try:
+            task = TodoTask.query.get_or_404(task_id)
+            
+            # Verificar se a tarefa pertence a uma lista do usuário
+            user_id = session.get('user_id')
+            if task.list.user_id != user_id:
+                return jsonify({"success": False, "error": "Acesso negado"}), 403
+                
+            return jsonify(task.to_dict())
+        except Exception as e:
+            return jsonify({"success": False, "error": str(e)}), 500

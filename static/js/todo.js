@@ -195,6 +195,11 @@ function createList() {
     const name = document.getElementById('listName').value;
     const description = document.getElementById('listDescription').value;
     
+    if (!name) {
+        alert('List name is required!');
+        return;
+    }
+
     fetch('/api/todo/lists', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -205,7 +210,13 @@ function createList() {
         if (data.success) {
             loadTodoLists();
             closeModal('newListModal');
+        } else {
+            alert('Error creating list: ' + data.error);
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error creating list');
     });
 }
 
@@ -231,7 +242,20 @@ function createTask() {
 
 // Funções helper
 function openNewListModal() {
+    // Limpa os campos ao abrir o modal
+    document.getElementById('listName').value = '';
+    document.getElementById('listDescription').value = '';
+    // Remove qualquer data-list-id que possa existir
+    document.getElementById('newListModal').removeAttribute('data-list-id');
+    // Certifica que o botão está com o texto correto
+    document.querySelector('#newListModal .modal-buttons').innerHTML = `
+        <button id="createListButton">Create</button>
+        <button onclick="closeModal('newListModal')">Cancel</button>
+    `;
     document.getElementById('newListModal').style.display = 'block';
+    
+    // Adiciona o event listener para o botão de criar
+    document.getElementById('createListButton').onclick = createList;
 }
 
 function openNewTaskModal(listId) {
@@ -293,38 +317,80 @@ function deleteList(listId) {
 
 function editTask(taskId) {
     fetch(`/api/todo/tasks/${taskId}`)
-        .then(response => response.json())
-        .then(task => {
-            document.getElementById('taskTitle').value = task.title;
-            document.getElementById('taskDescription').value = task.description || '';
-            document.getElementById('taskPriority').value = task.priority;
-            document.getElementById('currentListId').value = task.list_id;
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(response => {
+            if (!response.success && response.error) {
+                throw new Error(response.error);
+            }
+            
+            // Resetar o formulário e configurar para edição
             const modal = document.getElementById('newTaskModal');
-            modal.setAttribute('data-task-id', taskId);
-            document.querySelector('#newTaskModal .modal-buttons').innerHTML = `
-                <button onclick="updateTask(${taskId})">Update</button>
+            modal.querySelector('h3').textContent = 'Edit Task';
+            
+            // Preencher os campos com os dados da tarefa
+            document.getElementById('taskTitle').value = response.title || '';
+            document.getElementById('taskDescription').value = response.description || '';
+            document.getElementById('taskPriority').value = response.priority || 'Media';
+            document.getElementById('currentListId').value = response.list_id;
+            
+            // Atualizar os botões do modal
+            const modalButtons = modal.querySelector('.modal-buttons');
+            modalButtons.innerHTML = `
+                <button onclick="updateTask(${taskId})">Save Changes</button>
                 <button onclick="closeModal('newTaskModal')">Cancel</button>
             `;
+            
+            // Abrir o modal
             modal.style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error loading task:', error);
+            alert('Error loading task data: ' + error.message);
         });
 }
 
 function updateTask(taskId) {
-    const title = document.getElementById('taskTitle').value;
-    const description = document.getElementById('taskDescription').value;
+    const title = document.getElementById('taskTitle').value.trim();
+    const description = document.getElementById('taskDescription').value.trim();
     const priority = document.getElementById('taskPriority').value;
-    
+    const list_id = document.getElementById('currentListId').value;
+
+    if (!title) {
+        alert('Task title is required!');
+        return;
+    }
+
+    const taskData = {
+        title: title,
+        description: description,
+        priority: priority,
+        list_id: list_id
+    };
+
     fetch(`/api/todo/tasks/${taskId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description, priority })
+        headers: { 
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(taskData)
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            loadTodoLists();
+            loadTodoLists(); // Recarrega todas as listas
             closeModal('newTaskModal');
+        } else {
+            alert('Error updating task: ' + (data.error || 'Unknown error'));
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating task');
     });
 }
 
