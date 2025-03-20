@@ -79,7 +79,7 @@ Seu foco e ajudar equipes a trabalharem melhor juntas, reconhecer conquistas e m
                     "repeat_penalty": 1.1
                 }
             },
-            timeout=120
+            timeout=240
         )
         
         if response.status_code == 200:

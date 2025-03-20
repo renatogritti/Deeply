@@ -115,7 +115,7 @@
                     // Decodifica o JSON de base64
                     const jsonData = atob(params.json);
                     // Monta a mensagem de relatório
-                    const reportPrompt = "monte um status report em Portugues do Board com as atividades:1. a iniciar; 2. atividades em andamento; 3. atividades finalizadas; baseado no seguinte board: " + jsonData;
+                    const reportPrompt = "monte um status report em Portugues do Board com as atividades:1. a iniciar; 2. atividades em andamento; 3. atividades finalizadas; Faca uam analise de riscos baseado nas informacoes e monte recomendacoes de gestao de projetos baseado no seguinte board: " + jsonData;
                     
                     // Adiciona mensagem de relatório em andamento
                     addMessage("Analisando o Projeto...", 'ai');

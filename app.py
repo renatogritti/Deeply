@@ -36,4 +36,4 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Proteção contra CSRF
 
 # Configuração da AI
 OLLAMA_API_BASE = "http://127.0.0.1:11434"
-OLLAMA_MODEL = "gemma3:1b"  # Alterado para Gemma 3B gemma3:1b
+OLLAMA_MODEL = "gemma3:4b"  # Alterado para Gemma 3B gemma3:1b
