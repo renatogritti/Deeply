@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Projects - Kanban Board</title>
+    <title>Manage Projects - Deeply</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/projects.css') }}">
     <script src="{{ url_for('static', filename='js/projects.js') }}" defer></script>
@@ -19,12 +19,13 @@
     </div>
 
     <div class="sidebar">
-        <a href="/kanban" class="back-button">
+        <a href="{{ add_project_param('/kanban') }}" class="back-button">
             <svg viewBox="0 0 24 24">
                 <path fill="currentColor" d="M4 3C2.89 3 2 3.89 2 5V19C2 20.11 2.89 21 4 21H20C21.11 21 22 20.11 22 19V5C22 3.89 21.11 3 20 3H4M4 5H20V19H4V5M6 7V17H10V7H6M12 7V11H16V7H12M12 13V17H16V13H12Z"/>
             </svg>
-            <span class="back-text">Back to Kanban</span>
+            <span class="back-text">Voltar ao Kanban</span>
         </a>
+        </button>
     </div>
 
     <div class="projects-container">

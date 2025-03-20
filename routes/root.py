@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_file
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_file, g
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import json

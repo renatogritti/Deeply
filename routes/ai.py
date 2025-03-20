@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify, current_app
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_file, g, Blueprint
 import requests
 from app import OLLAMA_API_BASE, OLLAMA_MODEL
 from requests.adapters import HTTPAdapter
@@ -41,10 +41,11 @@ def init_app(app):
 @login_required
 def ai_page():
     # Recebe os parâmetros da URL
+    projeto_id = request.args.get('projeto')
     acao = request.args.get('acao')
     json_data = request.args.get('json')
     
-    return render_template('ai.html', acao=acao, json_data=json_data)
+    return render_template('ai.html', projeto_id=projeto_id, acao=acao, json_data=json_data)
 
 @ai_bp.route('/chat', methods=['POST'])
 @login_required 

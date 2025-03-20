@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,7 +27,7 @@
             </div>
 
             <!-- Botão de AI -->
-            <button class="ai-button" onclick="window.location.href='/ai'">
+            <button class="ai-button" onclick="window.location.href='{{ add_project_param('/ai') }}'">
                 <svg viewBox="0 0 24 24">
                     <path fill="currentColor" d="M12,2C13.85,2 15.55,2.78 16.9,4.1L18.6,2.4L19.9,3.7L18.2,5.4C19.5,6.75 20.3,8.45 20.3,10.3C20.3,13.95 17.95,17.1 14.7,18.3L13.4,16.95C16.2,15.95 18.1,13.3 18.1,10.3C18.1,7.05 15.35,4.3 12.1,4.3C8.85,4.3 6.1,7.05 6.1,10.3C6.1,13.3 8,15.95 10.8,16.95L9.5,18.3C6.25,17.1 3.9,13.95 3.9,10.3C3.9,8.45 4.7,6.75 6,5.4L4.3,3.7L5.6,2.4L7.3,4.1C8.65,2.78 10.35,2 12.2,2H12Z"/>
                 </svg>
@@ -35,7 +35,7 @@
             </button>
 
             <!-- Botão de Badges -->
-            <button class="badges-button" onclick="window.location.href='/gamification'">
+            <button class="badges-button" onclick="window.location.href='{{ add_project_param('/gamification') }}'">
                 <svg viewBox="0 0 24 24">
                     <path fill="currentColor" d="M20,2H4V4L9.81,8.36C6.14,9.57 4.14,13.53 5.35,17.2C6.56,20.87 10.5,22.87 14.19,21.66C17.86,20.45 19.86,16.5 18.65,12.82C17.95,10.71 16.3,9.05 14.19,8.36L20,4V2M14.94,19.5L12,17.78L9.06,19.5L9.84,16.17L7.25,13.93L10.66,13.64L12,10.5L13.34,13.64L16.75,13.93L14.16,16.17L14.94,19.5Z"/>
                 </svg>
@@ -75,7 +75,7 @@
 
     <div class="sidebar">
         <!-- Botão do Messenger - Agora como primeiro botão -->
-        <button class="sidebar-button" onclick="window.location.href='/messenger'">
+        <button class="sidebar-button" onclick="window.location.href='{{ add_project_param('/messenger') }}'">
             <svg viewBox="0 0 24 24">
                 <path fill="currentColor" d="M20,2H4A2,2 0 0,0 2,4V22L6,18H20A2,2 0 0,0 22,16V4A2,2 0 0,0 20,2M6,9H18V11H6M14,14H6V12H14M18,8H6V6H18" />
             </svg>
@@ -154,7 +154,7 @@
             </button>
             <button id="analyzeProjectBtn" class="analyze-button" onclick="ReportProjectData()">
                 <svg viewBox="0 0 24 24" width="16" height="16">
-                    <path fill="currentColor" d="M19 3H5C3.89 3 3 3.89 3 5V19C3 20.11 3.89 21 5 21H19C20.11 21 21 20.11 21 19V5C21 3.89 20.11 3 19 3M19 19H5V5H19V19M11 7H13V13H11V7M11 15H13V17H11V15Z"/>
+                    <path fill="currentColor" d="M19 3H5C3.89 3 3.89 3 5 3H19C20.11 3 21 3.89 21 5V19C21 20.11 20.11 21 19 21H5C3.89 21 3 20.11 3 19V5C3 3.89 3.89 3 5 3M19 19H5V5H19V19M11 7H13V13H11V7M11 15H13V17H11V15Z"/>
                 </svg>
                 Status Report
             </button>
@@ -345,47 +345,91 @@
             return card;
         }
 
-        function openNewCardModal(phase_id) {
-            const modal = document.getElementById("createModal");
-            const newCardProject = document.getElementById("newCardProject");
-            const selectedProjectId = document.getElementById("projectFilter").value;
+        async function openNewCardModal(phase_id) {
+            try {
+                const modal = document.getElementById("createModal");
+                const newCardProject = document.getElementById("newCardProject");
+                const selectedProjectId = document.getElementById("projectFilter").value;
+                
+                // Mostrar modal
+                modal.style.display = "block";
+                
+                // Limpar campos
+                document.getElementById("newCardTitle").value = "";
+                document.getElementById("newCardDescription").value = "";
+                document.getElementById("newCardTempo").value = "";
+                document.getElementById("newCardDeadline").value = "";
 
-            modal.style.display = "block";
-            
-            // Limpar campos
-            document.getElementById("newCardTitle").value = "";
-            document.getElementById("newCardDescription").value = "";
-            document.getElementById("newCardTempo").value = "";
-            document.getElementById("newCardDeadline").value = "";
+                // Carregar dados (usuários e tags)
+                await loadModalData();
 
-            // Carregar usuários primeiro
-            fetch('/api/teams')
-                .then(response => response.json())
-                .then(teams => {
-                    // Atualizar lista de usuários
-                    const userSelect = document.getElementById('newCardUsers');
-                    userSelect.innerHTML = teams.map(team => 
-                        `<option value="${team.id}">${team.name}</option>`
-                    ).join('');
+                // Configurar projeto primeiro
+                if (selectedProjectId) {
+                    newCardProject.value = selectedProjectId;
+                    newCardProject.disabled = true;
                     
-                    // Depois de carregar usuários, configurar projeto e fases
-                    if (selectedProjectId) {
-                        newCardProject.value = selectedProjectId;
-                        newCardProject.disabled = true;
-                        loadPhasesByProject(selectedProjectId).then(() => {
-                            if (phase_id) {
-                                document.getElementById("newCardPhase").value = phase_id.replace('phase_', '');
-                            }
-                        });
+                    // Carregar fases do projeto
+                    await loadPhasesByProject(selectedProjectId);
+                    
+                    // Se foi passada uma phase_id, selecionar a fase correta
+                    if (phase_id) {
+                        // Converter phase_id para o formato correto
+                        const phaseValue = typeof phase_id === 'string' ? 
+                            phase_id.replace('phase_', '') : 
+                            phase_id;
+                        
+                        // Selecionar a fase no select
+                        const phaseSelect = document.getElementById("newCardPhase");
+                        if (phaseSelect) {
+                            phaseSelect.value = phaseValue;
+                            phaseSelect.disabled = true; // Opcional: travar a fase selecionada
+                        }
                     }
-                    
-                    // Carregar tags
-                    loadTags();
-                })
-                .catch(error => {
-                    console.error('Error loading teams:', error);
-                    alert('Error loading users list');
-                });
+                }
+
+            } catch (error) {
+                console.error('Error opening modal:', error);
+                alert('Erro ao abrir o formulário de criação de card: ' + error.message);
+            }
+        }
+
+        // Função auxiliar para carregar dados do modal
+        async function loadModalData() {
+            try {
+                // Carregar usuários
+                const usersPromise = fetch('/api/teams').then(res => res.json());
+                // Carregar tags
+                const tagsPromise = fetch('/api/tags').then(res => res.json());
+                
+                // Aguardar todas as requisições
+                const [users, tags] = await Promise.all([usersPromise, tagsPromise]);
+                
+                // Atualizar select de usuários
+                const userSelect = document.getElementById('newCardUsers');
+                if (userSelect) {
+                    userSelect.innerHTML = users.map(user => 
+                        `<option value="${user.id}">${user.name}</option>`
+                    ).join('');
+                }
+                
+                // Atualizar tags
+                const tagsContainer = document.getElementById('newCardTags');
+                if (tagsContainer) {
+                    tagsContainer.innerHTML = tags.map(tag => `
+                        <div class="tag-checkbox">
+                            <input type="checkbox" id="new_tag_${tag.id}" value="${tag.id}">
+                            <label for="new_tag_${tag.id}" style="background-color: ${tag.color}">
+                                ${tag.name}
+                            </label>
+                        </div>
+                    `).join('');
+                }
+                
+                return { users, tags };
+            } catch (error) {
+                console.error('Error loading modal data:', error);
+                throw error;
+            }
         }
 
         function loadTeamsList() {
@@ -864,12 +908,59 @@
         function applyFilters() {
             const projectId = document.getElementById('projectFilter').value;
             
+            // Atualiza a URL com o projeto selecionado
+            const url = new URL(window.location.href);
             if (projectId) {
+                url.searchParams.set('projeto', projectId);
+                history.pushState({}, '', url);
+                
+                // Atualiza todos os links da página
+                updateAllLinks(projectId);
+                
+                // Carrega o board
                 loadBoard(projectId);
             } else {
+                url.searchParams.delete('projeto');
+                history.pushState({}, '', url);
                 document.querySelector('.kanban-board').innerHTML = '<p></p>';
             }
         }
+
+        // Função para atualizar todos os links com o projeto atual
+        function updateAllLinks(projectId) {
+            // Atualiza links da sidebar
+            document.querySelectorAll('.sidebar-button').forEach(button => {
+                const onclick = button.getAttribute('onclick');
+                if (onclick && onclick.includes('window.location.href')) {
+                    const baseUrl = onclick.match(/href='([^']+)'/)[1];
+                    const newUrl = addProjectParam(baseUrl, projectId);
+                    button.setAttribute('onclick', `window.location.href='${newUrl}'`);
+                }
+            });
+        }
+
+        // Função para adicionar parâmetro projeto à URL
+        function addProjectParam(url, projectId) {
+            const urlObj = new URL(url, window.location.origin);
+            if (projectId) {
+                urlObj.searchParams.set('projeto', projectId);
+            }
+            return urlObj.toString();
+        }
+
+        // Inicialização quando a página carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const projectId = urlParams.get('projeto');
+            
+            if (projectId) {
+                const projectFilter = document.getElementById('projectFilter');
+                if (projectFilter) {
+                    projectFilter.value = projectId;
+                    loadBoard(projectId);
+                }
+            }
+        });
 
         function loadBoard(projectId) {
             // Primeiro, carregue as fases do projeto
@@ -890,7 +981,7 @@
                         column.innerHTML = `
                             <div class="column-header">
                                 <h2>${phase.name}</h2>
-                                <button class="add-card-button" onclick="openNewCardModal(${phase.id})" title="Add new card">+</button>
+                                <button class="add-card-button" onclick="openNewCardModal('phase_${phase.id}')" title="Add new card">+</button>
                             </div>
                         `;
                         
@@ -1339,7 +1430,7 @@
 
         function loadBoard(projectId) {
             if (!projectId) {
-                document.querySelector('.kanban-board').innerHTML = '<p>Please select a project</p>';
+                document.querySelector('.kanban-board').innerHTML = '<p></p>';
                 return;
             }
 
@@ -1359,7 +1450,7 @@
                         column.innerHTML = `
                             <div class="column-header">
                                 <h2>${phase.name}</h2>
-                                <button class="add-card-button" onclick="openNewCardModal(${phase.id})" title="Add new card">+</button>
+                                <button class="add-card-button" onclick="openNewCardModal('phase_${phase.id}')" title="Add new card">+</button>
                             </div>
                         `;
                         
@@ -1747,6 +1838,62 @@
         }
     
     
+        function updateGlobalProject(projectId) {
+            // Atualiza a URL atual com o novo projeto selecionado
+            const url = new URL(window.location.href);
+            if (projectId) {
+                url.searchParams.set('projeto', projectId);
+            } else {
+                url.searchParams.delete('projeto');
+            }
+            history.pushState({}, '', url);
+            
+            // Atualiza os links da sidebar com o novo projeto
+            document.querySelectorAll('.sidebar-button').forEach(button => {
+                const href = button.getAttribute('onclick')?.match(/href='([^']+)'/)?.[1];
+                if (href) {
+                    const newHref = updateUrlWithProject(href, projectId);
+                    button.setAttribute('onclick', `window.location.href='${newHref}'`);
+                }
+            });
+
+            // Atualiza os botões do header
+            document.querySelectorAll('.ai-button, .badges-button').forEach(button => {
+                const href = button.getAttribute('onclick')?.match(/href='([^']+)'/)?.[1];
+                if (href) {
+                    const newHref = updateUrlWithProject(href, projectId);
+                    button.setAttribute('onclick', `window.location.href='${newHref}'`);
+                }
+            });
+            
+            // Carrega o board com o projeto selecionado
+            loadBoard(projectId);
+        }
+
+        function updateUrlWithProject(url, projectId) {
+            const urlObj = new URL(url, window.location.origin);
+            if (projectId) {
+                urlObj.searchParams.set('projeto', projectId);
+            } else {
+                urlObj.searchParams.delete('projeto');
+            }
+            return urlObj.toString();
+        }
+
+        // Inicializa com o projeto da URL quando a página carrega
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const projectId = urlParams.get('projeto');
+            
+            if (projectId) {
+                // Seleciona o projeto no dropdown
+                const projectSelect = document.getElementById('projectFilter');
+                if (projectSelect) {
+                    projectSelect.value = projectId;
+                    updateGlobalProject(projectId);
+                }
+            }
+        });
     
     </script>
     <footer class="footer">

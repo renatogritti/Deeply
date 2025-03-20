@@ -7,7 +7,7 @@ It includes database connection details, email configuration, and other settings
 
 """
 
-from flask import Flask
+from flask import Flask, request, g, session
 from flask_session import Session
 
 app = Flask(__name__)
@@ -37,3 +37,35 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Proteção contra CSRF
 # Configuração da AI
 OLLAMA_API_BASE = "http://127.0.0.1:11434"
 OLLAMA_MODEL = "gemma3:4b"  # Alterado para Gemma 3B gemma3:1b
+
+@app.context_processor
+def utility_processor():
+    def get_current_project():
+        # Tenta obter da URL, depois da sessão
+        projeto_id = request.args.get('projeto') or session.get('projeto_id')
+        return projeto_id
+        
+    def add_project_param(url):
+        projeto_id = get_current_project()
+        if not projeto_id:
+            return url
+        if '?' in url:
+            return f"{url}&projeto={projeto_id}"
+        return f"{url}?projeto={projeto_id}"
+    
+    return dict(get_current_project=get_current_project, 
+               add_project_param=add_project_param)
+
+@app.before_request
+def before_request():
+    # Pega o projeto da URL
+    projeto_id = request.args.get('projeto')
+    
+    # Se existe projeto na URL, atualiza a sessão
+    if projeto_id:
+        session['projeto_id'] = projeto_id
+    # Se não existe na URL mas existe na sessão, mantém o da sessão
+    elif 'projeto_id' in session:
+        g.projeto_id = session['projeto_id']
+    else:
+        g.projeto_id = None
