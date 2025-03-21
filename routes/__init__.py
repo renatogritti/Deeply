@@ -9,6 +9,7 @@ from routes import (
     messenger,
     pomodoro,
     kudos,
+    docs,
     gamification,
     ai  # Nova importação
 )
@@ -27,6 +28,7 @@ def init_app(app):
     cards.init_app(app)
     todo.init_app(app)
     messenger.init_app(app)
+    docs.init_app(app)
     pomodoro.init_app(app)
     kudos.init_app(app)  # Registra as rotas do kudos
     gamification.init_app(app)  # Registra as rotas de gamificação
