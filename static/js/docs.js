@@ -15,8 +15,18 @@ function loadProjectDocs(projectId) {
         currentPath = '';
         document.getElementById('folderTree').innerHTML = '';
         document.getElementById('filesList').innerHTML = '';
+        
+        // Remove o parâmetro projeto da URL
+        const url = new URL(window.location.href);
+        url.searchParams.delete('projeto');
+        history.pushState({}, '', url);
         return;
     }
+
+    // Atualiza a URL com o projeto selecionado
+    const url = new URL(window.location.href);
+    url.searchParams.set('projeto', projectId);
+    history.pushState({}, '', url);
 
     currentProject = projectId;
     currentPath = `Docs/Projects/${projectId}`;

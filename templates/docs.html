@@ -89,5 +89,20 @@
     </footer>
     
     <script src="{{ url_for('static', filename='js/docs.js') }}"></script>
+    <script>
+        // Carrega o projeto da URL no carregamento da página
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const projectId = urlParams.get('projeto');
+            
+            if (projectId) {
+                const projectFilter = document.getElementById('projectFilter');
+                if (projectFilter) {
+                    projectFilter.value = projectId;
+                    loadProjectDocs(projectId);
+                }
+            }
+        });
+    </script>
 </body>
 </html>

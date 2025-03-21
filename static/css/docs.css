@@ -65,6 +65,12 @@
     box-shadow: 0 0 0 2px rgba(138, 5, 190, 0.1);
 }
 
+.project-filter select option:checked {
+    background: var(--primary-lighter);
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
 .docs-content {
     display: grid;
     grid-template-columns: 300px 1fr;
