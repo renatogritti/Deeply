@@ -46,7 +46,15 @@
                 <div id="messagesContainer" class="messages-list"></div>
                 <div class="message-input-container">
                     <textarea id="messageInput" placeholder="Type your message..."></textarea>
+                    <button class="emoji-trigger" onclick="toggleEmojiPicker(event)">😊</button>
                     <button onclick="sendMessage()">Send</button>
+                </div>
+                
+                <!-- Adicione o Emoji Picker -->
+                <div id="emojiPicker" class="emoji-picker">
+                    <div class="emoji-list">
+                        <!-- Emojis serão inseridos aqui via JavaScript -->
+                    </div>
                 </div>
             </div>
         </div>

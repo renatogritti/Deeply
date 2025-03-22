@@ -3,6 +3,7 @@ let currentChannel = null;
 document.addEventListener('DOMContentLoaded', () => {
     loadChannels();
     setupMessageInput();
+    initEmojiPicker();
 });
 
 function loadChannels() {
@@ -290,3 +291,96 @@ function deleteChannel(channelId) {
 function closeEditModal() {
     document.getElementById('editChannelModal').style.display = 'none';
 }
+
+// Lista de emojis comuns para mensagens
+const commonEmojis = [
+    '😊', '😄', '😅', '🤣', '😂', '😉', '😍', '🥰',
+    '😘', '😋', '😎', '🤩', '🥳', '😤', '🤔', '🤗',
+    '👍', '👎', '👌', '🙌', '👏', '🤝', '💪', '🙏',
+    '❤️', '💔', '💯', '✨', '🎉', '🎊', '🎈', '🎵'
+];
+
+// Inicializa o emoji picker
+function initEmojiPicker() {
+    const emojiList = document.querySelector('.emoji-list');
+    if (emojiList) {
+        emojiList.innerHTML = commonEmojis.map(emoji => 
+            `<span class="emoji-item" onclick="insertEmoji('${emoji}')">${emoji}</span>`
+        ).join('');
+    }
+}
+
+// Toggle do emoji picker
+function toggleEmojiPicker(event) {
+    const picker = document.getElementById('emojiPicker');
+    const button = event.currentTarget;
+    
+    if (!picker.initialized) {
+        initEmojiPicker();
+        picker.initialized = true;
+    }
+    
+    if (picker.style.display === 'block') {
+        picker.style.display = 'none';
+        return;
+    }
+
+    // Calcula a posição ideal
+    const buttonRect = button.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
+    const windowWidth = window.innerWidth;
+    
+    // Exibe temporariamente para obter dimensões
+    picker.style.display = 'block';
+    picker.style.visibility = 'hidden';
+    const pickerHeight = picker.offsetHeight;
+    const pickerWidth = picker.offsetWidth;
+    
+    // Calcula posição inicial (acima do botão)
+    let top = buttonRect.top - pickerHeight - 5;
+    let left = buttonRect.left;
+    
+    // Se não couber acima, posiciona abaixo
+    if (top < 0) {
+        top = buttonRect.bottom + 5;
+        
+        // Se também não couber abaixo, posiciona onde houver mais espaço
+        if (top + pickerHeight > windowHeight) {
+            top = Math.max(5, windowHeight - pickerHeight - 5);
+        }
+    }
+    
+    // Ajusta posição horizontal se necessário
+    if (left + pickerWidth > windowWidth) {
+        left = Math.max(5, windowWidth - pickerWidth - 5);
+    }
+    
+    // Aplica a posição final
+    picker.style.top = `${top}px`;
+    picker.style.left = `${left}px`;
+    picker.style.visibility = 'visible';
+    
+    event.stopPropagation();
+}
+
+function insertEmoji(emoji) {
+    const messageInput = document.getElementById('messageInput');
+    const start = messageInput.selectionStart;
+    const end = messageInput.selectionEnd;
+    const text = messageInput.value;
+    
+    messageInput.value = text.slice(0, start) + emoji + text.slice(end);
+    messageInput.focus();
+    messageInput.selectionStart = messageInput.selectionEnd = start + emoji.length;
+    
+    // Removida a linha que fechava o picker
+    // document.getElementById('emojiPicker').style.display = 'none';
+}
+
+// Fecha o picker ao clicar fora
+document.addEventListener('click', (event) => {
+    const picker = document.getElementById('emojiPicker');
+    if (picker && !event.target.closest('.emoji-trigger') && !event.target.closest('.emoji-picker')) {
+        picker.style.display = 'none';
+    }
+});

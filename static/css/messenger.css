@@ -297,6 +297,55 @@
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
+/* Emoji Picker */
+.emoji-trigger {
+    padding: 8px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    transition: all 0.2s ease;
+}
+
+.emoji-trigger:hover {
+    transform: scale(1.1);
+}
+
+.emoji-picker {
+    position: fixed;
+    z-index: 1000;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    display: none;
+    max-width: min(320px, calc(100vw - 10px));
+    width: 320px;
+}
+
+.emoji-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(32px, 1fr));
+    gap: 4px;
+    padding: 8px;
+    max-height: min(200px, calc(100vh - 100px));
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.emoji-item {
+    font-size: 24px;
+    padding: 4px;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.emoji-item:hover {
+    background-color: var(--primary-lighter);
+}
+
 @media (max-width: 768px) {
     .messenger-container {
         flex-direction: column;
@@ -320,5 +369,15 @@
 
     .message-input-container {
         padding: 8px;
+    }
+    
+    .emoji-picker {
+        max-width: calc(100vw - 20px);
+        width: calc(100vw - 20px);
+    }
+    
+    .emoji-list {
+        max-height: 150px;
+        grid-template-columns: repeat(auto-fill, minmax(28px, 1fr));
     }
 }
