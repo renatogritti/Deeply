@@ -6,6 +6,7 @@
     <title>Deeply - Kudos</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/kudos.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1.18.3/index.js" type="module"></script>
 </head>
 <body>
     <div class="header">
@@ -13,7 +14,7 @@
             <svg class="logo" viewBox="0 0 24 24">
                 <path d="M20 6H4V4H20V6M14.4 23L11.8 15L13.7 14.2L16.3 22.2L14.4 23M9.6 23L7.7 22.2L10.3 14.2L12.2 15L9.6 23M8 12H16V14H8V12M4 8H20V10H4V8Z"/>
             </svg>
-            <h1>Kudos</h1>
+            <h1>Feed Kudos - Team Recognition</h1>
         </div>
     </div>
 
@@ -47,6 +48,16 @@
                     </select>
                     <input type="date" id="filterDate" onchange="filterKudos()">
                 </div>
+                <div class="remaining-kudos">
+                    <span>Remaining Kudos</span>
+                    <div class="kudos-stars">
+                        <span class="star">⭐</span>
+                        <span class="star">⭐</span>
+                        <span class="star">⭐</span>
+                        <span class="star">⭐</span>
+                        <span class="star">⭐</span>
+                    </div>
+                </div>
             </div>
 
             <!-- Feed de Kudos -->
@@ -72,23 +83,63 @@
                 </div>
                 <div class="form-group">
                     <label>Categoria</label>
-                    <select name="category" required>
-                        <option value="reconhecimento">Reconhecimento</option>
-                        <option value="premio">Prêmio</option>
-                        <option value="mensagem">Mensagem</option>
-                    </select>
+                    <div class="category-buttons">
+                        <input type="radio" id="cat_reconhecimento" name="category" value="reconhecimento" required>
+                        <label for="cat_reconhecimento">
+                            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M20 6H4V4H20V6M20 12H4V10H20V12M20 18H4V16H20V18Z"/></svg>
+                            Reconhecimento
+                        </label>
+                        
+                        <input type="radio" id="cat_premio" name="category" value="premio">
+                        <label for="cat_premio">
+                            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M20 6.91L17.09 4H12V2H22V12H20V6.91Z"/></svg>
+                            Prêmio
+                        </label>
+                        
+                        <input type="radio" id="cat_mensagem" name="category" value="mensagem">
+                        <label for="cat_mensagem">
+                            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M20,2H4A2,2 0 0,0 2,4V22L6,18H20A2,2 0 0,0 22,16V4A2,2 0 0,0 20,2Z"/></svg>
+                            Mensagem
+                        </label>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Tipo</label>
-                    <select name="type" required>
-                        <option value="trabalho_equipe">Trabalho em Equipe</option>
-                        <option value="inovacao">Inovação</option>
-                        <option value="ajuda">Ajuda</option>
-                    </select>
+                    <div class="type-selector">
+                        <div class="type-card" onclick="selectType('trabalho_equipe')">
+                            <input type="radio" name="type" value="trabalho_equipe" required>
+                            <div class="type-content">
+                                <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12,5.5A3.5,3.5 0 0,1 15.5,9A3.5,3.5 0 0,1 12,12.5A3.5,3.5 0 0,1 8.5,9A3.5,3.5 0 0,1 12,5.5Z"/></svg>
+                                <span>Trabalho em Equipe</span>
+                            </div>
+                        </div>
+                        <div class="type-card" onclick="selectType('inovacao')">
+                            <input type="radio" name="type" value="inovacao">
+                            <div class="type-content">
+                                <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12,2A7,7 0 0,1 19,9C19,11.38 17.81,13.47 16,14.74V17A1,1 0 0,1 15,18H9A1,1 0 0,1 8,17V14.74C6.19,13.47 5,11.38 5,9A7,7 0 0,1 12,2Z"/></svg>
+                                <span>Inovação</span>
+                            </div>
+                        </div>
+                        <div class="type-card" onclick="selectType('ajuda')">
+                            <input type="radio" name="type" value="ajuda">
+                            <div class="type-content">
+                                <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12,1C7,1 3,5 3,10C3,14.1 5.2,17.7 8.8,19.4C9.8,19.8 10,20.3 10,20.8V22H14V20.8C14,20.3 14.2,19.8 15.2,19.4C18.8,17.7 21,14.1 21,10C21,5 17,1 12,1Z"/></svg>
+                                <span>Ajuda</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Mensagem</label>
-                    <textarea name="message" required rows="4"></textarea>
+                    <div class="message-input-container">
+                        <textarea name="message" required rows="4"></textarea>
+                        <button type="button" class="emoji-trigger" onclick="toggleEmojiPicker()">
+                            <svg viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M12,2C6.47,2 2,6.47 2,12C2,17.53 6.47,22 12,22C17.53,22 22,17.53 22,12C22,6.47 17.53,2 12,2M12,20C7.58,20 4,16.42 4,12C4,7.58 7.58,4 12,4C16.42,4 20,7.58 20,12C20,16.42 16.42,20 12,20M15.5,11C16.33,11 17,10.33 17,9.5C17,8.67 16.33,8 15.5,8C14.67,8 14,8.67 14,9.5C14,10.33 14.67,11 15.5,11M8.5,11C9.33,11 10,10.33 10,9.5C10,8.67 9.33,8 8.5,8C7.67,8 7,8.67 7,9.5C7,10.33 7.67,11 8.5,11M12,17.5C14.33,17.5 16.31,16.04 17.11,14H6.89C7.69,16.04 9.67,17.5 12,17.5Z"/>
+                            </svg>
+                        </button>
+                        <emoji-picker class="emoji-picker"></emoji-picker>
+                    </div>
                 </div>
                 <div class="modal-buttons">
                     <button type="submit">Enviar</button>

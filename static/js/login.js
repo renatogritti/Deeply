@@ -17,7 +17,7 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            window.location.href = '/kanban';
+            window.location.href = '/kudos';
         } else {
             document.getElementById('errorMessage').textContent = 'Usuário ou senha inválidos';
         }

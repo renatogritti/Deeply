@@ -3,6 +3,31 @@ document.addEventListener('DOMContentLoaded', function() {
     loadUsers();
     setupFilters();
     setupNewKudoButton();
+
+    // Configurar o emoji picker
+    const picker = document.querySelector('emoji-picker');
+    const textarea = document.querySelector('textarea[name="message"]');
+    
+    picker.addEventListener('emoji-click', event => {
+        const cursor = textarea.selectionStart;
+        const text = textarea.value;
+        const insert = event.detail.unicode;
+        textarea.value = text.slice(0, cursor) + insert + text.slice(cursor);
+        textarea.selectionStart = cursor + insert.length;
+        textarea.selectionEnd = cursor + insert.length;
+        textarea.focus();
+    });
+
+    // Fechar o picker ao clicar fora
+    document.addEventListener('click', function(e) {
+        const picker = document.querySelector('emoji-picker');
+        const trigger = document.querySelector('.emoji-trigger');
+        if (!picker.contains(e.target) && !trigger.contains(e.target)) {
+            picker.style.display = 'none';
+        }
+    });
+
+    updateRemainingKudos();
 });
 
 function loadKudos() {
@@ -14,6 +39,7 @@ function loadKudos() {
             kudos.forEach(kudo => {
                 feed.appendChild(createKudoCard(kudo));
             });
+            updateRemainingKudos(); // Atualiza as estrelas após carregar kudos
         })
         .catch(error => {
             console.error('Error loading kudos:', error);
@@ -142,8 +168,19 @@ function setupNewKudoButton() {
     });
 }
 
+let isSubmitting = false;
+
 function submitKudo(event) {
     event.preventDefault();
+    
+    if (isSubmitting) {
+        return;
+    }
+
+    isSubmitting = true;
+    const submitButton = event.target.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+
     const formData = new FormData(event.target);
     const data = {
         receiver_id: parseInt(formData.get('receiver_id')),
@@ -165,13 +202,17 @@ function submitKudo(event) {
         }
         return response.json();
     })
-    .then(result => {
+    .then(() => {
         closeKudoModal();
-        loadKudos(); // Recarrega todos os kudos após criar um novo
+        return loadKudos();
     })
     .catch(error => {
         console.error('Error:', error);
         alert('Erro ao criar kudo: ' + (error.error || 'Erro desconhecido'));
+    })
+    .finally(() => {
+        submitButton.disabled = false;
+        isSubmitting = false;
     });
 }
 
@@ -257,4 +298,36 @@ function hasReaction(reactions, type) {
 
 function countReactions(reactions, type) {
     return reactions.filter(r => r.reaction_type === type).length;
+}
+
+function selectType(type) {
+    const radio = document.querySelector(`input[name="type"][value="${type}"]`);
+    radio.checked = true;
+}
+
+function toggleEmojiPicker() {
+    const picker = document.querySelector('emoji-picker');
+    picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
+}
+
+function updateRemainingKudos() {
+    return fetch('/kudos/api/kudos/remaining')
+        .then(response => response.json())
+        .then(data => {
+            const stars = document.querySelectorAll('.kudos-stars .star');
+            const remainingText = document.querySelector('.remaining-kudos span');
+            
+            stars.forEach((star, index) => {
+                if (index < data.remaining) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+
+            remainingText.textContent = `Remaining Kudos (${data.remaining}/${data.total})`;
+        })
+        .catch(error => {
+            console.error('Error loading remaining kudos:', error);
+        });
 }

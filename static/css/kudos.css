@@ -209,14 +209,16 @@
 .modal-content {
     background: white;
     width: 90%;
-    max-width: 500px;
-    margin: 50px auto;
-    padding: 20px;
-    border-radius: 8px;
+    max-width: 700px; /* Aumentado de 500px */
+    margin: 30px auto;
+    padding: 24px; /* Aumentado de 16px para dar mais espaço interno */
+    border-radius: 12px; /* Aumentado para combinar com o novo tamanho */
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
 }
 
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 12px;
 }
 
 .form-group label {
@@ -348,4 +350,227 @@
 
 .kudo-info {
     flex: 1;
+}
+
+/* Estilos para o fence de categorias */
+.category-fence {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 2px solid #e9ecef;
+}
+
+.category-fence input[type="radio"] {
+    display: none;
+}
+
+.category-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    width: 100%;
+}
+
+.category-option svg {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 8px;
+    color: #6c757d;
+}
+
+.category-option span {
+    font-size: 14px;
+    color: #495057;
+}
+
+.category-fence input[type="radio"]:checked + .category-option {
+    background: #8A05BE;
+    border-color: #6A03A0;
+}
+
+.category-fence input[type="radio"]:checked + .category-option svg,
+.category-fence input[type="radio"]:checked + .category-option span {
+    color: white;
+}
+
+/* Estilos para os cards de tipo */
+.type-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.type-card {
+    position: relative;
+    cursor: pointer;
+}
+
+.type-card input[type="radio"] {
+    display: none;
+}
+
+.type-content {
+    padding: 8px;
+    text-align: center;
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    height: 70px;
+    justify-content: center;
+}
+
+.type-content svg {
+    width: 24px;
+    height: 24px;
+}
+
+.type-content span {
+    font-size: 14px;
+    font-weight: 500;
+    color: #495057;
+}
+
+.type-card input[type="radio"]:checked + .type-content {
+    background: linear-gradient(135deg, #8A05BE 0%, #6A03A0 100%);
+    border-color: #6A03A0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(106, 3, 160, 0.2);
+}
+
+.type-card input[type="radio"]:checked + .type-content svg,
+.type-card input[type="radio"]:checked + .type-content span {
+    color: white;
+}
+
+/* Novo estilo para categorias */
+.category-buttons {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.category-buttons input[type="radio"] {
+    display: none;
+}
+
+.category-buttons label {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.category-buttons svg {
+    width: 18px;
+    height: 18px;
+    color: #6c757d;
+}
+
+.category-buttons input[type="radio"]:checked + label {
+    background: linear-gradient(135deg, #8A05BE 0%, #6A03A0 100%);
+    border-color: #6A03A0;
+    color: white;
+}
+
+.category-buttons input[type="radio"]:checked + label svg {
+    color: white;
+}
+
+.message-input-container {
+    position: relative;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.message-input-container textarea {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    resize: vertical;
+    min-height: 80px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.emoji-trigger {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    color: #6c757d;
+    transition: all 0.2s;
+}
+
+.emoji-trigger:hover {
+    background: #f8f9fa;
+    color: #8A05BE;
+}
+
+.emoji-trigger svg {
+    width: 24px;
+    height: 24px;
+}
+
+.emoji-picker {
+    display: none;
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.remaining-kudos {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.remaining-kudos span {
+    color: #495057;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.kudos-stars {
+    display: flex;
+    gap: 2px;
+}
+
+.kudos-stars .star {
+    font-size: 16px;
+    color: #FFD700;
+    opacity: 0.3;
+    transition: opacity 0.3s ease;
+}
+
+.kudos-stars .star.active {
+    opacity: 1;
 }
