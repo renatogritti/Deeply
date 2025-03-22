@@ -197,3 +197,258 @@
     font-size: 16px;
     line-height: 1.4;
 }
+
+/* Forest Garden Styles */
+.forest-garden {
+    background: linear-gradient(135deg, #f7f9fc 0%, #e3f2fd 100%);
+    border: none;
+    overflow: hidden;
+    position: relative;
+}
+
+.forest-garden::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h60v60H0z' fill='none'/%3E%3Cpath d='M30 5l4 7h-8z' fill='rgba(138,5,190,0.03)'/%3E%3C/svg%3E");
+    opacity: 0.5;
+}
+
+.garden-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.garden-stats {
+    display: flex;
+    gap: 24px;
+}
+
+.stat-item {
+    text-align: center;
+    background: rgba(138, 5, 190, 0.1);
+    padding: 8px 16px;
+    border-radius: 12px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.stat-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.garden-container {
+    position: relative;
+    height: 600px;
+    background: linear-gradient(180deg, #fff5f7 0%, #fff8f8 100%);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 
+        inset 0 2px 6px rgba(0,0,0,0.05),
+        0 1px 3px rgba(255,182,193,0.2);
+}
+
+.garden-container::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: linear-gradient(
+        180deg,
+        rgba(138,5,190,0.02) 0%,
+        rgba(138,5,190,0.08) 100%
+    );
+    border-radius: 0 0 16px 16px;
+}
+
+.garden-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 32px;
+    padding: 32px;
+    height: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+.tree-spot {
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%;
+}
+
+.tree-spot:hover {
+    transform: scale(1.15) translateY(-10px);
+}
+
+.tree-sample {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: drop-shadow(0 4px 8px rgba(255,182,193,0.3));
+}
+
+.tree-spot:hover .tree-sample {
+    filter: drop-shadow(0 8px 12px rgba(138,5,190,0.2));
+}
+
+.seed {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%23795548' d='M256,384c-17.7,0-32-14.3-32-32V224c0-17.7,14.3-32,32-32s32,14.3,32,32v128C288,369.7,273.7,384,256,384z'/%3E%3Ccircle fill='%23FFB7C5' cx='256' cy='160' r='32'/%3E%3C/svg%3E");
+    transform: scale(0.6);
+}
+
+.sapling {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%23795548' d='M256,512c-17.7,0-32-14.3-32-32V288c0-17.7,14.3-32,32-32s32,14.3,32,32v192C288,497.7,273.7,512,256,512z'/%3E%3Cpath fill='%23FFB7C5' d='M256,256c-70.7,0-128-57.3-128-128S185.3,0,256,0s128,57.3,128,128S326.7,256,256,256z'/%3E%3C/svg%3E");
+    transform: scale(0.8);
+}
+
+.tree {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%23795548' d='M256,512c-17.7,0-32-14.3-32-32V320c0-17.7,14.3-32,32-32s32,14.3,32,32v160C288,497.7,273.7,512,256,512z'/%3E%3Cpath fill='%23FFB7C5' d='M416,288H96c-17.7,0-32-14.3-32-32c0-17.7,14.3-32,32-32h320c17.7,0,32,14.3,32,32C448,273.7,433.7,288,416,288z M128,160c0-70.7,57.3-128,128-128s128,57.3,128,128'/%3E%3C/svg%3E");
+}
+
+.blooming {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%23795548' d='M256,512c-17.7,0-32-14.3-32-32V320c0-17.7,14.3-32,32-32s32,14.3,32,32v160C288,497.7,273.7,512,256,512z'/%3E%3Cpath fill='%23FFB7C5' d='M416,288c-53,0-96-43-96-96s43-96,96-96s96,43,96,96S469,288,416,288z M96,288c-53,0-96-43-96-96s43-96,96-96s96,43,96,96 S149,288,96,288z M256,384c-53,0-96-43-96-96s43-96,96-96s96,43,96,96S309,384,256,384z'/%3E%3C/svg%3E");
+    animation: bloomPulse 3s ease-in-out infinite;
+}
+
+@keyframes bloomPulse {
+    0% { transform: scale(1); filter: brightness(1) drop-shadow(0 4px 8px rgba(255,182,193,0.3)); }
+    50% { transform: scale(1.05); filter: brightness(1.1) drop-shadow(0 6px 12px rgba(255,182,193,0.5)); }
+    100% { transform: scale(1); filter: brightness(1) drop-shadow(0 4px 8px rgba(255,182,193,0.3)); }
+}
+
+@keyframes falling {
+    0% { transform: translateY(-10px) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.8; }
+    90% { opacity: 0.8; }
+    100% { transform: translateY(120vh) rotate(360deg); opacity: 0; }
+}
+
+.falling-petal {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23FFB7C5' d='M12,2C17.52,2 22,6.48 22,12C22,17.52 17.52,22 12,22C6.48,22 2,17.52 2,12C2,6.48 6.48,2 12,2Z'/%3E%3C/svg%3E");
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.garden-legend {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 16px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.tree-tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    pointer-events: none;
+    transform: translateY(-100%) scale(0.9);
+    top: -12px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.tree-spot:hover .tree-tooltip {
+    opacity: 1;
+    transform: translateY(-100%) scale(1);
+}
+
+.garden-container {
+    position: relative;
+    height: 600px;
+    background: linear-gradient(180deg, #fff5f7 0%, #fff8f8 100%);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 
+        inset 0 2px 6px rgba(0,0,0,0.05),
+        0 1px 3px rgba(255,182,193,0.2);
+}
+
+#cherry-garden {
+    width: 100%;
+    height: 100%;
+    transition: all 0.3s ease;
+}
+
+.tree-details {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 16px 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    opacity: 0;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,182,193,0.3);
+    color: #333;
+    font-size: 14px;
+    max-width: 300px;
+    text-align: center;
+}
+
+.tree-icon {
+    width: 32px;
+    height: 32px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    filter: drop-shadow(0 2px 4px rgba(255,182,193,0.3));
+}
+
+.legend-item {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 8px 16px;
+    border-radius: 20px;
+    backdrop-filter: blur(5px);
+}
+
+.garden-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%23FFB7C5' fill-opacity='0.05' d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3z'%3E%3C/path%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+}

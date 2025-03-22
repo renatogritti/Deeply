@@ -105,6 +105,9 @@ function updateChart(data, period) {
     
     // Atualiza o ranking
     updateRanking(data.ranking);
+    
+    // Adicionar chamada para atualizar o Forest Garden
+    updateForestGarden(data);
 }
 
 function getMedalIcon(position) {
@@ -161,4 +164,98 @@ function updateRanking(ranking) {
             ${getMedalIcon(index)}
         </div>
     `).join('');
+}
+
+function updateForestGarden(data) {
+    // Inicializa o jardim se ainda não existir
+    if (!window.cherryGarden && document.getElementById('cherry-garden')) {
+        window.cherryGarden = new CherryGarden('cherry-garden');
+    }
+
+    // Verifica se o jardim está disponível
+    if (!window.cherryGarden) {
+        console.error('Cherry Garden não está disponível');
+        return;
+    }
+
+    // Calcular totais
+    const treesCount = data.values.filter(v => v > 0).length;
+    const totalMinutes = data.values.reduce((acc, curr) => acc + curr, 0);
+    const hoursCount = Math.floor(totalMinutes / 60);
+
+    console.log('Atualizando jardim com:', {
+        treesCount,
+        totalMinutes,
+        hoursCount,
+        values: data.values
+    });
+
+    // Atualizar contadores
+    const totalTrees = document.getElementById('totalTrees');
+    const totalHours = document.getElementById('totalHours');
+
+    if (totalTrees) animateCounter(totalTrees, treesCount);
+    if (totalHours) animateCounter(totalHours, hoursCount);
+
+    // Atualizar o jardim 3D
+    window.cherryGarden.updateGarden({
+        ...data,
+        activeCount: treesCount,
+        totalMinutes: totalMinutes
+    });
+}
+
+function createPetals(container) {
+    const petalCount = 30;
+    
+    // Remover pétalas antigas
+    container.querySelectorAll('.falling-petal').forEach(petal => petal.remove());
+    
+    for (let i = 0; i < petalCount; i++) {
+        const petal = document.createElement('div');
+        petal.className = 'falling-petal';
+        
+        // Posição e animação aleatórias
+        const startDelay = Math.random() * 10;
+        const duration = 10 + Math.random() * 5;
+        const startX = Math.random() * 100;
+        
+        petal.style.cssText = `
+            left: ${startX}%;
+            animation: falling ${duration}s linear ${startDelay}s infinite;
+            transform: scale(${0.5 + Math.random() * 0.5});
+        `;
+        
+        container.appendChild(petal);
+    }
+}
+
+function animateCounter(element, targetValue) {
+    const duration = 1500;
+    const steps = 60;
+    const increment = targetValue / steps;
+    let current = 0;
+    let step = 0;
+
+    const animate = () => {
+        step++;
+        current += increment;
+        element.textContent = Math.round(current);
+        
+        if (step < steps) {
+            requestAnimationFrame(animate);
+        } else {
+            element.textContent = targetValue;
+        }
+    };
+
+    requestAnimationFrame(animate);
+}
+
+function getTreeType(minutes) {
+    // Mantendo consistência com o cherry-garden.js
+    if (minutes < 30) return 'seed';        // Broto: menos de 30 minutos
+    if (minutes < 60) return 'sapling';     // Jovem: 30-60 minutos
+    if (minutes < 120) return 'tree';       // Adulta: 1-2 horas
+    return 'blooming';                      // Florescendo: mais de 2 horas
 }
