@@ -141,7 +141,7 @@
             </div>
             <button id="analyzeProjectBtn" class="analyze-button" onclick="analyzeProjectData()">
                 <svg viewBox="0 0 24 24" width="16" height="16">
-                    <path fill="currentColor" d="M19 3H5C3.89 3 3 3.89 3 5V19C3 20.11 3.89 21 5 21H19C20.11 21 21 20.11 21 19V5C21 3.89 20.11 3 19 3M19 19H5V5H19V19M11 7H13V13H11V7M11 15H13V17H11V15Z"/>
+                    <path fill="currentColor" d="M19 3H5C3.89 3 3.89 3 5 3H19C20.11 3 21 3.89 21 5V19C21 20.11 20.11 21 19 21H5C3.89 21 3 20.11 3 19V5C3 3.89 3.89 3 5 3M19 19H5V5H19V19M11 7H13V13H11V7M11 15H13V17H11V15Z"/>
                 </svg>
                 Analisar Projeto
             </button>
@@ -632,16 +632,15 @@
             document.getElementById("editCardDescription").value = description;
             document.getElementById("editCardTempo").value = tempo;
             document.getElementById("editCardId").value = card.id;
-
-            // Configurar projeto e carregar fases
             document.getElementById("editCardProject").value = projectId;
-            loadPhasesByProject(projectId).then(() => {
-                // Após carregar as fases, identificar a fase atual baseado na coluna pai
-                const currentColumn = card.closest('.kanban-column');
-                if (currentColumn) {
-                    const phaseId = currentColumn.id.replace('phase_', '');
-                    document.getElementById("editCardPhase").value = phaseId;
-                }
+
+            // Identificar a fase atual baseado na coluna pai
+            const currentColumn = card.closest('.kanban-column');
+            const currentPhaseId = currentColumn ? currentColumn.id.replace('phase_', '') : '';
+
+            // Carregar fases do projeto e então selecionar a fase atual
+            loadPhasesByProject(projectId, 'editCardPhase').then(() => {
+                document.getElementById("editCardPhase").value = currentPhaseId;
             });
 
             // Configurar deadline
@@ -1663,16 +1662,16 @@
             });
         }
 
-        function loadPhasesByProject(projectId) {
+        function loadPhasesByProject(projectId, selectId = 'newCardPhase') {
             if (!projectId) {
-                document.getElementById('newCardPhase').innerHTML = '<option value="">Select Phase</option>';
+                document.getElementById(selectId).innerHTML = '<option value="">Select Phase</option>';
                 return Promise.resolve();
             }
 
             return fetch(`/api/projects/${projectId}/phases`)
                 .then(response => response.json())
                 .then(phases => {
-                    const phaseSelect = document.getElementById('newCardPhase');
+                    const phaseSelect = document.getElementById(selectId);
                     phaseSelect.innerHTML = '<option value="">Select Phase</option>';
                     phases.forEach(phase => {
                         phaseSelect.innerHTML += `
