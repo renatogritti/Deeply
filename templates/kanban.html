@@ -209,7 +209,15 @@
                 </div>
 
                 <div class="form-group">
-                    <input type="text" id="editCardTempo" placeholder="Time Estimate: e.g., 2h">
+                    <div class="tempo-group">
+                        <input type="text" id="editCardTempo" placeholder="Time Estimate: e.g., 2h">
+                        <button type="button" id="aiEstimateEditBtn" class="ai-estimate-btn" title="Obter estimativa baseada em IA">
+                            <svg viewBox="0 0 24 24" width="16" height="16">
+                                <path fill="currentColor" d="M12,2C13.85,2 15.55,2.78 16.9,4.1L18.6,2.4L19.9,3.7L18.2,5.4C19.5,6.75 20.3,8.45 20.3,10.3C20.3,13.95 17.95,17.1 14.7,18.3L13.4,16.95C16.2,15.95 18.1,13.3 18.1,10.3C18.1,7.05 15.35,4.3 12.1,4.3C8.85,4.3 6.1,7.05 6.1,10.3C6.1,13.3 8,15.95 10.8,16.95L9.5,18.3C6.25,17.1 3.9,13.95 3.9,10.3C3.9,8.45 4.7,6.75 6,5.4L4.3,3.7L5.6,2.4L7.3,4.1C8.65,2.78 10.35,2 12.2,2H12Z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="estimateEditToast" class="toast-message"></div>
                 </div>
             </div>
 
@@ -279,7 +287,15 @@
                                         <textarea id="newCardDescription" placeholder="Card description" rows="4"></textarea>
                 </div>
                 <div class="form-group">
-                                        <input type="text" id="newCardTempo" placeholder="Time Estimate: e.g., 2h">
+                    <div class="tempo-group">
+                        <input type="text" id="newCardTempo" placeholder="Time Estimate: e.g., 2h">
+                        <button type="button" id="aiEstimateBtn" class="ai-estimate-btn" title="Obter estimativa baseada em IA">
+                            <svg viewBox="0 0 24 24" width="16" height="16">
+                                <path fill="currentColor" d="M12,2C13.85,2 15.55,2.78 16.9,4.1L18.6,2.4L19.9,3.7L18.2,5.4C19.5,6.75 20.3,8.45 20.3,10.3C20.3,13.95 17.95,17.1 14.7,18.3L13.4,16.95C16.2,15.95 18.1,13.3 18.1,10.3C18.1,7.05 15.35,4.3 12.1,4.3C8.85,4.3 6.1,7.05 6.1,10.3C6.1,13.3 8,15.95 10.8,16.95L9.5,18.3C6.25,17.1 3.9,13.95 3.9,10.3C3.9,8.45 4.7,6.75 6,5.4L4.3,3.7L5.6,2.4L7.3,4.1C8.65,2.78 10.35,2 12.2,2H12Z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="estimateToast" class="toast-message"></div>
                 </div>
             </div>
 
@@ -403,45 +419,66 @@
         async function openNewCardModal(phase_id) {
             try {
                 const modal = document.getElementById("createModal");
-                const newCardProject = document.getElementById("newCardProject");
+                const projectSelect = document.getElementById("newCardProject");
+                const phaseSelect = document.getElementById("newCardPhase");
                 const selectedProjectId = document.getElementById("projectFilter").value;
-                
-                // Mostrar modal
-                modal.style.display = "block";
-                
+
+                if (!selectedProjectId) {
+                    alert("Por favor, selecione um projeto primeiro!");
+                    return;
+                }
+
                 // Limpar campos
                 document.getElementById("newCardTitle").value = "";
                 document.getElementById("newCardDescription").value = "";
                 document.getElementById("newCardTempo").value = "";
                 document.getElementById("newCardDeadline").value = "";
 
-                // Carregar dados (usuários e tags)
-                await loadModalData();
+                // Setar e desabilitar o projeto selecionado
+                projectSelect.value = selectedProjectId;
+                projectSelect.disabled = true;
 
-                // Configurar projeto primeiro
-                if (selectedProjectId) {
-                    newCardProject.value = selectedProjectId;
-                    newCardProject.disabled = true;
-                    
-                    // Carregar fases do projeto
-                    await loadPhasesByProject(selectedProjectId);
-                    
-                    // Se foi passada uma phase_id, selecionar a fase correta
-                    if (phase_id) {
-                        // Converter phase_id para o formato correto
-                        const phaseValue = typeof phase_id === 'string' ? 
-                            phase_id.replace('phase_', '') : 
-                            phase_id;
-                        
-                        // Selecionar a fase no select
-                        const phaseSelect = document.getElementById("newCardPhase");
-                        if (phaseSelect) {
-                            phaseSelect.value = phaseValue;
-                            phaseSelect.disabled = true; // Opcional: travar a fase selecionada
-                        }
-                    }
+                // Carregar fases do projeto usando a mesma função do modal de edição
+                await loadPhasesByProject(selectedProjectId, 'newCardPhase');
+
+                // Se foi passada uma phase_id, selecionar a fase
+                if (phase_id) {
+                    const phaseId = typeof phase_id === 'string' ? 
+                        phase_id.replace('phase_', '') : 
+                        phase_id;
+                    phaseSelect.value = phaseId;
                 }
 
+                // Carregar tags e usuários
+                try {
+                    const { users, tags } = await loadModalData();
+                    
+                    // Atualizar select de usuários
+                    const userSelect = document.getElementById('newCardUsers');
+                    if (userSelect) {
+                        userSelect.innerHTML = users.map(user => 
+                            `<option value="${user.id}">${user.name}</option>`
+                        ).join('');
+                    }
+                    
+                    // Atualizar tags
+                    const tagsContainer = document.getElementById('newCardTags');
+                    if (tagsContainer) {
+                        tagsContainer.innerHTML = tags.map(tag => `
+                            <div class="tag-checkbox">
+                                <input type="checkbox" id="new_tag_${tag.id}" value="${tag.id}">
+                                <label for="new_tag_${tag.id}" style="background-color: ${tag.color}">
+                                    ${tag.name}
+                                </label>
+                            </div>
+                        `).join('');
+                    }
+                } catch (error) {
+                    console.error('Error loading modal data:', error);
+                }
+
+                // Mostrar o modal
+                modal.style.display = "block";
             } catch (error) {
                 console.error('Error opening modal:', error);
                 alert('Erro ao abrir o formulário de criação de card: ' + error.message);
@@ -2056,5 +2093,274 @@ document.addEventListener('DOMContentLoaded', setupSearch);
 <!-- Manter apenas esta referência ao script do Pomodoro -->
 <script src="{{ url_for('static', filename='js/pomodoro.js') }}"></script>
 
-    </body>
+<!-- Adicione este script ao final do arquivo, antes do </body> -->
+<script>
+// ...existing code...
+
+// Função para requisitar estimativa da AI
+async function requestAIEstimate(description, toastElement, inputElement) {
+    if (!description.trim()) {
+        toastElement.textContent = "Adicione uma descrição antes de solicitar uma estimativa.";
+        toastElement.classList.add("show");
+        setTimeout(() => toastElement.classList.remove("show"), 5000);
+        return;
+    }
+
+    // Mostrar mensagem de carregamento
+    toastElement.textContent = "Analisando estimativa...";
+    toastElement.classList.add("show", "loading");
+
+    try {
+        const prompt = `Baseado na descrição da tarefa, me passe uma estimativa sumarizada baseado nas melhores práticas. Segue a descrição: ${description}`;
+        
+        const response = await fetch('/ai/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message: prompt })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        // Mostrar resultado e remover a classe de carregamento
+        toastElement.textContent = data.response;
+        toastElement.classList.remove("loading");
+        
+        // Extrair tempo da resposta (procurando por padrões como "2h", "4h30m", etc.)
+        const timePattern = /(\d+)\s*(?:h|hora|horas)(?:\s*e\s*(\d+)\s*(?:m|min|minutos)?)?/i;
+        const match = data.response.match(timePattern);
+        
+        if (match) {
+            let estimatedTime = `${match[1]}h`;
+            if (match[2]) {
+                estimatedTime += `${match[2]}m`;
+            }
+            inputElement.value = estimatedTime;
+        }
+        
+        // Esconder o toast após alguns segundos
+        setTimeout(() => toastElement.classList.remove("show"), 10000);
+    } catch (error) {
+        console.error('Error:', error);
+        toastElement.textContent = `Erro ao obter estimativa: ${error.message}`;
+        toastElement.classList.remove("loading");
+        setTimeout(() => toastElement.classList.remove("show"), 5000);
+    }
+}
+
+// Inicializar botões de estimativa quando o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', function() {
+    // Botão para o modal de criação
+    const aiEstimateBtn = document.getElementById('aiEstimateBtn');
+    if (aiEstimateBtn) {
+        aiEstimateBtn.addEventListener('click', function() {
+            const description = document.getElementById('newCardDescription').value;
+            const toast = document.getElementById('estimateToast');
+            const input = document.getElementById('newCardTempo');
+            requestAIEstimate(description, toast, input);
+        });
+    }
+    
+    // Botão para o modal de edição
+    const aiEstimateEditBtn = document.getElementById('aiEstimateEditBtn');
+    if (aiEstimateEditBtn) {
+        aiEstimateEditBtn.addEventListener('click', function() {
+            const description = document.getElementById('editCardDescription').value;
+            const toast = document.getElementById('estimateEditToast');
+            const input = document.getElementById('editCardTempo');
+            requestAIEstimate(description, toast, input);
+        });
+    }
+});
+</script>
+
+<style>
+/* ...existing code... */
+.tempo-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.ai-estimate-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ai-estimate-btn:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(138, 5, 190, 0.2);
+}
+
+.toast-message {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background-color: rgba(138, 5, 190, 0.1);
+    border-left: 3px solid var(--primary-color);
+    border-radius: 4px;
+    font-size: 14px;
+    color: var(--text-primary);
+    display: none;
+}
+
+.toast-message.show {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.toast-message.loading {
+    background-color: rgba(138, 5, 190, 0.05);
+    border-left-color: var(--primary-dark);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Melhoria nos estilos do toast para exibir a resposta formatada */
+.toast-message {
+    margin-top: 8px;
+    padding: 12px 16px;
+    background-color: rgba(138, 5, 190, 0.1);
+    border-left: 3px solid var(--primary-color);
+    border-radius: 4px;
+    font-size: 14px;
+    color: var(--text-primary);
+    display: none;
+    max-width: 100%;
+    overflow-y: auto;
+    max-height: 120px;
+    line-height: 1.5;
+    white-space: pre-line; /* Preserva quebras de linha */
+}
+
+.toast-message.show {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.toast-message.loading {
+    background-color: rgba(138, 5, 190, 0.05);
+    border-left-color: var(--primary-dark);
+}
+
+/* Destaque para a estimativa de tempo nas respostas */
+.toast-message .time-estimate {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+
+<!-- Adicione este script ao final do arquivo, antes do </body> -->
+<script>
+// ...existing code...
+
+// Função aprimorada para requisitar estimativa da AI
+async function requestAIEstimate(description, toastElement, inputElement) {
+    if (!description.trim()) {
+        toastElement.textContent = "Adicione uma descrição antes de solicitar uma estimativa.";
+        toastElement.classList.add("show");
+        setTimeout(() => toastElement.classList.remove("show"), 5000);
+        return;
+    }
+
+    // Mostrar mensagem de carregamento
+    toastElement.textContent = "Analisando estimativa...";
+    toastElement.classList.add("show", "loading");
+
+    try {
+        const prompt = `Baseado na descrição da tarefa, me passe uma estimativa sumarizada baseado nas melhores práticas. Segue a descrição: ${description}`;
+        
+        const response = await fetch('/ai/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message: prompt })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        // Formatar a resposta para exibição adequada
+        const formattedResponse = formatAIResponse(data.response);
+        
+        // Mostrar resultado e remover a classe de carregamento
+        toastElement.innerHTML = formattedResponse;
+        toastElement.classList.remove("loading");
+        
+        // Extrair tempo da resposta (procurando por padrões como "2h", "4h30m", etc.)
+        const timePattern = /(\d+)\s*(?:h|hora|horas)(?:\s*e\s*(\d+)\s*(?:m|min|minutos)?)?/i;
+        const match = data.response.match(timePattern);
+        
+        if (match) {
+            let estimatedTime = `${match[1]}h`;
+            if (match[2]) {
+                estimatedTime += `${match[2]}m`;
+            }
+            inputElement.value = estimatedTime;
+        }
+        
+        // Esconder o toast após alguns segundos
+        setTimeout(() => toastElement.classList.remove("show"), 15000);
+    } catch (error) {
+        console.error('Error:', error);
+        toastElement.textContent = `Erro ao obter estimativa: ${error.message}`;
+        toastElement.classList.remove("loading");
+        setTimeout(() => toastElement.classList.remove("show"), 5000);
+    }
+}
+
+// Função para formatar a resposta da AI
+function formatAIResponse(response) {
+    // Destacar números seguidos de h, hora, horas
+    response = response.replace(/(\d+\s*(?:h|hora|horas)(?:\s*e\s*\d+\s*(?:m|min|minutos))?)/gi, 
+        '<span class="time-estimate">$1</span>');
+    
+    // Converter quebras de linha para HTML
+    response = response.replace(/\n/g, '<br>');
+    
+    // Adicionar espaço após pontuação se não houver
+    response = response.replace(/([.,:;!?])([^\s])/g, '$1 $2');
+    
+    return response;
+}
+
+// ...existing code...
+</script>
+
+</body>
 </html>

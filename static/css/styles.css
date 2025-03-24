@@ -1864,7 +1864,7 @@ textarea.form-input {
     order: 999; /* Força o botão de som a ser o último */
 }
 
-/* ...rest of existing code... */
+/* ...existing code... */
 
 .compact-textarea {
     max-width: 300px !important;  /* Força uma largura máxima */
@@ -1872,7 +1872,7 @@ textarea.form-input {
     resize: vertical;             /* Permite apenas redimensionar verticalmente */
 }
 
-/* ...rest of existing code... */
+/* ...existing code... */
 
 /* Responsividade Global */
 @media (max-width: 768px) {
@@ -2451,3 +2451,108 @@ textarea.form-input {
 #editModal .modal-col:last-child {
     gap: 16px;
 }
+
+/* Estilos para o grupo de tempo com o botão de IA */
+.tempo-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.ai-estimate-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.ai-estimate-btn:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(138, 5, 190, 0.2);
+}
+
+.ai-estimate-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(138, 5, 190, 0.1);
+}
+
+.toast-message {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background-color: rgba(138, 5, 190, 0.1);
+    border-left: 3px solid var(--primary-color);
+    border-radius: 4px;
+    font-size: 14px;
+    color: var(--text-primary);
+    display: none;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+}
+
+.toast-message.show {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.toast-message.loading {
+    background-color: rgba(138, 5, 190, 0.05);
+    border-left-color: var(--primary-dark);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Estilos aprimorados para o toast de estimativa */
+.toast-message {
+    margin-top: 8px;
+    padding: 12px 16px;
+    background-color: rgba(138, 5, 190, 0.1);
+    border-left: 3px solid var(--primary-color);
+    border-radius: 4px;
+    font-size: 14px;
+    color: var(--text-primary);
+    display: none;
+    max-width: 100%;
+    overflow-y: auto;
+    max-height: 120px;
+    line-height: 1.5;
+    white-space: pre-line; /* Preserva quebras de linha */
+    text-align: left;
+}
+
+.toast-message.show {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.toast-message.loading {
+    background-color: rgba(138, 5, 190, 0.05);
+    border-left-color: var(--primary-dark);
+}
+
+/* Destaque para a estimativa de tempo nas respostas */
+.toast-message .time-estimate {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ...existing code... */
