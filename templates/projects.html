@@ -102,8 +102,22 @@
                     <div class="project-header">
                         <h3>{{ project.name }}</h3>
                         <div class="project-actions">
-                            <button onclick="editProject({{ project.id }})" class="edit-btn">Edit</button>
-                            <button onclick="deleteProject({{ project.id }})" class="delete-btn">Delete</button>
+                            <div class="button-group">
+                                <button onclick="editProject({{ project.id }})" class="edit-btn">Edit</button>
+                                <button onclick="deleteProject({{ project.id }})" class="delete-btn">Delete</button>
+                            </div>
+                            <button onclick="exportProject({{ project.id }})" class="export-btn">
+                                <svg viewBox="0 0 24 24" width="16" height="16">
+                                    <path fill="currentColor" d="M23 12l-4-4v3h-9v2h9v3l4-4M15 16H4V8h11V6H4c-1.11 0-2 .89-2 2v8c0 1.11.89 2 2 2h11v-2z"/>
+                                </svg>
+                                Export
+                            </button>
+                            <button onclick="showImportModal({{ project.id }})" class="import-btn">
+                                <svg viewBox="0 0 24 24" width="16" height="16">
+                                    <path fill="currentColor" d="M14 2H6c-1.11 0-2 .89-2 2v16c0 1.11.89 2 2 2h12c1.11 0 2-.89 2-2V8l-6-6zm-1 12h-2v3l-3-3h2V8h3v6zm3.5-4H19v6h-6.5l2-2H17v-2h-2.5l2-2z"/>
+                                </svg>
+                                Import
+                            </button>
                         </div>
                     </div>
                     <p class="project-description">{{ project.description or 'No description' }}</p>
@@ -118,6 +132,20 @@
                 </div>
                 {% endfor %}
             </div>
+        </div>
+    </div>
+
+    <div id="importModal" class="modal">
+        <div class="modal-content">
+            <h3>Import Cards</h3>
+            <form id="importForm" enctype="multipart/form-data">
+                <input type="file" name="file" accept=".xlsx" required>
+                <input type="hidden" name="project_id" id="importProjectId">
+                <div class="modal-buttons">
+                    <button type="button" onclick="closeImportModal()" class="cancel-btn">Cancel</button>
+                    <button type="submit" class="confirm-btn">Import</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -251,6 +279,50 @@
         async function editProject(id) {
             // Implementar edição de projeto
             alert('Edit project feature coming soon!');
+        }
+
+        async function exportProject(id) {
+            try {
+                window.location.href = `/api/projects/${id}/export`;
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error exporting project');
+            }
+        }
+
+        function showImportModal(projectId) {
+            document.getElementById('importModal').style.display = 'block';
+            document.getElementById('importProjectId').value = projectId;
+        }
+
+        function closeImportModal() {
+            document.getElementById('importModal').style.display = 'none';
+        }
+
+        document.getElementById('importForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const projectId = document.getElementById('importProjectId').value;
+
+            try {
+                const response = await fetch(`/api/projects/${projectId}/import`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    window.location.reload();
+                } else if (result.error_log) {
+                    // Download do log de erros
+                    window.location.href = `/api/projects/${projectId}/error_log`;
+                } else {
+                    alert('Error importing cards: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error importing cards');
+            }
         }
 
         function fillColumns() {

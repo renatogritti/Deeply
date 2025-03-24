@@ -7,8 +7,14 @@ It includes database connection details, email configuration, and other settings
 
 """
 
+import os
 from flask import Flask, request, g, session
 from flask_session import Session
+
+# Configuração do UPLOAD_FOLDER
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 app = Flask(__name__)
 app.secret_key = "uma_chave_muito_segura_aqui"  # Troque por uma chave segura!
@@ -37,6 +43,8 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Proteção contra CSRF
 # Configuração da AI
 OLLAMA_API_BASE = "http://127.0.0.1:11434"
 OLLAMA_MODEL = "gemma3:4b"  # Alterado para Gemma 3B gemma3:1b
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.context_processor
 def utility_processor():
@@ -69,3 +77,23 @@ def before_request():
         g.projeto_id = session['projeto_id']
     else:
         g.projeto_id = None
+
+def create_app():
+    app = Flask(__name__)
+    
+    # Configurações básicas
+    app.secret_key = "uma_chave_muito_segura_aqui"
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///kanban.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    
+    
+    # Inicializar extensões
+    Session(app)
+    
+    # Registrar blueprints e outras configurações
+    from routes import projects, ai, kanban
+    projects.init_app(app)
+    ai.init_app(app)
+    kanban.init_app(app)
+    
+    return app
