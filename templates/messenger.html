@@ -42,6 +42,35 @@
                 </div>
                 <div id="channelsList" class="channels-list"></div>
             </div>
+
+            <!-- Frame de filtros ativos -->
+            <div class="active-filters-bar">
+                <div class="active-filters-content">
+                    <div class="active-filters-header">
+                        <span>Filtros Ativos:</span>
+                        <button onclick="clearFilters()" class="clear-all-filters">Limpar Todos</button>
+                    </div>
+                    <div class="active-filters-list">
+                        <div id="activeHashtags" class="filter-tags"></div>
+                        <div id="activeMentions" class="filter-tags"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Frame de busca de filtros -->
+            <div class="filter-frame">
+                <div class="filter-group">
+                    <div class="filter-input-wrapper">
+                        <span class="filter-prefix">#</span>
+                        <input type="text" id="hashtagFilter" placeholder="Adicionar hashtag">
+                    </div>
+                    <div class="filter-input-wrapper">
+                        <span class="filter-prefix">@</span>
+                        <input type="text" id="mentionFilter" placeholder="Adicionar menção">
+                    </div>
+                </div>
+            </div>
+
             <div class="messages-container">
                 <div id="messagesContainer" class="messages-list"></div>
                 <div class="message-input-container">

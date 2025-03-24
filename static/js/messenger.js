@@ -1,9 +1,35 @@
 let currentChannel = null;
+let activeHashtags = new Set();
+let activeMentions = new Set();
+let allMessages = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     loadChannels();
     setupMessageInput();
     initEmojiPicker();
+
+    // Event listeners para os inputs de filtro
+    const hashtagFilter = document.getElementById('hashtagFilter');
+    hashtagFilter.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const tag = this.value.replace('#', '').trim();
+            if (tag) {
+                addHashtagFilter(tag);
+                this.value = '';
+            }
+        }
+    });
+
+    const mentionFilter = document.getElementById('mentionFilter');
+    mentionFilter.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const mention = this.value.replace('@', '').trim();
+            if (mention) {
+                addMentionFilter(mention);
+                this.value = '';
+            }
+        }
+    });
 });
 
 function loadChannels() {
@@ -55,10 +81,42 @@ function loadMessages(channelId) {
     fetch(`/api/channels/${channelId}/messages`)
         .then(response => response.json())
         .then(messages => {
-            const messagesContainer = document.getElementById('messagesContainer');
-            messagesContainer.innerHTML = messages.map(message => createMessageHTML(message)).join('');
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            allMessages = messages; // Armazena todas as mensagens
+            displayFilteredMessages();
         });
+}
+
+function displayFilteredMessages() {
+    let filteredMessages = allMessages;
+
+    if (activeHashtags.size > 0) {
+        filteredMessages = filteredMessages.filter(message => 
+            Array.from(activeHashtags).some(tag => 
+                message.content.includes(`#${tag}`)));
+    }
+
+    if (activeMentions.size > 0) {
+        filteredMessages = filteredMessages.filter(message =>
+            Array.from(activeMentions).some(mention =>
+                message.content.includes(`@${mention}`)));
+    }
+
+    const messagesContainer = document.getElementById('messagesContainer');
+    messagesContainer.innerHTML = filteredMessages.map(message => createMessageHTML(message)).join('');
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    // Atualiza os filtros ativos na UI
+    updateActiveFilters();
+}
+
+function processMessageContent(content) {
+    // Processa hashtags
+    content = content.replace(/#(\w+)/g, '<span class="hashtag" onclick="addHashtagFilter(\'$1\')">#$1</span>');
+    
+    // Processa menções
+    content = content.replace(/@(\w+)/g, '<span class="mention" onclick="addMentionFilter(\'$1\')">@$1</span>');
+    
+    return content;
 }
 
 function createMessageHTML(message) {
@@ -69,7 +127,7 @@ function createMessageHTML(message) {
                 <span>${message.user_name}</span>
                 <span>${new Date(message.created_at).toLocaleString()}</span>
             </div>
-            <div class="message-content">${message.content}</div>
+            <div class="message-content">${processMessageContent(message.content)}</div>
         </div>
     `;
 }
@@ -384,3 +442,53 @@ document.addEventListener('click', (event) => {
         picker.style.display = 'none';
     }
 });
+
+// Funções para gerenciar filtros
+function addHashtagFilter(tag) {
+    activeHashtags.add(tag);
+    displayFilteredMessages();
+}
+
+function addMentionFilter(mention) {
+    activeMentions.add(mention);
+    displayFilteredMessages();
+}
+
+function removeHashtagFilter(tag) {
+    activeHashtags.delete(tag);
+    displayFilteredMessages();
+}
+
+function removeMentionFilter(mention) {
+    activeMentions.delete(mention);
+    displayFilteredMessages();
+}
+
+function updateActiveFilters() {
+    const hashtagsContainer = document.getElementById('activeHashtags');
+    const mentionsContainer = document.getElementById('activeMentions');
+
+    hashtagsContainer.innerHTML = Array.from(activeHashtags)
+        .map(tag => `
+            <span class="filter-tag">
+                #${tag}
+                <button onclick="removeHashtagFilter('${tag}')">&times;</button>
+            </span>
+        `).join('');
+
+    mentionsContainer.innerHTML = Array.from(activeMentions)
+        .map(mention => `
+            <span class="filter-tag">
+                @${mention}
+                <button onclick="removeMentionFilter('${mention}')">&times;</button>
+            </span>
+        `).join('');
+}
+
+function clearFilters() {
+    activeHashtags.clear();
+    activeMentions.clear();
+    displayFilteredMessages();
+    document.getElementById('hashtagFilter').value = '';
+    document.getElementById('mentionFilter').value = '';
+}
