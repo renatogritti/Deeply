@@ -279,3 +279,20 @@ pyrightconfig.json
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,python,flask
+__pycache__/app.cpython-313.pyc
+__pycache__/app.cpython-313.pyc
+__pycache__/app.cpython-313.pyc
+auth/__pycache__/authorization.cpython-313.pyc
+flask_session/4d070346f3a0abbc3ea42d25a39a6969
+flask_session/21e581fea1af4b19ff8cb346e0bd9698
+flask_session/25d85b3cbdb68d28c5100386a59c629e
+flask_session/72e751f54e33a5bbd6454c48bea885e7
+flask_session/2029240f6d1128be89ddc32729463129
+flask_session/c5a13a76417dc49c9f7b0145705ced79
+models/__pycache__/db.cpython-313.pyc
+routes/__pycache__/__init__.cpython-313.pyc
+routes/__pycache__/cards.cpython-313.pyc
+routes/__pycache__/projects.cpython-313.pyc
+routes/__pycache__/root.cpython-313.pyc
+routes/__pycache__/tags.cpython-313.pyc
+routes/__pycache__/teams.cpython-313.pyc

@@ -24,7 +24,34 @@ app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "uma_chave_muito_segura_aqui")
 
 # Configuração do Banco de Dados
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI", 'sqlite:///kanban.db')
+DB_TYPE = os.getenv("DB_TYPE", "sqlite").lower()
+
+if DB_TYPE == "sqlite":
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLITE_DATABASE_URI", 'sqlite:///kanban.db')
+elif DB_TYPE == "mariadb":
+    # Conexão com MariaDB
+    MARIADB_USER = os.getenv("MARIADB_USER", "root")
+    MARIADB_PASSWORD = os.getenv("MARIADB_PASSWORD", "")
+    MARIADB_HOST = os.getenv("MARIADB_HOST", "localhost")
+    MARIADB_PORT = os.getenv("MARIADB_PORT", "3306")
+    MARIADB_DB = os.getenv("MARIADB_DB", "deeply")
+    
+    # Codifica a senha para evitar problemas com caracteres especiais como '@'
+    from urllib.parse import quote_plus
+    encoded_password = quote_plus(MARIADB_PASSWORD)
+    
+    # Cria a string de conexão com a senha codificada
+    db_uri = f"mysql+pymysql://{MARIADB_USER}:{encoded_password}@{MARIADB_HOST}:{MARIADB_PORT}/{MARIADB_DB}"
+    
+    # Log para depuração (remove ou comenta esta linha em produção)
+    print(f"Conectando ao banco de dados: {MARIADB_USER}@{MARIADB_HOST}:{MARIADB_PORT}/{MARIADB_DB}")
+    
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+else:
+    # Default para SQLite em caso de configuração inválida
+    print(f"Tipo de banco de dados '{DB_TYPE}' não suportado. Usando SQLite como padrão.")
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///kanban.db'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Configuração da Sessão
@@ -96,7 +123,33 @@ def create_app():
     
     # Configurações básicas
     app.secret_key = os.getenv("SECRET_KEY", "uma_chave_muito_segura_aqui")
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI", 'sqlite:///kanban.db')
+    
+    # Configuração dinâmica do Banco de Dados para a função create_app
+    DB_TYPE = os.getenv("DB_TYPE", "sqlite").lower()
+    
+    if DB_TYPE == "sqlite":
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLITE_DATABASE_URI", 'sqlite:///kanban.db')
+    elif DB_TYPE == "mariadb":
+        # Conexão com MariaDB
+        MARIADB_USER = os.getenv("MARIADB_USER", "root")
+        MARIADB_PASSWORD = os.getenv("MARIADB_PASSWORD", "")
+        MARIADB_HOST = os.getenv("MARIADB_HOST", "localhost")
+        MARIADB_PORT = os.getenv("MARIADB_PORT", "3306")
+        MARIADB_DB = os.getenv("MARIADB_DB", "deeply")
+        
+        # Codifica a senha para evitar problemas com caracteres especiais como '@'
+        from urllib.parse import quote_plus
+        encoded_password = quote_plus(MARIADB_PASSWORD)
+        
+        # Cria a string de conexão com a senha codificada
+        db_uri = f"mysql+pymysql://{MARIADB_USER}:{encoded_password}@{MARIADB_HOST}:{MARIADB_PORT}/{MARIADB_DB}"
+        
+        app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+    else:
+        # Default para SQLite em caso de configuração inválida
+        print(f"Tipo de banco de dados '{DB_TYPE}' não suportado. Usando SQLite como padrão.")
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///kanban.db'
+    
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
     # Inicializar extensões
