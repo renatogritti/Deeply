@@ -448,3 +448,25 @@ class KudosReaction(db.Model):
             'reaction_type': self.reaction_type,
             'user': self.user.to_dict()
         }
+
+class AppUsage(db.Model):
+    """Registros de uso de aplicativos pelos usuários"""
+    usage_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=False)
+    app_name = db.Column(db.Text, nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False)
+    end_time = db.Column(db.DateTime, nullable=False)
+    minutes_used = db.Column(db.Integer, nullable=False)
+    
+    # Adiciona relacionamento com o usuário
+    user = db.relationship('Team', backref='app_usage')
+
+    def to_dict(self):
+        return {
+            'usage_id': self.usage_id,
+            'user_id': self.user_id,
+            'app_name': self.app_name,
+            'start_time': self.start_time.isoformat(),
+            'end_time': self.end_time.isoformat(),
+            'minutes_used': self.minutes_used
+        }
