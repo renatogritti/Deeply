@@ -45,21 +45,31 @@ def init_app(app):
         try:
             data = request.json
             
-            # Convert deadline string to datetime if provided
+            # Convert dates
             deadline = None
+            start_date = None
             if data.get('deadline'):
                 try:
                     deadline = datetime.strptime(data['deadline'], '%Y-%m-%d')
                 except ValueError:
                     return jsonify({"success": False, "error": "Invalid deadline format"}), 400
-                
+                    
+            if data.get('start_date'):
+                try:
+                    start_date = datetime.strptime(data['start_date'], '%Y-%m-%d')
+                except ValueError:
+                    return jsonify({"success": False, "error": "Invalid start date format"}), 400
+                    
             card = KanbanCard(
                 id=data['id'],
                 title=data['title'],
                 description=data['description'],
                 tempo=data['tempo'],
                 deadline=deadline,
-                phase_id=data['phase_id'],  # Use phase_id
+                start_date=start_date,
+                percentage=data.get('percentage', 0),
+                comments=data.get('comments', ''),
+                phase_id=data['phase_id'],
                 team_id=data.get('team_id'),
                 project_id=data['project_id']
             )
@@ -110,6 +120,12 @@ def init_app(app):
             if 'deadline' in data:
                 # Convert deadline string to datetime if provided
                 card.deadline = datetime.strptime(data['deadline'], '%Y-%m-%d') if data['deadline'] else None
+            if 'start_date' in data:
+                card.start_date = datetime.strptime(data['start_date'], '%Y-%m-%d') if data['start_date'] else None
+            if 'percentage' in data:
+                card.percentage = data['percentage']
+            if 'comments' in data:
+                card.comments = data['comments']
             if 'phase_id' in data:  # Atualizado: usar phase_id ao invés de column
                 card.phase_id = data['phase_id']
             if 'team_id' in data:

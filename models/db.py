@@ -175,6 +175,10 @@ class KanbanCard(db.Model):
     team_id = db.Column(db.Integer, db.ForeignKey('team.id'))  # Mantenha para compatibilidade
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # Novos campos
+    start_date = db.Column(db.DateTime, nullable=True)
+    percentage = db.Column(db.Integer, default=0)
+    comments = db.Column(db.Text)
     tags = db.relationship('Tag', secondary=card_tags, lazy='subquery',
                          backref=db.backref('cards', lazy=True))
     users = db.relationship('Team', secondary=card_users, lazy='subquery',
@@ -191,6 +195,9 @@ class KanbanCard(db.Model):
                 'description': self.description,
                 'tempo': self.tempo,
                 'deadline': self.deadline.isoformat() if self.deadline else None,  # Add this line
+                'start_date': self.start_date.isoformat() if self.start_date else None,
+                'percentage': self.percentage,
+                'comments': self.comments,
                 'phase_id': self.phase_id,
                 'team_id': self.team_id,
                 'project_id': self.project_id,

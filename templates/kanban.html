@@ -227,6 +227,11 @@
             <!-- Coluna 2 -->
             <div class="modal-col">
                 <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="date" id="editCardStartDate">
+                </div>
+                
+                <div class="form-group">
                     <label>Deadline</label>
                     <input type="date" id="editCardDeadline">
                 </div>
@@ -245,6 +250,16 @@
                     <div id="editCardTags" class="tags-selection scrollable">
                         <!-- Tags will be added here -->
                     </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Comments</label>
+                    <textarea id="editCardComments" placeholder="Additional comments" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Percentage Complete</label>  
+                    <input type="number" id="editCardPercentage" min="0" max="100">
                 </div>
             </div>
         </div>
@@ -305,6 +320,11 @@
             <!-- Coluna 2 -->
             <div class="modal-col">
                 <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="date" id="newCardStartDate">
+                </div>
+                
+                <div class="form-group">
                     <label>Deadline</label>
                     <input type="date" id="newCardDeadline">
                 </div>
@@ -323,6 +343,16 @@
                     <div id="newCardTags" class="tags-selection scrollable">
                         <!-- Tags will be added here -->
                     </div>
+                </div>
+            
+                <div class="form-group">
+                    <label>Comments</label>
+                    <textarea id="newCardComments" placeholder="Additional comments" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Percentage Complete</label>
+                    <input type="number" id="newCardPercentage" min="0" max="100" value="0">
                 </div>
             </div>
         </div>
@@ -359,7 +389,7 @@
         }
 
 
-        function createCard(id, title, description, tempo, team_name, tags = [], project_id, deadline = null, users = []) {
+        function createCard(id, title, description, tempo, team_name, tags = [], project_id, deadline = null, users = [], start_date = null, percentage = 0, comments = '') {
             var card = document.createElement("div");
             card.className = "kanban-card";
             card.id = id;
@@ -416,8 +446,25 @@
                 card.appendChild(usersContainer);
             }
 
+            // Adicionar barra de progresso no final do card
+            if (percentage > 0) {
+                const progressContainer = document.createElement("div");
+                progressContainer.className = "card-progress";
+                
+                const progressBar = document.createElement("div");
+                progressBar.className = "progress-bar";
+                progressBar.innerHTML = `
+                    <div class="progress-fill" style="width: ${percentage}%"></div>
+                    <span class="progress-text">${percentage}%</span>
+                `;
+                
+                progressContainer.appendChild(progressBar);
+                card.appendChild(progressContainer);
+            }
+
             return card;
         }
+
 
         async function openNewCardModal(phase_id) {
             try {
@@ -436,6 +483,9 @@
                 document.getElementById("newCardDescription").value = "";
                 document.getElementById("newCardTempo").value = "";
                 document.getElementById("newCardDeadline").value = "";
+                document.getElementById("newCardStartDate").value = "";
+                document.getElementById("newCardPercentage").value = 0;
+                document.getElementById("newCardComments").value = "";
 
                 // Setar e desabilitar o projeto selecionado
                 projectSelect.value = selectedProjectId;
@@ -608,22 +658,27 @@
                 return;
             }
 
+            const data = {
+                id: id,
+                title: title,
+                description: description,
+                tempo: tempo,
+                deadline: deadline || null,
+                start_date: document.getElementById("newCardStartDate").value || null,
+                percentage: parseInt(document.getElementById("newCardPercentage").value) || 0,
+                comments: document.getElementById("newCardComments").value || '',
+                phase_id: phase_id,
+                project_id: projectId,
+                tag_ids: selectedTags,
+                user_ids: selectedUsers
+            };
+
             fetch('/api/cards', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    id: id,
-                    title: title,
-                    description: description,
-                    tempo: tempo,
-                    deadline: deadline || null,
-                    phase_id: phase_id,
-                    project_id: projectId,
-                    tag_ids: selectedTags,
-                    user_ids: selectedUsers
-                })
+                body: JSON.stringify(data)
             })
             .then(response => response.json())
             .then(data => {
@@ -637,7 +692,10 @@
                         data.card.tags,
                         projectId, 
                         deadline, 
-                        data.card.users
+                        data.card.users,
+                        data.card.start_date,
+                        data.card.percentage,
+                        data.card.comments
                     );
 
                     document.getElementById(`phase_${phase_id}`).appendChild(card);
@@ -697,10 +755,6 @@
             document.querySelectorAll('#editCardTags input[type="checkbox"]').forEach(checkbox => {
                 checkbox.checked = false;
             });
-            
-            document.querySelectorAll('#editCardUsers option').forEach(option => {
-                option.selected = false;
-            });
 
             // Carregar dados do card via API
             fetch(`/api/cards/${card.id}`)
@@ -714,11 +768,24 @@
 
                     // Atualizar usuários
                     const userSelect = document.getElementById('editCardUsers');
+                    // Primeiro limpar todas as seleções
+                    Array.from(userSelect.options).forEach(option => option.selected = false);
+                    // Depois marcar os usuários atribuídos
                     if (data.users) {
-                        Array.from(userSelect.options).forEach(option => {
-                            option.selected = data.users.some(user => user.id === parseInt(option.value));
+                        data.users.forEach(user => {
+                            const option = userSelect.querySelector(`option[value="${user.id}"]`);
+                            if (option) {
+                                option.selected = true;
+                            }
                         });
                     }
+
+                    // Atualizar campos adicionais
+                    if (data.start_date) {
+                        document.getElementById("editCardStartDate").value = data.start_date.split('T')[0];
+                    }
+                    document.getElementById("editCardPercentage").value = data.percentage || 0;
+                    document.getElementById("editCardComments").value = data.comments || '';
                 })
                 .catch(error => {
                     console.error('Error loading card data:', error);
@@ -727,6 +794,7 @@
             modal.style.display = "block";
         }
 
+
         function saveCardEdit() {
             const id = document.getElementById("editCardId").value;
             const data = {
@@ -734,6 +802,9 @@
                 description: document.getElementById("editCardDescription").value,
                 tempo: document.getElementById("editCardTempo").value,
                 deadline: document.getElementById("editCardDeadline").value,
+                start_date: document.getElementById("editCardStartDate").value,
+                percentage: parseInt(document.getElementById("editCardPercentage").value) || 0,
+                comments: document.getElementById("editCardComments").value,
                 phase_id: document.getElementById("editCardPhase").value,
                 project_id: document.getElementById("editCardProject").value,
                 tag_ids: Array.from(document.querySelectorAll('#editCardTags input[type="checkbox"]:checked'))
@@ -762,7 +833,10 @@
                         data.card.tags,
                         data.card.project_id,
                         data.card.deadline,
-                        data.card.users
+                        data.card.users,
+                        data.card.start_date,
+                        data.card.percentage,
+                        data.card.comments
                     );
 
                     // Atualizar o card existente
@@ -1109,7 +1183,10 @@
                                 card.tags,
                                 card.project_id,
                                 card.deadline,
-                                card.users
+                                card.users,
+                                card.start_date,
+                                card.percentage,
+                                card.comments
                             );
                             column.appendChild(cardElement);
                         }
@@ -1193,7 +1270,10 @@
                     ],
                     "{{ card.project_id }}",
                     "{{ card.deadline }}",
-                    {{ card.users | tojson }}
+                    {{ card.users | tojson }},
+                    "{{ card.start_date }}",
+                    "{{ card.percentage }}",
+                    "{{ card.comments }}"
                 )
             );
         {% endfor %}
@@ -1578,7 +1658,10 @@
                                 card.tags,
                                 card.project_id,
                                 card.deadline,
-                                card.users
+                                card.users,
+                                card.start_date,
+                                card.percentage,
+                                card.comments
                             ));
                         }
                     });
@@ -1737,6 +1820,9 @@
                 document.getElementById("newCardDescription").value = "";
                 document.getElementById("newCardTempo").value = "";
                 document.getElementById("newCardDeadline").value = "";
+                document.getElementById("newCardStartDate").value = "";
+                document.getElementById("newCardPercentage").value = 0;
+                document.getElementById("newCardComments").value = "";
 
                 // Carregar dados (usuários e tags)
                 const { users, tags } = await loadModalData();
