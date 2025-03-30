@@ -40,16 +40,21 @@ def init_app(app):
     def create_team():
         try:
             data = request.json
-            # Gerar hash da senha padrão 'admin'
             default_password = 'admin'
             password_hash = hashlib.sha256(default_password.encode()).hexdigest()
             
             team = Team(
                 name=data['name'],
-                email=data.get('email', ''),  # Tornar email obrigatório
+                email=data.get('email', ''),
                 description=data.get('description', ''),
-                password_hash=password_hash  # Adicionar o hash da senha
+                password_hash=password_hash,
+                is_admin=data.get('is_admin', False)
             )
+
+            if 'project_access' in data:
+                projects = Project.query.filter(Project.id.in_(data['project_access'])).all()
+                team.project_access = projects
+
             db.session.add(team)
             db.session.commit()
             return jsonify({"success": True, "team": team.to_dict()})
@@ -66,6 +71,11 @@ def init_app(app):
                 team.name = data['name']
             if 'description' in data:
                 team.description = data['description']
+            if 'is_admin' in data:
+                team.is_admin = data['is_admin']
+            if 'project_access' in data:
+                projects = Project.query.filter(Project.id.in_(data['project_access'])).all()
+                team.project_access = projects
                 
             db.session.commit()
             return jsonify({"success": True, "team": team.to_dict()})

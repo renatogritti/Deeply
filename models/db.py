@@ -19,6 +19,12 @@ card_users = db.Table('card_users',
     db.Column('team_id', db.Integer, db.ForeignKey('team.id'), primary_key=True)
 )
 
+# Nova tabela para controle de acesso aos projetos
+project_access = db.Table('project_access',
+    db.Column('team_id', db.Integer, db.ForeignKey('team.id'), primary_key=True),
+    db.Column('project_id', db.Integer, db.ForeignKey('project.id'), primary_key=True)
+)
+
 class Team(db.Model):
     """
     Team Model
@@ -56,6 +62,9 @@ class Team(db.Model):
     linkedin = db.Column(db.String(200))
     contexto_trabalho = db.Column(db.Text)
     foto = db.Column(db.String(200))  # Caminho para a foto
+    is_admin = db.Column(db.Boolean, default=False)  # Novo flag para administrador
+    project_access = db.relationship('Project', secondary='project_access', lazy='subquery',
+                                   backref=db.backref('authorized_teams', lazy=True))
 
     def to_dict(self):
         """Convert team object to dictionary for JSON serialization."""
@@ -74,7 +83,9 @@ class Team(db.Model):
             'organizacao': self.organizacao,
             'linkedin': self.linkedin,
             'contexto_trabalho': self.contexto_trabalho,
-            'foto': self.foto
+            'foto': self.foto,
+            'is_admin': self.is_admin,
+            'project_access': [p.id for p in self.project_access]
         }
     
     def verify_password(self, password):
