@@ -204,7 +204,8 @@
                 </div>
                 
                 <div class="form-group">
-                    <input type="text" id="editCardTitle" placeholder="Card">
+                    <label>Card</label>
+                    <input type="text" id="editCardTitle" placeholder="Card title">
                 </div>
 
                 <div class="form-group">
@@ -212,54 +213,82 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Time Estimate</label>
                     <div class="tempo-group">
-                        <input type="text" id="editCardTempo" placeholder="Time Estimate: e.g., 2h">
-                        <button type="button" id="aiEstimateEditBtn" class="ai-estimate-btn" title="Obter estimativa baseada em IA">AI
-                            <svg viewBox="0 0 24 24" width="16" height="16">
-                                <path fill="currentColor" d="M12,2C13.85,2 15.55,2.78 16.9,4.1L18.6,2.4L19.9,3.7L18.2,5.4C19.5,6.75 20.3,8.45 20.3,10.3C20.3,13.95 17.95,17.1 14.7,18.3L13.4,16.95C16.2,15.95 18.1,13.3 18.1,10.3C18.1,7.05 15.35,4.3 12.1,4.3C8.85,4.3 6.1,7.05 6.1,10.3C6.1,13.3 8,15.95 10.8,16.95L9.5,18.3C6.25,17.1 3.9,13.95 3.9,10.3C3.9,8.45 4.7,6.75 6,5.4L4.3,3.7L5.6,2.4L7.3,4.1C8.65,2.78 10.35,2 12.2,2H12Z"/>
-                            </svg>
-                        </button>
+                        <input type="text" id="editCardTempo" placeholder="e.g., 2h">
+                        <button type="button" id="aiEstimateEditBtn" class="ai-estimate-btn" title="Get AI-based estimate">AI</button>
                     </div>
                     <div id="estimateEditToast" class="toast-message"></div>
                 </div>
             </div>
 
-            <!-- Coluna 2 -->
+            <!-- Coluna 2 - Accordions -->
             <div class="modal-col">
-                <div class="form-group">
-                    <label>Start Date</label>
-                    <input type="date" id="editCardStartDate">
-                </div>
-                
-                <div class="form-group">
-                    <label>Deadline</label>
-                    <input type="date" id="editCardDeadline">
-                </div>
-                
-                <div class="form-group">
-                    <label>Assigned Team Members</label>
-                    <select id="editCardUsers" multiple size="6">
-                        {% for team in teams|sort(attribute='name') %}
-                            <option value="{{ team.id }}">{{ team.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Tags</label>
-                    <div id="editCardTags" class="tags-selection scrollable">
-                        <!-- Tags will be added here -->
+                <!-- Accordion Dates -->
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <h4>Dates</h4>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="form-group">
+                            <label>Start Date</label>
+                            <input type="date" id="editCardStartDate">
+                        </div>
+                        <div class="form-group">
+                            <label>Due Date</label>
+                            <input type="date" id="editCardDeadline">
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Comments</label>
-                    <textarea id="editCardComments" placeholder="Additional comments" rows="3"></textarea>
+                <!-- Accordion Team Members -->
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <h4>Team Members</h4>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="form-group">
+                            <label>Assigned Team Members</label>
+                            <select id="editCardUsers" multiple size="6">
+                                {% for team in teams|sort(attribute='name') %}
+                                    <option value="{{ team.id }}">{{ team.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Percentage Complete</label>  
-                    <input type="number" id="editCardPercentage" min="0" max="100">
+                <!-- Accordion Tags -->
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <h4>Tags</h4>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div id="editCardTags" class="tags-selection scrollable">
+                            <!-- Tags will be added here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accordion Comments -->
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <h4>Comments</h4>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <textarea id="editCardComments" placeholder="Additional comments" rows="3"></textarea>
+                    </div>
+                </div>
+
+                <!-- Percentage Slider -->
+                <div class="percentage-slider">
+                    <label>Progress</label>
+                    <input type="range" id="editCardPercentage" min="0" max="100" value="0">
+                    <div class="percentage-value">0%</div>
                 </div>
             </div>
         </div>
@@ -298,61 +327,92 @@
                 </div>
                 
                 <div class="form-group">
-                                        <input type="text" id="newCardTitle" placeholder="Card">
+                    <label>Card</label>
+                    <input type="text" id="newCardTitle" placeholder="Card title">
                 </div>
 
                 <div class="form-group">
-                                        <textarea id="newCardDescription" placeholder="Card description" rows="4"></textarea>
+                    <textarea id="newCardDescription" placeholder="Card description" rows="4"></textarea>
                 </div>
+
                 <div class="form-group">
+                    <label>Time Estimate</label>
                     <div class="tempo-group">
-                        <input type="text" id="newCardTempo" placeholder="Time Estimate: e.g., 2h">
-                        <button type="button" id="aiEstimateBtn" class="ai-estimate-btn" title="Obter estimativa baseada em IA">AI
-                            <svg viewBox="0 0 24 24" width="16" height="16">
-                                <path fill="currentColor" d="M12,2C13.85,2 15.55,2.78 16.9,4.1L18.6,2.4L19.9,3.7L18.2,5.4C19.5,6.75 20.3,8.45 20.3,10.3C20.3,13.95 17.95,17.1 14.7,18.3L13.4,16.95C16.2,15.95 18.1,13.3 18.1,10.3C18.1,7.05 15.35,4.3 12.1,4.3C8.85,4.3 6.1,7.05 6.1,10.3C6.1,13.3 8,15.95 10.8,16.95L9.5,18.3C6.25,17.1 3.9,13.95 3.9,10.3C3.9,8.45 4.7,6.75 6,5.4L4.3,3.7L5.6,2.4L7.3,4.1C8.65,2.78 10.35,2 12.2,2H12Z"/>
-                            </svg>
-                        </button>
+                        <input type="text" id="newCardTempo" placeholder="e.g., 2h">
+                        <button type="button" id="aiEstimateBtn" class="ai-estimate-btn" title="Get AI-based estimate">AI</button>
                     </div>
                     <div id="estimateToast" class="toast-message"></div>
                 </div>
+
             </div>
 
-            <!-- Coluna 2 -->
+            <!-- Coluna 2 - Accordions -->
             <div class="modal-col">
-                <div class="form-group">
-                    <label>Start Date</label>
-                    <input type="date" id="newCardStartDate">
-                </div>
-                
-                <div class="form-group">
-                    <label>Deadline</label>
-                    <input type="date" id="newCardDeadline">
-                </div>
-                
-                <div class="form-group">
-                    <label>Assigned Team Members</label>
-                    <select id="newCardUsers" multiple size="6">
-                        {% for team in teams|sort(attribute='name') %}
-                            <option value="{{ team.id }}">{{ team.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Tags</label>
-                    <div id="newCardTags" class="tags-selection scrollable">
-                        <!-- Tags will be added here -->
+                <!-- Accordion Dates -->
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <h4>Dates</h4>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="form-group">
+                            <label>Start Date</label>
+                            <input type="date" id="newCardStartDate">
+                        </div>
+                        <div class="form-group">
+                            <label>Due Date</label>
+                            <input type="date" id="newCardDeadline">
+                        </div>
                     </div>
                 </div>
-            
-                <div class="form-group">
-                    <label>Comments</label>
-                    <textarea id="newCardComments" placeholder="Additional comments" rows="3"></textarea>
+
+                <!-- Accordion Team Members -->
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <h4>Team Members</h4>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="form-group">
+                            <label>Assigned Team Members</label>
+                            <select id="newCardUsers" multiple size="6">
+                                {% for team in teams|sort(attribute='name') %}
+                                    <option value="{{ team.id }}">{{ team.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Percentage Complete</label>
-                    <input type="number" id="newCardPercentage" min="0" max="100" value="0">
+                <!-- Accordion Tags -->
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <h4>Tags</h4>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div id="newCardTags" class="tags-selection scrollable">
+                            <!-- Tags will be added here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accordion Comments -->
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <h4>Comments</h4>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <textarea id="newCardComments" placeholder="Additional comments" rows="3"></textarea>
+                    </div>
+                </div>
+
+                <!-- Percentage Slider -->
+                <div class="percentage-slider">
+                    <label>Progress</label>
+                    <input type="range" id="newCardPercentage" min="0" max="100" value="0">
+                    <div class="percentage-value">0%</div>
                 </div>
             </div>
         </div>
@@ -784,7 +844,12 @@
                     if (data.start_date) {
                         document.getElementById("editCardStartDate").value = data.start_date.split('T')[0];
                     }
-                    document.getElementById("editCardPercentage").value = data.percentage || 0;
+                    // Atualizar percentual e seu label
+                    const percentageInput = document.getElementById("editCardPercentage");
+                    const percentageValue = data.percentage || 0;
+                    percentageInput.value = percentageValue;
+                    percentageInput.nextElementSibling.textContent = `${percentageValue}%`;
+                    
                     document.getElementById("editCardComments").value = data.comments || '';
                 })
                 .catch(error => {
@@ -2446,6 +2511,43 @@ function formatAIResponse(response) {
 }
 
 // ...existing code...
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializa accordions
+    document.querySelectorAll('.accordion-header').forEach(header => {
+        header.addEventListener('click', function() {
+            // Toggle active class no header
+            this.classList.toggle('active');
+            
+            // Toggle active class no content
+            const content = this.nextElementSibling;
+            content.classList.toggle('active');
+            
+            // Ajusta max-height baseado no conteúdo real
+            if (content.classList.contains('active')) {
+                content.style.maxHeight = content.scrollHeight + 'px';
+            } else {
+                content.style.maxHeight = '0';
+            }
+        });
+    });
+
+    // Atualiza o valor do percentage em tempo real
+    const percentageInputs = document.querySelectorAll('input[type="range"]');
+    percentageInputs.forEach(input => {
+        const valueDisplay = input.nextElementSibling;
+        
+        // Atualiza o valor inicial
+        valueDisplay.textContent = input.value + '%';
+        
+        // Atualiza quando o valor mudar
+        input.addEventListener('input', function() {
+            valueDisplay.textContent = this.value + '%';
+        });
+    });
+});
 </script>
 
 </body>
