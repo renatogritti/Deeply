@@ -1,0 +1,61 @@
+:root {
+    --primary-color: #6A03A0;
+    --primary-light: #A020F0;
+    --primary-dark: #6A03A0;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: #f5f5f5;
+    font-family: 'Roboto', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.header, .sidebar {
+    background: var(--primary-color);
+    color: white;
+}
+
+.header {
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.main-container {
+    display: flex;
+    height: calc(100vh - 64px);
+    overflow: hidden;
+}
+
+.sidebar {
+    width: 280px;
+    min-width: 280px;
+    padding: 1.5rem;
+    position: fixed;  /* Alterado para fixed */
+    left: 0;         /* Adicionado */
+    top: 64px;       /* Altura do header */
+    bottom: 0;       /* Adicionado para estender até embaixo */
+    z-index: 2;
+    box-shadow: 4px 0 8px rgba(0,0,0,0.15);
+    overflow-y: auto; /* Adicionado caso o conteúdo seja maior que a altura */
+}
+
+.content {
+    flex: 1;
+    padding: 2rem 3rem;
+    overflow-y: auto;
+    margin-left: 280px; /* Ajustado para a largura exata da sidebar */
+}
+
+// ... copiar todo o resto do CSS que estava no profile.html para cá ...

@@ -44,13 +44,37 @@ class Team(db.Model):
     password_hash = db.Column(db.String(256))  # Adicionado campo password_hash
     cards = db.relationship('KanbanCard', backref='team', lazy=True)
 
+    # Novos campos para perfil
+    pais = db.Column(db.String(100))
+    cidade = db.Column(db.String(100))
+    telefone = db.Column(db.String(20))
+    idioma = db.Column(db.String(20), default='pt-BR')
+    fuso_horario = db.Column(db.String(50), default='America/Sao_Paulo')
+    cargo = db.Column(db.String(100))
+    departamento = db.Column(db.String(100))
+    organizacao = db.Column(db.String(100))
+    linkedin = db.Column(db.String(200))
+    contexto_trabalho = db.Column(db.Text)
+    foto = db.Column(db.String(200))  # Caminho para a foto
+
     def to_dict(self):
         """Convert team object to dictionary for JSON serialization."""
         return {
             'id': self.id,
             'name': self.name,
             'email': self.email,  # Incluído email no retorno
-            'description': self.description
+            'description': self.description,
+            'pais': self.pais,
+            'cidade': self.cidade,
+            'telefone': self.telefone,
+            'idioma': self.idioma,
+            'fuso_horario': self.fuso_horario,
+            'cargo': self.cargo,
+            'departamento': self.departamento,
+            'organizacao': self.organizacao,
+            'linkedin': self.linkedin,
+            'contexto_trabalho': self.contexto_trabalho,
+            'foto': self.foto
         }
     
     def verify_password(self, password):

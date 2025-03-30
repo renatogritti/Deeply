@@ -31,6 +31,8 @@ app.config.update(
     PERMANENT_SESSION_LIFETIME=timedelta(minutes=30)  # Tempo máximo da sessão
 )
 
+
+
 # Inicializa as rotas e o banco de dados
 init_app(app)
 

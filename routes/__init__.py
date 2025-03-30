@@ -11,7 +11,9 @@ from routes import (
     kudos,
     docs,
     gamification,
-    ai  # Nova importação
+    ai,
+    profile
+
 )
 
 def init_app(app):
@@ -33,5 +35,8 @@ def init_app(app):
     kudos.init_app(app)  # Registra as rotas do kudos
     gamification.init_app(app)  # Registra as rotas de gamificação
     ai.init_app(app)  # Registra as rotas de AI
+    profile.init_app(app)  # Registra as rotas de perfil
+
+    
 
     return app
