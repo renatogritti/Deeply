@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Deeply</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="{{ url_for('static', filename='js/kanban-board.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/kanban-search.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/kanban-ai.js') }}"></script>
     <meta name="theme-color" content="#8A05BE">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"></noscript>
@@ -1059,7 +1062,11 @@
         });
 
         function loadBoard(projectId) {
-            // Primeiro, carregue as fases do projeto
+            if (!projectId) {
+                document.querySelector('.kanban-board').innerHTML = '<p></p>';
+                return;
+            }
+
             fetch(`/api/projects/${projectId}/phases`)
                 .then(response => response.json())
                 .then(phases => {
@@ -1159,13 +1166,6 @@
             showModal('projectModal');
             loadProjectsList();
         }
-
-
-        window.onload = function() {
-            loadTags();
-            loadProjects();
-            applyFilters();
-        };
 
 
         loadTags();

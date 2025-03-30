@@ -2556,3 +2556,52 @@ textarea.form-input {
 }
 
 /* ...existing code... */
+
+/* Estilos migrados do kanban.html */
+.calendar-filter-button {
+    border: 1px solid #8A05BE;
+    padding: 8px 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 30px;
+    margin-left: 270px;
+}
+
+.calendar-filter-button svg {
+    fill: #8A05BE;
+    width: 20px;
+    height: 15px;
+}
+
+.calendar-filter-button span {
+    color: #8A05BE;
+    font-weight: bold;
+}
+
+/* Estilos do SVG dentro do timer-button */
+.timer-button svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Estilos do SVG dentro do resetTimer */
+#resetTimer svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Estilos do SVG dentro do aiEstimateEditBtn e aiEstimateBtn */
+.ai-estimate-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Estilos para análise de projeto */
+#analyzeProjectBtn svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+/* ...existing code... */
