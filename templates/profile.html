@@ -394,11 +394,11 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="sidebar-content">
-                <button class="back-button" onclick="window.location.href='/kanban'">
+                <button class="back-button" onclick="window.location.href='{{ add_project_param('/kanban') }}'">
                     <svg width="24" height="24" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"/>
                     </svg>
-                    Voltar ao Kanban
+                    
                 </button>
                 <div class="photo-section">
                     <div class="photo-container">
@@ -683,6 +683,20 @@
             const sidebar = document.querySelector('.sidebar');
             if (window.innerWidth > 768) {
                 sidebar.classList.remove('active');
+            }
+        });
+
+        // Carrega o projeto da URL no carregamento da página
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const projectId = urlParams.get('projeto');
+            
+            // Atualiza o link de voltar se houver um projeto selecionado
+            if (projectId) {
+                const backButton = document.querySelector('.back-button');
+                backButton.onclick = function() {
+                    window.location.href = `/kanban?projeto=${projectId}`;
+                }
             }
         });
     </script>

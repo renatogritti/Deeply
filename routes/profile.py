@@ -12,13 +12,19 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def add_project_param(url):
+    """Adiciona o parâmetro do projeto à URL se existir na query string"""
+    project_id = request.args.get('projeto')
+    if project_id:
+        return f"{url}?projeto={project_id}"
+    return url
 
 def init_app(app):
     @app.route('/profile')
     @login_required
     def profile():
         user = Team.query.filter_by(email=session['usuario']).first()
-        return render_template('profile.html', user=user)
+        return render_template('profile.html', user=user, add_project_param=add_project_param)
 
     @app.route('/api/profile', methods=['PUT'])
     @login_required
