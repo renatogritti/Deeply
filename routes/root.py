@@ -99,6 +99,7 @@ def init_app(app):
                 regenerate_session()
                 session['usuario'] = user.email
                 session['user_id'] = user.id
+                session['is_admin'] = user.is_admin
                 session['csrf_token'] = secrets.token_hex(32)
                 session['last_activity'] = datetime.now().timestamp()
                 
@@ -118,12 +119,32 @@ def init_app(app):
     @login_required
     def kanban():
         """Render the main Kanban board page."""
+        user_id = session.get('user_id')
+        is_admin = session.get('is_admin')
+        
+        if is_admin:
+            # Admin vê todos os projetos
+            projects = [project.to_dict() for project in Project.query.all()]
+        else:
+            # Usuários normais veem apenas projetos com acesso
+            projects = [
+                project.to_dict() for project in Project.query
+                .join(project_access)
+                .filter(project_access.c.team_id == user_id)
+                .all()
+            ]
+
         cards = [card.to_dict() for card in KanbanCard.query.all()]
         teams = [team.to_dict() for team in Team.query.all()]
         tags = [tag.to_dict() for tag in Tag.query.all()]
-        projects = [project.to_dict() for project in Project.query.all()]
         
-        return render_template('kanban.html', cards=cards, teams=teams, tags=tags, projects=projects)
+        return render_template('kanban.html', 
+                             cards=cards, 
+                             teams=teams, 
+                             tags=tags, 
+                             projects=projects,
+                             user_id=user_id,
+                             is_admin=is_admin)
 
     @app.route('/calendar')
     @login_required

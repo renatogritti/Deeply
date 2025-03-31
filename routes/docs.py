@@ -18,7 +18,19 @@ def init_app(app):
     @login_required
     def docs():
         """Render the documents page."""
-        projects = Project.query.all()
+        user_id = session.get('user_id')
+        is_admin = session.get('is_admin')
+        
+        if is_admin:
+            # Admin vê todos os projetos
+            projects = Project.query.all()
+        else:
+            # Usuários normais veem apenas projetos com acesso
+            projects = Project.query\
+                .join(project_access)\
+                .filter(project_access.c.team_id == user_id)\
+                .all()
+                
         return render_template('docs.html', projects=projects)
 
     @app.route('/api/docs/<project_id>/structure')

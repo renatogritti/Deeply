@@ -11,8 +11,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function loadProjectDocs(projectId) {
     if (!projectId) {
-        currentProject = null;
-        currentPath = '';
         document.getElementById('folderTree').innerHTML = '';
         document.getElementById('filesList').innerHTML = '';
         

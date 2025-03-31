@@ -169,6 +169,56 @@ function updateUrlWithProject(url, projectId) {
     return urlObj.toString();
 }
 
+function loadProjects() {
+    const isAdmin = {{ 'true' if is_admin else 'false' }};
+    const userId = {{ user_id if user_id else 'null' }};
+
+    fetch('/api/projects')
+        .then(response => response.json())
+        .then(projects => {
+            const projectFilter = document.getElementById("projectFilter");
+            const newCardProject = document.getElementById("newCardProject");
+            
+            // Se não for admin, filtra os projetos pelo acesso
+            let filteredProjects = projects;
+            if (!isAdmin) {
+                fetch(`/api/project_access/${userId}`)
+                    .then(response => response.json())
+                    .then(accessData => {
+                        const allowedProjectIds = accessData.map(access => access.project_id);
+                        filteredProjects = projects.filter(project => 
+                            allowedProjectIds.includes(project.id)
+                        );
+                        
+                        updateProjectSelects(filteredProjects);
+                    });
+            } else {
+                updateProjectSelects(filteredProjects);
+            }
+        });
+}
+
+function updateProjectSelects(projects) {
+    const projectFilter = document.getElementById("projectFilter");
+    const newCardProject = document.getElementById("newCardProject");
+    
+    const options = '<option value="">All Projects</option>' + 
+        projects.map(project => `
+            <option value="${project.id}">${project.name}</option>`
+        ).join('');
+    
+    projectFilter.innerHTML = options;
+    newCardProject.innerHTML = options.replace('All Projects', 'Select Project');
+    
+    // Manter o projeto selecionado se houver um na URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectId = urlParams.get('projeto');
+    if (projectId && projects.some(p => p.id.toString() === projectId)) {
+        projectFilter.value = projectId;
+        loadBoard(projectId);
+    }
+}
+
 // Inicialização quando a página carregar
 document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
