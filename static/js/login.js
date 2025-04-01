@@ -23,7 +23,7 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
         
         if (data.success) {
             // Forçar redirecionamento com uma abordagem direta
-            window.location.replace('/kanban');
+            window.location.replace('/kudos');
         } else {
             document.getElementById('errorMessage').textContent = 'Usuário ou senha inválidos';
         }
