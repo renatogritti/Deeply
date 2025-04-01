@@ -59,7 +59,47 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('Erro ao carregar eventos');
             });
     };
+
+    // Pré-seleciona o projeto da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectId = urlParams.get('project');
+    if (projectId) {
+        const projectFilter = document.getElementById('projectFilter');
+        if (projectFilter) {
+            projectFilter.value = projectId;
+            filterByProject(projectId);
+        }
+    }
 });
+
+function filterByProject(projectId) {
+    // Atualiza a URL com o projeto selecionado
+    const url = new URL(window.location.href);
+    if (projectId) {
+        url.searchParams.set('projeto', projectId);
+    } else {
+        url.searchParams.delete('projeto');
+    }
+    history.pushState({}, '', url);
+
+    // Filtra os cartões usando o mesmo parâmetro
+    fetch(`/api/calendar/cards${projectId ? `?projeto=${projectId}` : ''}`)
+        .then(response => response.json())
+        .then(data => {
+            calendar.removeAllEvents();
+            const events = data.map(card => ({
+                title: card.title,
+                start: card.deadline,
+                description: card.description,
+                backgroundColor: card.tags?.[0]?.color || '#1a73e8',
+                borderColor: card.tags?.[0]?.color || '#1a73e8',
+                textColor: '#ffffff'
+            }));
+            calendar.addEventSource(events);
+            updateTasksList(data);
+        })
+        .catch(error => console.error('Erro ao filtrar eventos:', error));
+}
 
 function updateTasksList(cards) {
     const withDeadline = cards.filter(card => card.deadline);

@@ -150,20 +150,67 @@ def init_app(app):
     @login_required
     def calendar():
         """Render the calendar view page."""
-        cards_with_deadline = KanbanCard.query.filter(
+        user_id = session.get('user_id')
+        is_admin = session.get('is_admin')
+        project_id = request.args.get('projeto')  # Mudou de 'project' para 'projeto'
+        
+        # Filtra os projetos baseado nas permissões
+        if is_admin:
+            projects = Project.query.all()
+        else:
+            projects = Project.query\
+                .join(project_access)\
+                .filter(project_access.c.team_id == user_id)\
+                .all()
+
+        # Base query para os cards
+        cards_query = KanbanCard.query
+
+        # Aplica filtro de projeto se especificado
+        if project_id:
+            cards_query = cards_query.filter(KanbanCard.project_id == project_id)
+            
+        # Aplica filtro de acesso se não for admin
+        if not is_admin:
+            cards_query = cards_query.join(Project)\
+                .join(project_access)\
+                .filter(project_access.c.team_id == user_id)
+
+        # Separa cards com e sem deadline
+        cards_with_deadline = cards_query.filter(
             KanbanCard.deadline.isnot(None)
         ).order_by(KanbanCard.deadline).all()
         
-        cards_without_deadline = KanbanCard.query.filter(
+        cards_without_deadline = cards_query.filter(
             KanbanCard.deadline.is_(None)
         ).all()
-        
-        projects = Project.query.all()
         
         return render_template('calendar.html',
                              cards_with_deadline=cards_with_deadline,
                              cards_without_deadline=cards_without_deadline,
                              projects=projects)
+
+    @app.route('/api/calendar/cards')
+    @login_required
+    def get_calendar_cards():
+        """Get cards for calendar view with optional project filter."""
+        project_id = request.args.get('project_id')
+        user_id = session.get('user_id')
+        is_admin = session.get('is_admin')
+
+        query = KanbanCard.query
+
+        if project_id:
+            query = query.filter(KanbanCard.project_id == project_id)
+        
+        if not is_admin:
+            # Filtra apenas cartões de projetos que o usuário tem acesso
+            query = query.join(Project)\
+                .join(project_access)\
+                .filter(project_access.c.team_id == user_id)
+
+        cards = query.all()
+        return jsonify([card.to_dict() for card in cards])
 
     @app.route('/projects')
     @login_required

@@ -65,32 +65,44 @@
 
 /* Estilo do filtro de projeto */
 .project-filter {
-    margin-left: auto;
+    margin-left: 20px;
 }
 
 .project-filter select {
     padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background: #fff;
-    color: #333;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
     font-size: 14px;
     width: 200px;
     cursor: pointer;
     appearance: none;
     -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M7 10l5 5 5-5H7z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M7 10l5 5 5-5H7z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 8px center;
     background-size: 16px;
 }
 
 .project-filter select:hover {
-    border-color: #8A05BE;
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 .project-filter select:focus {
     outline: none;
-    border-color: #8A05BE;
-    box-shadow: 0 0 0 2px rgba(138, 5, 190, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.project-filter select option {
+    background: #fff;
+    color: #333;
+}
+
+/* Ajuste do filtro no header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 24px;
 }

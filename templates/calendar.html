@@ -117,6 +117,14 @@
             </svg>
             <h1>Calendar</h1>
         </div>
+        <div class="project-filter">
+            <select id="projectFilter" onchange="filterByProject(this.value)">
+                <option value="">Todos os Projetos</option>
+                {% for project in projects %}
+                <option value="{{ project.id }}" {% if project.id|string == request.args.get('projeto') %}selected{% endif %}>{{ project.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
 
     <div class="sidebar">
