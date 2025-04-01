@@ -161,23 +161,37 @@ def init_app(app):
             ws = wb.active
             ws.title = "Project Export"
             
-            headers = ['Phase', 'Card Title', 'Description', 'Time', 'Deadline', 'Users', 'Tags']
+            # Headers atualizados
+            headers = [
+                'Phase', 'Card Title', 'Description', 'Time Estimate', 
+                'Start Date', 'Due Date', 'Users', 'Tags', 
+                'Comments', 'Percentage'
+            ]
             ws.append(headers)
             
             for phase in project.phases:
                 for card in phase.cards:
-                    users = ";".join([user.email for user in card.users])
-                    tags = ";".join([tag.name for tag in card.tags])
-                    deadline = card.deadline.strftime('%Y-%m-%d') if card.deadline else ''
+                    users = ";".join([user.email for user in card.users]) if card.users else ''
+                    tags = ";".join([tag.name for tag in card.tags]) if card.tags else ''
+                    
+                    # Formatação das datas
+                    start_date = card.start_date.strftime('%Y-%m-%d') if card.start_date else ''
+                    due_date = card.deadline.strftime('%Y-%m-%d') if card.deadline else ''
+                    
+                    # Formatação dos comentários
+                    comments = "; ".join([f"{c.user.email}: {c.content}" for c in card.comments]) if card.comments else ''
                     
                     row = [
                         phase.name,
                         card.title,
                         card.description,
-                        card.tempo,  # Alterado para usar o atributo 'tempo'
-                        deadline,
+                        card.tempo,
+                        start_date,
+                        due_date,
                         users,
-                        tags
+                        tags,
+                        comments,
+                        card.percentage
                     ]
                     ws.append(row)
             
@@ -191,15 +205,13 @@ def init_app(app):
                             max_length = len(str(cell.value))
                     except:
                         pass
-                adjusted_width = (max_length + 2)
+                adjusted_width = min(max_length + 2, 50)  # Limita a largura máxima
                 ws.column_dimensions[column_letter].width = adjusted_width
             
-            # Salvar temporariamente
             filename = f"project_export_{project_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             wb.save(filepath)
             
-            # Enviar arquivo
             return send_file(
                 filepath,
                 as_attachment=True,
@@ -222,10 +234,35 @@ def init_app(app):
                 return jsonify({"success": False, "error": "Invalid file format"}), 400
 
             project = Project.query.get_or_404(project_id)
-            
-            # Criar arquivo temporário para log de erros
             error_log = []
             temp_log = tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.txt')
+            
+            def parse_excel_date(date_value):
+                """Converte uma data do Excel para datetime"""
+                if not date_value:
+                    return None
+                    
+                if isinstance(date_value, datetime):
+                    return date_value
+                    
+                try:
+                    # Tenta converter string para data
+                    if isinstance(date_value, str):
+                        # Tenta diferentes formatos de data
+                        for fmt in ['%Y-%m-%d', '%d/%m/%Y', '%d-%m-%Y']:
+                            try:
+                                return datetime.strptime(date_value.strip(), fmt)
+                            except ValueError:
+                                continue
+                        
+                    # Se for um número do Excel (número de dias desde 1900)
+                    if isinstance(date_value, (int, float)):
+                        return datetime(1899, 12, 30) + timedelta(days=int(date_value))
+                        
+                except Exception as e:
+                    return None
+                    
+                return None
             
             try:
                 wb = load_workbook(file)
@@ -244,61 +281,91 @@ def init_app(app):
                             if not phase:
                                 raise ValueError(f"Phase not found: {row_data['Phase']}")
                             
-                            # Verificar se o card existe
                             card_title = row_data['Card Title'].strip()
                             existing_card = KanbanCard.query.filter_by(
                                 project_id=project_id,
                                 title=card_title
                             ).first()
 
-                            # Preparar dados do card
-                            try:
-                                deadline = datetime.strptime(row_data['Deadline'], '%Y-%m-%d') if row_data['Deadline'] and row_data['Deadline'].strip() else None
-                            except ValueError:
-                                deadline = None
+                            # Processamento das datas usando a nova função
+                            start_date = parse_excel_date(row_data.get('Start Date'))
+                            if not start_date and row_data.get('Start Date'):
+                                error_log.append(f"Warning: Invalid start date format for card '{card_title}': {row_data['Start Date']}")
 
-                            # Processar usuários e tags
+                            due_date = parse_excel_date(row_data.get('Due Date'))
+                            if not due_date and row_data.get('Due Date'):
+                                error_log.append(f"Warning: Invalid due date format for card '{card_title}': {row_data['Due Date']}")
+
+                            # Processamento de usuários
                             users = []
                             if row_data['Users']:
                                 for email in row_data['Users'].split(';'):
                                     user = Team.query.filter_by(email=email.strip()).first()
                                     if not user:
-                                        raise ValueError(f"User not found: {email}")
-                                    users.append(user)
-                                    
+                                        error_log.append(f"Warning: User not found: {email}")
+                                    else:
+                                        users.append(user)
+                                        
+                            # Processamento de tags
                             tags = []
                             if row_data['Tags']:
                                 for tag_name in row_data['Tags'].split(';'):
                                     tag = Tag.query.filter_by(name=tag_name.strip()).first()
                                     if not tag:
-                                        raise ValueError(f"Tag not found: {tag_name}")
-                                    tags.append(tag)
+                                        error_log.append(f"Warning: Tag not found: {tag_name}")
+                                    else:
+                                        tags.append(tag)
 
+                            # Processamento de comentários
+                            comments = []
+                            if row_data['Comments']:
+                                for comment_text in row_data['Comments'].split(';'):
+                                    parts = comment_text.split(':', 1)
+                                    if len(parts) == 2:
+                                        user_email, content = parts
+                                        user = Team.query.filter_by(email=user_email.strip()).first()
+                                        if user:
+                                            comment = Comment(
+                                                content=content.strip(),
+                                                user=user
+                                            )
+                                            comments.append(comment)
+
+                            # Atualizar ou criar card com as novas datas
                             if existing_card:
-                                # Atualizar card existente
                                 existing_card.description = row_data['Description']
-                                existing_card.tempo = row_data['Time']
-                                existing_card.deadline = deadline
+                                existing_card.tempo = row_data['Time Estimate']
+                                existing_card.start_date = start_date
+                                existing_card.deadline = due_date
                                 existing_card.phase_id = phase.id
                                 existing_card.users = users
                                 existing_card.tags = tags
-                            else:
-                                # Gerar ID único para o novo card
-                                card_id = str(uuid.uuid4())
+                                existing_card.percentage = row_data.get('Percentage', 0)
                                 
-                                # Criar novo card com ID gerado
+                                # Atualizar comentários
+                                for comment in comments:
+                                    comment.card = existing_card
+                                    db.session.add(comment)
+                            else:
                                 new_card = KanbanCard(
-                                    id=card_id,  # Adicionar o ID gerado
+                                    id=str(uuid.uuid4()),
                                     project_id=project_id,
                                     phase_id=phase.id,
                                     title=card_title,
                                     description=row_data['Description'],
-                                    tempo=row_data['Time'],
-                                    deadline=deadline,
+                                    tempo=row_data['Time Estimate'],
+                                    start_date=start_date,
+                                    deadline=due_date,
+                                    percentage=row_data.get('Percentage', 0),
                                     users=users,
                                     tags=tags
                                 )
                                 db.session.add(new_card)
+                                
+                                # Adicionar comentários ao novo card
+                                for comment in comments:
+                                    comment.card = new_card
+                                    db.session.add(comment)
                             
                             db.session.flush()
                                 
@@ -306,14 +373,17 @@ def init_app(app):
                             error_log.append(f"Error in row {row[0].row}: {str(e)}")
 
                     if error_log:
-                        db.session.rollback()
+                        # Escrever logs mas continuar com a importação
                         for error in error_log:
                             temp_log.write(error + '\n')
                         temp_log.close()
-                        return jsonify({"success": False, "error_log": True}), 400
-                    
+                        
                     db.session.commit()
-                    return jsonify({"success": True})
+                    return jsonify({
+                        "success": True,
+                        "has_warnings": bool(error_log),
+                        "warning_count": len(error_log)
+                    })
                     
             finally:
                 wb.close()
