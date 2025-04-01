@@ -11,6 +11,7 @@ import os
 from flask import Flask, request, g, session
 from flask_session import Session
 from dotenv import load_dotenv
+from utils.logger import setup_logger
 
 # Carrega variáveis de ambiente
 load_dotenv()
@@ -86,6 +87,8 @@ AI_MODEL_TYPE = os.getenv("AI_MODEL_TYPE", "local")
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+logger = setup_logger('app')
+
 @app.context_processor
 def utility_processor():
     def get_current_project():
@@ -119,46 +122,55 @@ def before_request():
         g.projeto_id = None
 
 def create_app():
+    logger.info("Iniciando aplicação Deeply")
     app = Flask(__name__)
     
-    # Configurações básicas
-    app.secret_key = os.getenv("SECRET_KEY", "uma_chave_muito_segura_aqui")
-    
-    # Configuração dinâmica do Banco de Dados para a função create_app
-    DB_TYPE = os.getenv("DB_TYPE", "sqlite").lower()
-    
-    if DB_TYPE == "sqlite":
-        app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLITE_DATABASE_URI", 'sqlite:///kanban.db')
-    elif DB_TYPE == "mariadb":
-        # Conexão com MariaDB
-        MARIADB_USER = os.getenv("MARIADB_USER", "root")
-        MARIADB_PASSWORD = os.getenv("MARIADB_PASSWORD", "")
-        MARIADB_HOST = os.getenv("MARIADB_HOST", "localhost")
-        MARIADB_PORT = os.getenv("MARIADB_PORT", "3306")
-        MARIADB_DB = os.getenv("MARIADB_DB", "deeply")
+    try:
+        # Configurações básicas
+        app.secret_key = os.getenv("SECRET_KEY", "uma_chave_muito_segura_aqui")
+        logger.debug("Configurações básicas carregadas")
         
-        # Codifica a senha para evitar problemas com caracteres especiais como '@'
-        from urllib.parse import quote_plus
-        encoded_password = quote_plus(MARIADB_PASSWORD)
+        # Configuração dinâmica do Banco de Dados para a função create_app
+        DB_TYPE = os.getenv("DB_TYPE", "sqlite").lower()
+        logger.info(f"Tipo de banco de dados configurado: {DB_TYPE}")
         
-        # Cria a string de conexão com a senha codificada
-        db_uri = f"mysql+pymysql://{MARIADB_USER}:{encoded_password}@{MARIADB_HOST}:{MARIADB_PORT}/{MARIADB_DB}"
+        if DB_TYPE == "sqlite":
+            app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLITE_DATABASE_URI", 'sqlite:///kanban.db')
+        elif DB_TYPE == "mariadb":
+            # Conexão com MariaDB
+            MARIADB_USER = os.getenv("MARIADB_USER", "root")
+            MARIADB_PASSWORD = os.getenv("MARIADB_PASSWORD", "")
+            MARIADB_HOST = os.getenv("MARIADB_HOST", "localhost")
+            MARIADB_PORT = os.getenv("MARIADB_PORT", "3306")
+            MARIADB_DB = os.getenv("MARIADB_DB", "deeply")
+            
+            # Codifica a senha para evitar problemas com caracteres especiais como '@'
+            from urllib.parse import quote_plus
+            encoded_password = quote_plus(MARIADB_PASSWORD)
+            
+            # Cria a string de conexão com a senha codificada
+            db_uri = f"mysql+pymysql://{MARIADB_USER}:{encoded_password}@{MARIADB_HOST}:{MARIADB_PORT}/{MARIADB_DB}"
+            
+            app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+        else:
+            # Default para SQLite em caso de configuração inválida
+            print(f"Tipo de banco de dados '{DB_TYPE}' não suportado. Usando SQLite como padrão.")
+            app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///kanban.db'
         
-        app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
-    else:
-        # Default para SQLite em caso de configuração inválida
-        print(f"Tipo de banco de dados '{DB_TYPE}' não suportado. Usando SQLite como padrão.")
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///kanban.db'
-    
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    
-    # Inicializar extensões
-    Session(app)
-    
-    # Registrar blueprints e outras configurações
-    from routes import projects, ai, kanban
-    projects.init_app(app)
-    ai.init_app(app)
-    kanban.init_app(app)
-    
-    return app
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        logger.info("Configurações de banco de dados carregadas")
+        
+        # Inicializar extensões
+        Session(app)
+        
+        # Registrar blueprints e outras configurações
+        from routes import projects, ai, kanban
+        projects.init_app(app)
+        ai.init_app(app)
+        kanban.init_app(app)
+        
+        logger.info("Aplicação iniciada com sucesso")
+        return app
+    except Exception as e:
+        logger.critical(f"Erro fatal ao iniciar aplicação: {str(e)}", exc_info=True)
+        raise

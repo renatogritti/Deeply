@@ -6,11 +6,15 @@ import os
 from dotenv import load_dotenv
 import hashlib, secrets
 from functools import wraps
+from utils.logger import setup_logger
+import logging
 
 from auth.authorization import login_required  # Importa o decorador de autenticação
 
 from app import *
 from models.db import *
+
+logger = setup_logger('root')
 
 # Dicionário para controlar tentativas de login
 login_attempts = {}
@@ -46,6 +50,7 @@ def init_app(app):
             now = datetime.now().timestamp()
             
             if now - last_activity > 1800:  # 30 minutos
+                logger.info(f"Sessão expirada para usuário: {session['usuario']}")
                 session.clear()
                 return redirect(url_for('index'))
             
@@ -60,60 +65,66 @@ def init_app(app):
     def validate_login():
         """Validate login credentials"""
         ip = request.remote_addr
+        logger.info(f"Tentativa de login do IP: {ip}")
         
         if not check_brute_force(ip):
+            logger.warning(f"Bloqueio de força bruta ativo para IP: {ip}")
             return jsonify({
                 "success": False, 
                 "message": "Muitas tentativas. Tente novamente em 5 minutos."
             }), 429
 
-        data = request.json
-
-        
-        if not data or 'username' not in data or 'password' not in data:
-            return jsonify({"success": False, "message": "Dados inválidos"}), 400
-
-        # Primeiro tenta login como admin master
-        password_hash = hashlib.sha256(data['password'].encode()).hexdigest()
-        if (data['username'] == os.getenv('ADMIN_USER') and 
-            password_hash == os.getenv('ADMIN_PASSWORD_HASH')):
-            
-            if ip in login_attempts:
-                del login_attempts[ip]
-            
-            regenerate_session()
-            session['usuario'] = 'admin'
-            session['csrf_token'] = secrets.token_hex(32)
-            session['last_activity'] = datetime.now().timestamp()
-            
-            return jsonify({"success": True})
-        
-        # Se não for admin, tenta login como usuário normal
         try:
-            user = Team.query.filter_by(email=data['username']).first()
-            
-            if user and user.verify_password(data['password']):
+            data = request.json
+            if not data or 'username' not in data or 'password' not in data:
+                logger.warning("Tentativa de login com dados inválidos")
+                return jsonify({"success": False, "message": "Dados inválidos"}), 400
+
+            # Primeiro tenta login como admin master
+            password_hash = hashlib.sha256(data['password'].encode()).hexdigest()
+            if (data['username'] == os.getenv('ADMIN_USER') and 
+                password_hash == os.getenv('ADMIN_PASSWORD_HASH')):
+                
                 if ip in login_attempts:
                     del login_attempts[ip]
                 
                 regenerate_session()
-                session['usuario'] = user.email
-                session['user_id'] = user.id
-                session['is_admin'] = user.is_admin
+                session['usuario'] = 'admin'
                 session['csrf_token'] = secrets.token_hex(32)
                 session['last_activity'] = datetime.now().timestamp()
                 
                 return jsonify({"success": True})
-        except Exception as e:
-            print(f"Erro ao verificar usuário: {str(e)}")
-            db.session.rollback()  # Adiciona rollback em caso de erro
-            return jsonify({"success": False, "message": f"Erro ao verificar usuário: {str(e)}"}), 500
+            
+            # Se não for admin, tenta login como usuário normal
+            try:
+                user = Team.query.filter_by(email=data['username']).first()
+                
+                if user and user.verify_password(data['password']):
+                    if ip in login_attempts:
+                        del login_attempts[ip]
+                    
+                    regenerate_session()
+                    session['usuario'] = user.email
+                    session['user_id'] = user.id
+                    session['is_admin'] = user.is_admin
+                    session['csrf_token'] = secrets.token_hex(32)
+                    session['last_activity'] = datetime.now().timestamp()
+                    
+                    return jsonify({"success": True})
+            except Exception as e:
+                print(f"Erro ao verificar usuário: {str(e)}")
+                db.session.rollback()  # Adiciona rollback em caso de erro
+                return jsonify({"success": False, "message": f"Erro ao verificar usuário: {str(e)}"}), 500
 
-        # Incrementa contador de tentativas
-        attempts, _ = login_attempts.get(ip, (0, None))
-        login_attempts[ip] = (attempts + 1, None)
-        
-        return jsonify({"success": False, "message": "Usuário ou senha inválidos"}), 401
+            # Incrementa contador de tentativas
+            attempts, _ = login_attempts.get(ip, (0, None))
+            login_attempts[ip] = (attempts + 1, None)
+            
+            return jsonify({"success": False, "message": "Usuário ou senha inválidos"}), 401
+
+        except Exception as e:
+            logger.error(f"Erro no login: {str(e)}", exc_info=True)
+            return jsonify({"success": False, "message": f"Erro ao verificar usuário: {str(e)}"}), 500
 
     @app.route('/kanban')
     @login_required
