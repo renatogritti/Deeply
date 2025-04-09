@@ -69,10 +69,13 @@ def get_stats(period):
         user = Team.query.get(rank.user_id)
         if user:
             minutes = round(rank.total_duration / 60)
+            # Ofusca o nome se não for o usuário atual
+            display_name = user.name if user.id == user_id else f"Usuário {len(ranking) + 1}"
             ranking.append({
-                'id': user.id, # Adiciona o ID do usuário
-                'name': user.name,
-                'minutes': minutes
+                'id': user.id,
+                'name': display_name,
+                'minutes': minutes,
+                'is_current_user': user.id == user_id
             })
     
     return jsonify({

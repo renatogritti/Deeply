@@ -153,11 +153,11 @@ function updateRanking(ranking) {
 
     // Atualiza lista de ranking
     rankingList.innerHTML = ranking.map((user, index) => `
-        <div class="ranking-item">
+        <div class="ranking-item ${user.is_current_user ? 'current-user' : ''}">
             <div style="display: flex; align-items: center;">
                 <div class="ranking-position">${index + 1}</div>
                 <div class="ranking-info">
-                    <div class="ranking-name">${user.name}</div>
+                    <div class="ranking-name">${user.name}${user.is_current_user ? ' (Você)' : ''}</div>
                     <div class="ranking-minutes">${user.minutes} minutos</div>
                 </div>
             </div>
