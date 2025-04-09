@@ -74,7 +74,7 @@
     color: var(--primary-color);
     font-size: 15px;
     padding: 20px;
-    line-height: 1.6;
+    line-height: 1.2; /* Reduz o espaçamento entre linhas */
     box-shadow: 0 2px 6px rgba(138, 5, 190, 0.1); /* Sombra sutil em roxo */
     white-space: pre-line; /* Preserva quebras de linha */
 }
@@ -113,12 +113,49 @@
 }
 
 .ai-message p {
-    margin: 0;  /* Remove margem padrão */
-    padding: 4px 0;  /* Adiciona pequeno espaçamento vertical */
+    margin: 0;         /* Remove margens padrão */
+    padding: 2px 0;    /* Espaçamento vertical mínimo */
 }
 
 .ai-message p:last-child {
     margin-bottom: 0;
+}
+
+/* Estilos específicos para o resumo de login */
+.ai-message div {
+    margin-bottom: 4px;  /* Espaçamento reduzido entre seções */
+}
+
+/* Estilos para os níveis de indentação */
+.ai-message .level-0 {  /* Para links principais */
+    margin: 0;
+    padding: 2px 0;
+}
+
+.ai-message .level-1 {  /* Para subseções */
+    margin: 0 0 0 20px;
+    padding: 1px 0;
+}
+
+.ai-message .level-2 {  /* Para itens */
+    margin: 0 0 0 40px;
+    padding: 1px 0;
+}
+
+/* Ajuste para os bullets */
+.ai-message .bullet-main::before {
+    content: "•";
+    margin-right: 5px;
+}
+
+.ai-message .bullet-sub::before {
+    content: "-";
+    margin-right: 5px;
+}
+
+.ai-message .bullet-item::before {
+    content: "◦";
+    margin-right: 5px;
 }
 
 /* Estiliza os bullets */

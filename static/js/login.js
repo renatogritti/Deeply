@@ -22,8 +22,8 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
         console.log('Resposta do servidor:', data); // Log para diagnóstico
         
         if (data.success) {
-            // Forçar redirecionamento com uma abordagem direta
-            window.location.replace('/kudos');
+            // Redirecionar para o assistente AI com parâmetro de login
+            window.location.replace('/ai?acao=login');
         } else {
             document.getElementById('errorMessage').textContent = 'Usuário ou senha inválidos';
         }

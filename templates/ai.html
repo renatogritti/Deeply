@@ -156,6 +156,42 @@
                     console.error('Erro ao processar JSON:', error);
                     addMessage('Erro ao processar dados do board para relatório.', 'error');
                 }
+            } else if (params.acao === 'login') {
+                // Adiciona mensagem de boas-vindas e carregamento do resumo
+                addMessage("Bem-vindo de volta! Carregando seu resumo...", 'ai');
+                
+                // Solicita o resumo do usuário após login
+                fetch('/ai/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        message: "gere um resumo para o usuario que acabou de logar",
+                        action: "login_summary" 
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    // Remove a mensagem de carregamento
+                    const messages = document.getElementById('chat-messages');
+                    messages.removeChild(messages.lastChild);
+                    
+                    // Adiciona o resumo personalizado
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'message ai-message';
+                    messages.appendChild(messageDiv);
+                    typeWriter(data.response, messageDiv, 0, 30);
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    const messages = document.getElementById('chat-messages');
+                    messages.removeChild(messages.lastChild);
+                    addMessage('Erro ao carregar seu resumo: ' + error.message, 'error');
+                });
             }
         }
 

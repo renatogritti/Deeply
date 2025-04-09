@@ -10,6 +10,9 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from auth.authorization import login_required
 import re
+from models.db import db, KanbanCard, Project, TodoList, TodoTask, Message, Channel, Kudos, Team, card_users
+from datetime import datetime, timedelta
+from sqlalchemy import func, case
 
 ai_bp = Blueprint('ai', __name__, url_prefix='/ai')
 
@@ -129,10 +132,164 @@ def chat():
     try:
         data = request.json
         message = data.get('message')
+        action = data.get('action')
         
         if not message:
             return jsonify({'error': 'Mensagem vazia'}), 400
 
+        # Se a ação for para obter resumo após login
+        if action == "login_summary":
+            user_id = session.get('user_id')
+            if not user_id:
+                return jsonify({'error': 'Usuário não autenticado'}), 401
+                
+            # Busca o usuário
+            user = Team.query.get(user_id)
+            if not user:
+                return jsonify({'error': 'Usuário não encontrado'}), 404
+            
+            # Data atual para filtrar cards
+            current_date = datetime.now().date()
+            
+            # Busca cards diretamente da tabela KanbanCard
+            cards = (KanbanCard.query
+                    .join(card_users, KanbanCard.id == card_users.c.card_id)
+                    .join(Project, KanbanCard.project_id == Project.id)  # Join com Project
+                    .filter(
+                        card_users.c.team_id == user_id,
+                        KanbanCard.percentage < 100,
+                        (KanbanCard.start_date == None) | (KanbanCard.start_date.cast(db.Date) <= current_date),
+                        (KanbanCard.deadline == None) | (KanbanCard.deadline.cast(db.Date) >= current_date)
+                    )
+                    .order_by(Project.name, KanbanCard.deadline.asc())  # Ordena por projeto e deadline
+                    .all())
+            
+            # Organiza cards por projeto
+            projects_cards = {}
+            for card in cards:
+                project = Project.query.get(card.project_id)
+                project_name = project.name if project else "Projeto Desconhecido"
+                
+                if project_name not in projects_cards:
+                    projects_cards[project_name] = []
+                
+                projects_cards[project_name].append({
+                    "title": card.title,
+                    "due_date": card.deadline.strftime('%d/%m/%Y') if card.deadline else "Sem prazo",
+                    "percentage": card.percentage,
+                    "description": card.description  # Adiciona descrição para mais contexto
+                })
+            
+            # Busca TODOs do usuário
+            todo_lists = TodoList.query.filter_by(user_id=user_id).all()
+            todos_by_list = {}
+            for todo_list in todo_lists:
+                todos = TodoTask.query.filter_by(list_id=todo_list.id, completed=False).all()
+                if todos:
+                    todos_by_list[todo_list.name] = [{"title": todo.title} for todo in todos]
+            
+            # Busca mensagens recentes
+            channels = user.channels
+            messages = []
+            for channel in channels:
+                channel_messages = Message.query.filter_by(channel_id=channel.id).order_by(Message.created_at.desc()).limit(3).all()
+                for msg in channel_messages:
+                    sender = Team.query.get(msg.user_id)
+                    messages.append({
+                        "content": msg.content,
+                        "sender": sender.name if sender else "Usuário Desconhecido",
+                        "channel": channel.name,
+                        "created_at": msg.created_at.strftime('%d/%m/%Y %H:%M')
+                    })
+            
+            # Ordena as mensagens por data (mais recentes primeiro)
+            messages.sort(key=lambda x: datetime.strptime(x["created_at"], '%d/%m/%Y %H:%M'), reverse=True)
+            
+            # Limita a 3 mensagens
+            messages = messages[:3]
+            
+            # Busca kudos recentes
+            kudos = Kudos.query.order_by(Kudos.created_at.desc()).limit(3).all()
+            
+            # Cria o resumo
+            summary = {
+                "user_name": user.name,
+                "activities": {
+                    "title": "Atividades pendentes no Kanban",
+                    "projects": [
+                        {
+                            "name": project_name,
+                            "cards": cards_list
+                        } for project_name, cards_list in projects_cards.items()
+                    ]
+                },
+                "todos": todos_by_list,  # Mantido o nome da variável, mas alterado no prompt
+                "messages": messages,
+                "kudos": [{"message": k.message, "category": k.category, "sender": k.sender.name, 
+                          "receiver": k.receiver.name, "created_at": k.created_at.strftime('%d/%m/%Y')} for k in kudos]
+            }
+            
+            # Atualiza o prompt para refletir a nova estrutura mais concisa
+            prompt = f"""
+O usuário {summary['user_name']} acabou de fazer login. Monte um resumo personalizado com as informações abaixo:
+
+ATIVIDADES PENDENTES NO KANBAN:
+{json.dumps(summary['activities'], ensure_ascii=False, indent=2)}
+
+TODOs PESSOAIS:
+{json.dumps(summary['todos'], ensure_ascii=False, indent=2)}
+
+MENSAGENS RECENTES:
+{json.dumps(summary['messages'], ensure_ascii=False, indent=2)}
+
+RECONHECIMENTOS RECENTES:
+{json.dumps(summary['kudos'], ensure_ascii=False, indent=2)}
+
+Formatação esperada:
+- Saudação casual e personalizada (bom dia/tarde/noite + nome do usuário)
+
+<div class="level-0 bullet-main"><a href='/kanban'>Atividades pendentes no Kanban</a></div>
+<div class="level-1 bullet-sub">Projeto X</div>
+<div class="level-2 bullet-item">Card Y (data de vencimento) - Z% concluído</div>
+
+<div class="level-0 bullet-main"><a href='/todo'>TODOs pessoais</a></div>
+<div class="level-1 bullet-sub">Lista X</div>
+<div class="level-2 bullet-item">Item da lista</div>
+
+<div class="level-0 bullet-main"><a href='/messenger'>Mensagens recentes</a></div>
+<div class="level-2 bullet-item">Canal X: mensagem (enviada por Y)</div>
+
+<div class="level-0 bullet-main"><a href='/kudos'>Reconhecimentos recentes</a></div>
+<div class="level-2 bullet-item">De X para Y: mensagem</div>
+
+Instruções:
+- Use os caracteres especificados através das classes CSS
+- Mantenha exatamente esta estrutura HTML e as classes
+- Use linguagem casual e concisa
+- Não adicione espaçamentos extras
+"""
+
+            system_prompt = """Instruções:
+- Você é Deeply, um assistente especializado em trabalho colaborativo
+- Responda sempre em português do Brasil
+- Seja direto e objetivo com tom acolhedor mas conciso
+- Mantenha o texto compacto e bem organizado
+- Use apenas os links principais para cada seção
+- Seja motivador mas breve
+- Ajude o usuário a ter uma visão rápida do seu dia"""
+
+            if AI_MODEL_TYPE.lower() == "anthropic":
+                bot_response = get_response_from_anthropic(prompt, system_prompt)
+            else:  # default: local
+                bot_response = get_response_from_local_model(prompt, system_prompt)
+                
+            if not bot_response:
+                return jsonify({'error': 'Resposta vazia do modelo'}), 500
+                    
+            formatted_response = format_response(bot_response)
+            return jsonify({'response': formatted_response})
+        
+        # Caso normal, sem ação especial
         system_prompt = """Instruções:
 - Voce e Deeply, um assistente especializado em trabalho colaborativo, agilidade empresarial, social kudos e deep work.
 Seu foco e ajudar equipes a trabalharem melhor juntas, reconhecer conquistas e manter a produtividade profunda.
