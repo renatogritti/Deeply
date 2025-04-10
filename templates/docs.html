@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Documents - Deeply</title>
+    <title>Gerenciamento de Documentos - Deeply</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/docs.css') }}">
     <meta name="theme-color" content="#8A05BE">
@@ -14,7 +14,7 @@
             <svg class="logo" viewBox="0 0 24 24">
                 <path d="M14,17H7V15H14M17,13H7V11H17M17,9H7V7H17M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3Z"/>
             </svg>
-            <h1>Documents</h1>
+            <h1>Documentos</h1>
         </div>
     </div>
 
@@ -23,14 +23,14 @@
             <svg viewBox="0 0 24 24">
                 <path fill="currentColor" d="M4 3C2.89 3 2 3.89 2 5V19C2 20.11 2.89 21 4 21H20C21.11 21 22 20.11 22 19V5C22 3.89 21.11 3 20 3H4M4 5H20V19H4V5M6 7V17H10V7H6M12 7V11H16V7H12M12 13V17H16V13H12Z"/>
             </svg>
-            <span class="back-text">Back to Kanban</span>
+            <span class="back-text">Voltar ao Kanban</span>
         </a>
     </div>
 
-    <div class="filter-header">
-        <div class="project-filter">
+    <div class="docs-filter-header">
+        <div class="docs-project-filter">
             <select id="projectFilter" onchange="loadProjectDocs(this.value)">
-                <option value="">All Projects</option>
+                <option value="">Selecione um Projeto</option>
                 {% for project in projects %}
                 <option value="{{ project.id }}">{{ project.name }}</option>
                 {% endfor %}
@@ -43,66 +43,154 @@
             <!-- Coluna da Árvore de Pastas -->
             <div class="folders-column">
                 <div class="column-header">
-                    <h2>Folders</h2>
-                    <button onclick="createFolder()" class="new-folder-btn">
+                    <h2>Pastas</h2>
+                    <button onclick="showCreateFolderModal()" class="new-folder-btn">
                         <svg viewBox="0 0 24 24">
                             <path fill="currentColor" d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
                         </svg>
-                        New Folder
+                        Nova Pasta
                     </button>
                 </div>
+                <div class="folder-breadcrumb" id="folderBreadcrumb"></div>
                 <div id="folderTree" class="folder-tree"></div>
             </div>
 
-            <!-- Coluna dos Arquivos -->
+            <!-- Coluna dos Documentos -->
             <div class="files-column">
                 <div class="column-header">
-                    <h2>Files</h2>
+                    <h2>Documentos</h2>
                     <div class="file-actions">
-                        <input type="file" id="fileUpload" multiple hidden>
-                        <button onclick="document.getElementById('fileUpload').click()" class="upload-btn">
+                        <button onclick="showUploadDocumentModal()" class="upload-btn">
                             <svg viewBox="0 0 24 24">
                                 <path fill="currentColor" d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
                             </svg>
-                            Upload Files
+                            Novo Documento
                         </button>
                     </div>
                 </div>
-                <div id="filesList" class="files-list"></div>
+                <div id="documentsList" class="documents-list"></div>
             </div>
         </div>
     </div>
 
+    <!-- Modal de criação de pasta -->
     <div id="createFolderModal" class="modal">
         <div class="modal-content">
-            <h3>Create New Folder</h3>
-            <input type="text" id="folderName" placeholder="Folder Name">
-            <div class="modal-buttons">
-                <button onclick="confirmCreateFolder()">Create</button>
-                <button onclick="closeModal('createFolderModal')">Cancel</button>
+            <div class="modal-header">
+                <h3>Nova Pasta</h3>
+                <span class="close" onclick="closeModal('createFolderModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="folderName">Nome da Pasta</label>
+                    <input type="text" id="folderName" placeholder="Digite o nome da pasta">
+                </div>
+                <div class="form-group">
+                    <label for="folderDescription">Descrição (opcional)</label>
+                    <textarea id="folderDescription" placeholder="Descrição da pasta"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal('createFolderModal')">Cancelar</button>
+                <button class="btn-primary" onclick="createFolder()">Criar Pasta</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de upload de documento -->
+    <div id="uploadDocumentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Novo Documento</h3>
+                <span class="close" onclick="closeModal('uploadDocumentModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="documentName">Nome do Documento</label>
+                    <input type="text" id="documentName" placeholder="Digite o nome do documento">
+                </div>
+                <div class="form-group">
+                    <label for="documentDescription">Descrição (opcional)</label>
+                    <textarea id="documentDescription" placeholder="Descrição do documento"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="documentFile">Arquivo</label>
+                    <div class="file-upload">
+                        <input type="file" id="documentFile" class="file-input">
+                        <label for="documentFile" class="file-label">
+                            <svg viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
+                            </svg>
+                            <span id="selectedFileName">Selecionar arquivo...</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal('uploadDocumentModal')">Cancelar</button>
+                <button class="btn-primary" onclick="uploadDocument()">Enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de nova versão -->
+    <div id="newVersionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Nova Versão</h3>
+                <span class="close" onclick="closeModal('newVersionModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="documentNameVersion" class="document-title-modal"></p>
+                <div class="form-group">
+                    <label for="changeDescription">Descrição das Alterações</label>
+                    <textarea id="changeDescription" placeholder="Descreva as alterações feitas nesta versão"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="versionFile">Arquivo</label>
+                    <div class="file-upload">
+                        <input type="file" id="versionFile" class="file-input">
+                        <label for="versionFile" class="file-label">
+                            <svg viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
+                            </svg>
+                            <span id="selectedVersionFileName">Selecionar arquivo...</span>
+                        </label>
+                    </div>
+                </div>
+                <input type="hidden" id="currentDocumentId">
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal('newVersionModal')">Cancelar</button>
+                <button class="btn-primary" onclick="uploadVersion()">Enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de histórico de versões -->
+    <div id="versionHistoryModal" class="modal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3>Histórico de Versões</h3>
+                <span class="close" onclick="closeModal('versionHistoryModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="document-info">
+                    <h4 id="historyDocumentName"></h4>
+                    <p id="historyDocumentDescription" class="document-description"></p>
+                </div>
+                <div id="versionHistory" class="version-history"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal('versionHistoryModal')">Fechar</button>
             </div>
         </div>
     </div>
 
     <footer class="footer">
-        © 2024 GrittiCorp. All rights reserved.
+        © 2024 GrittiCorp. Todos os direitos reservados.
     </footer>
     
     <script src="{{ url_for('static', filename='js/docs.js') }}"></script>
-    <script>
-        // Carrega o projeto da URL no carregamento da página
-        document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const projectId = urlParams.get('projeto');
-            
-            if (projectId) {
-                const projectFilter = document.getElementById('projectFilter');
-                if (projectFilter) {
-                    projectFilter.value = projectId;
-                    loadProjectDocs(projectId);
-                }
-            }
-        });
-    </script>
 </body>
 </html>

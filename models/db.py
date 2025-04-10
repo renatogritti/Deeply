@@ -470,3 +470,115 @@ class AppUsage(db.Model):
             'end_time': self.end_time.isoformat(),
             'minutes_used': self.minutes_used
         }
+
+# Modelos para o sistema de gerenciamento de documentos
+class DocFolder(db.Model):
+    """
+    Pasta de documentos no sistema de gerenciamento de documentos
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)  # Aumentado de 100 para 255
+    description = db.Column(db.Text, nullable=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
+    parent_id = db.Column(db.Integer, db.ForeignKey('doc_folder.id'), nullable=True)
+    created_by = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    path = db.Column(db.String(1024), nullable=False)  # Aumentado de 500 para 1024
+
+    # Relacionamentos
+    project = db.relationship('Project', backref=db.backref('doc_folders', lazy=True))
+    creator = db.relationship('Team', backref=db.backref('created_folders', lazy=True))
+    subfolders = db.relationship('DocFolder', 
+                               backref=db.backref('parent', remote_side=[id]),
+                               lazy=True,
+                               cascade="all, delete-orphan")
+    documents = db.relationship('Document', backref='folder', lazy=True, cascade="all, delete-orphan")
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'project_id': self.project_id,
+            'parent_id': self.parent_id,
+            'created_by': self.created_by,
+            'creator_name': self.creator.name if self.creator else None,
+            'created_at': self.created_at.isoformat(),
+            'path': self.path
+        }
+
+class Document(db.Model):
+    """
+    Documento no sistema de gerenciamento de documentos
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)  # Aumentado de 200 para 255
+    description = db.Column(db.Text, nullable=True)
+    folder_id = db.Column(db.Integer, db.ForeignKey('doc_folder.id'), nullable=False)
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
+    created_by = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relacionamentos
+    project = db.relationship('Project', backref=db.backref('documents', lazy=True))
+    creator = db.relationship('Team', backref=db.backref('created_documents', lazy=True))
+    versions = db.relationship('DocumentVersion', backref='document', lazy=True, 
+                             cascade="all, delete-orphan", 
+                             order_by="desc(DocumentVersion.version_number)")
+    
+    def to_dict(self, include_versions=False):
+        data = {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'folder_id': self.folder_id,
+            'project_id': self.project_id,
+            'created_by': self.created_by,
+            'creator_name': self.creator.name,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }
+        
+        if self.versions and len(self.versions) > 0:
+            latest = self.versions[0]
+            data['latest_version'] = latest.version_number
+            data['latest_version_date'] = latest.created_at.isoformat()
+            data['latest_version_by'] = latest.uploader.name
+            
+            if include_versions:
+                data['versions'] = [v.to_dict() for v in self.versions]
+        
+        return data
+
+class DocumentVersion(db.Model):
+    """
+    Versão de um documento no sistema de gerenciamento de documentos
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    document_id = db.Column(db.Integer, db.ForeignKey('document.id'), nullable=False)
+    version_number = db.Column(db.Integer, nullable=False)
+    file_path = db.Column(db.String(1024), nullable=False)  # Aumentado de 500 para 1024
+    file_name = db.Column(db.String(255), nullable=False)   # Aumentado de 200 para 255
+    file_size = db.Column(db.Integer, nullable=False)
+    file_type = db.Column(db.String(100), nullable=True)    # Aumentado de 50 para 100
+    change_description = db.Column(db.Text, nullable=True)
+    uploaded_by = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relacionamentos
+    uploader = db.relationship('Team', backref=db.backref('uploaded_versions', lazy=True))
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'document_id': self.document_id,
+            'version_number': self.version_number,
+            'file_name': self.file_name,
+            'file_size': self.file_size,
+            'file_type': self.file_type,
+            'change_description': self.change_description,
+            'uploaded_by': self.uploaded_by,
+            'uploader_name': self.uploader.name,
+            'created_at': self.created_at.isoformat()
+        }
