@@ -222,9 +222,9 @@
     padding-left: 24px;
     padding-right: 24px;
     background: var(--background-color);
-    margin-left: 80px; /* Alinha com a sidebar */
+    margin-left: 24px; /* Reduzido de 80px para 24px */
     margin-right: 0;
-    width: calc(100% - 104px); /* Ajustado para alinhar com filter-header */
+    width: calc(100% - 48px); /* Ajustado para a nova margem */
 }
 
 /* Estilos das colunas */
@@ -415,6 +415,7 @@
 .files-column {
     flex: 1; /* Permite que a coluna de arquivos ocupe o espaço restante */
     min-width: 0; /* Permite que a coluna encolha se necessário */
+    max-width: 1015px;
     overflow: hidden; /* Impede overflow horizontal */
 }
 
@@ -464,18 +465,18 @@
     background-color: white;
     border-bottom: 1px solid var(--border-color);
     position: fixed;
-    left: 80px;
+    left: 24px; /* Reduzido de 80px para 24px */
     right: 24px; /* Aumentado para dar mais margem à direita */
     top: 60px;
     z-index: 10;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     height: 60px;
     padding: 0 24px; /* Simplificado padding */
-    width: calc(100% - 60px); /* Ajustado para não ultrapassar a tela */
+    width: calc(100% - 48px); /* Ajustado para a nova margem */
     padding-left: 324px; /* 300px (largura da coluna folders) + 24px (gap) */
     justify-content: flex-end; /* Alinha à direita */
     box-sizing: border-box; /* Garante que padding não aumente a largura */
-    max-width: calc(100% - 80px); /* Limita a largura máxima */
+    max-width: calc(100% - 48px); /* Ajustado para a nova margem */
 }
 
 .docs-project-filter {  /* Renomeado de project-filter */
