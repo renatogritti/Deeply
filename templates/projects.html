@@ -6,6 +6,8 @@
     <title>Manage Projects - Deeply</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/projects.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ai.css') }}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%238A05BE'/><text x='50%' y='55%' font-size='50' fill='white' text-anchor='middle' dominant-baseline='middle'>D</text></svg>">
     <script src="{{ url_for('static', filename='js/projects.js') }}" defer></script>
 </head>
 <body>
@@ -45,6 +47,12 @@
                     <div class="form-input-wrapper">
                         <textarea id="projectDescription" class="form-input" rows="4" placeholder="Enter a description for your project..."></textarea>
                     </div>
+                    <button type="button" id="aiAssistantBtn" class="ai-button" onclick="openAIModal()">
+                        <svg viewBox="0 0 24 24" width="16" height="16">
+                            <path fill="currentColor" d="M12,2C13.85,2 15.55,2.78 16.9,4.1L18.6,2.4L19.9,3.7L18.2,5.4C19.5,6.75 20.3,8.45 20.3,10.3C20.3,13.95 17.95,17.1 14.7,18.3L13.4,16.95C16.2,15.95 18.1,13.3 18.1,10.3C18.1,7.05 15.35,4.3 12.1,4.3C8.85,4.3 6.1,7.05 6.1,10.3C6.1,13.3 8,15.95 10.8,16.95L9.5,18.3C6.25,17.1 3.9,13.95 3.9,10.3C3.9,8.45 4.7,6.75 6,5.4L4.3,3.7L5.6,2.4L7.3,4.1C8.65,2.78 10.35,2 12.2,2H12Z"/>
+                        </svg>
+                        Assistente de AI para Briefing
+                    </button>
                 </div>
                 
                 <div class="form-group">
@@ -146,6 +154,38 @@
                     <button type="submit" class="confirm-btn">Import</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal do Assistente AI -->
+    <div id="aiModal" class="modal">
+        <div class="modal-content ai-modal-content">
+            <div class="modal-header">
+                <h3>
+                    <svg class="logo" viewBox="0 0 24 24" width="24" height="24">
+                        <path fill="currentColor" d="M12,2C13.85,2 15.55,2.78 16.9,4.1L18.6,2.4L19.9,3.7L18.2,5.4C19.5,6.75 20.3,8.45 20.3,10.3C20.3,13.95 17.95,17.1 14.7,18.3L13.4,16.95C16.2,15.95 18.1,13.3 18.1,10.3C18.1,7.05 15.35,4.3 12.1,4.3C8.85,4.3 6.1,7.05 6.1,10.3C6.1,13.3 8,15.95 10.8,16.95L9.5,18.3C6.25,17.1 3.9,13.95 3.9,10.3C3.9,8.45 4.7,6.75 6,5.4L4.3,3.7L5.6,2.4L7.3,4.1C8.65,2.78 10.35,2 12.2,2H12Z"/>
+                    </svg>
+                    Assistente de Briefing
+                </h3>
+                <span class="close-btn" onclick="closeAIModal()">&times;</span>
+            </div>
+            <div class="ai-container">
+                <div id="ai-chat-messages" class="chat-messages"></div>
+                
+                <div class="input-container">
+                    <textarea 
+                        id="aiUserInput" 
+                        placeholder="Digite sua resposta..."
+                        rows="1"
+                        onInput="this.rows = Math.min(5, this.value.split('\n').length)"
+                    ></textarea>
+                    <button onclick="sendBriefingResponse()">
+                        <svg viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M3.4 20.4L20.85 12.92C21.66 12.57 21.66 11.43 20.85 11.08L3.4 3.6C2.74 3.31 2.01 3.8 2.01 4.51L2 9.12C2 9.62 2.37 10.05 2.87 10.11L17 12L2.87 13.88C2.37 13.95 2 14.38 2 14.88L2.01 19.49C2.01 20.2 2.74 20.69 3.4 20.4Z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -367,6 +407,189 @@
                 `;
             }
         }
+
+        // Variáveis para controle do assistente de briefing
+        let briefingStep = 0;
+        const briefingQuestions = [
+            "Qual é o objetivo principal deste projeto?\n(O que você espera alcançar com ele?)",
+            "Quem é o público-alvo?\n(Para quem isso está sendo feito?)",
+            "Quais são os principais requisitos ou funcionalidades desejadas?\n(O que não pode faltar?)",
+            "Existe alguma referência, inspiração ou expectativa visual/funcional?\n(Tem algo que você viu e gostaria de seguir como base?)",
+            "Qual é o prazo ideal para entrega e existe um orçamento definido?\n(Tem datas ou limites financeiros já estabelecidos?)"
+        ];
+        const briefingAnswers = {
+            objetivo: "",
+            publico: "",
+            requisitos: "",
+            referencias: "",
+            prazo: ""
+        };
+        let briefingSummary = "";
+        let isWaitingConfirmation = false;
+
+        // Funções para o modal do assistente
+        function openAIModal() {
+            document.getElementById('aiModal').style.display = 'block';
+            resetBriefingChat();
+        }
+
+        function closeAIModal() {
+            document.getElementById('aiModal').style.display = 'none';
+        }
+
+        function resetBriefingChat() {
+            const chatMessages = document.getElementById('ai-chat-messages');
+            chatMessages.innerHTML = '';
+            briefingStep = 0;
+            isWaitingConfirmation = false;
+            
+            // Mensagem de boas-vindas
+            addAIMessage("Olá! Sou o assistente de briefing da Deeply. Vou te ajudar a criar uma descrição detalhada para seu projeto através de algumas perguntas rápidas. Vamos começar?");
+            
+            // Primeira pergunta após pequeno delay
+            setTimeout(() => {
+                addAIMessage(briefingQuestions[0]);
+            }, 1000);
+        }
+
+        function addAIMessage(message) {
+            const chatMessages = document.getElementById('ai-chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ai-message';
+            chatMessages.appendChild(messageDiv);
+            typeWriter(message, messageDiv, 0, 10);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function addUserMessage(message) {
+            const chatMessages = document.getElementById('ai-chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message user-message';
+            messageDiv.textContent = message;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function typeWriter(text, element, index, speed) {
+            if (index < text.length) {
+                element.innerHTML = text.substring(0, index + 1);
+                index++;
+                
+                // Ajusta velocidade para pausas naturais
+                let currentSpeed = speed;
+                if (text.charAt(index - 1) === '.') {
+                    currentSpeed = speed * 1.6;
+                } else if (text.charAt(index - 1) === ',') {
+                    currentSpeed = speed;
+                }
+                
+                setTimeout(() => typeWriter(text, element, index, speed), currentSpeed);
+            }
+        }
+
+        function sendBriefingResponse() {
+            const input = document.getElementById('aiUserInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            addUserMessage(message);
+            input.value = '';
+            
+            if (isWaitingConfirmation) {
+                if (message.toLowerCase().includes('sim') || 
+                    message.toLowerCase().includes('yes') || 
+                    message.toLowerCase().includes('ok') || 
+                    message.toLowerCase().includes('confirmo')) {
+                    
+                    // Aplica o sumário ao campo de descrição
+                    document.getElementById('projectDescription').value = briefingSummary;
+                    addAIMessage("Ótimo! O briefing foi aplicado ao campo de descrição do projeto. Você pode editar mais detalhes se quiser. Estou fechando o assistente.");
+                    
+                    // Fecha o modal após 3 segundos
+                    setTimeout(() => {
+                        closeAIModal();
+                    }, 3000);
+                } else {
+                    addAIMessage("Sem problemas! Você pode editar o briefing manualmente ou reiniciar este assistente quando quiser. Estou fechando o assistente.");
+                    setTimeout(() => {
+                        closeAIModal();
+                    }, 3000);
+                }
+                return;
+            }
+            
+            // Guarda a resposta da pergunta atual
+            switch (briefingStep) {
+                case 0:
+                    briefingAnswers.objetivo = message;
+                    break;
+                case 1:
+                    briefingAnswers.publico = message;
+                    break;
+                case 2:
+                    briefingAnswers.requisitos = message;
+                    break;
+                case 3:
+                    briefingAnswers.referencias = message;
+                    break;
+                case 4:
+                    briefingAnswers.prazo = message;
+                    break;
+            }
+            
+            briefingStep++;
+            
+            if (briefingStep < briefingQuestions.length) {
+                // Próxima pergunta
+                setTimeout(() => {
+                    addAIMessage(briefingQuestions[briefingStep]);
+                }, 500);
+            } else {
+                // Finaliza o questionário e gera o sumário
+                setTimeout(() => {
+                    addAIMessage("Obrigado pelas informações! Estou gerando o briefing do projeto...");
+                    
+                    // Gerar o sumário
+                    setTimeout(() => {
+                        generateBriefingSummary();
+                    }, 1500);
+                }, 500);
+            }
+        }
+
+        function generateBriefingSummary() {
+            // Gera o sumário com base nas respostas
+            briefingSummary = `# Briefing do Projeto
+
+## Objetivo Principal
+${briefingAnswers.objetivo}
+
+## Público-Alvo
+${briefingAnswers.publico}
+
+## Requisitos e Funcionalidades Principais
+${briefingAnswers.requisitos}
+
+## Referências e Inspirações
+${briefingAnswers.referencias}
+
+## Prazos e Orçamento
+${briefingAnswers.prazo}`;
+
+            // Exibe o sumário e pergunta se deseja aplicar
+            addAIMessage("Aqui está o briefing do seu projeto:\n\n" + briefingSummary + "\n\nDeseja aplicar este briefing à descrição do projeto? (Responda sim ou não)");
+            
+            isWaitingConfirmation = true;
+        }
+
+        // Adiciona evento de tecla ao campo de entrada
+        document.getElementById('aiUserInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendBriefingResponse();
+            }
+        });
     </script>
 </body>
 </html>
