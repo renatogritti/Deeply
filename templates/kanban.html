@@ -278,6 +278,12 @@
                         <span class="accordion-icon">▼</span>
                     </div>
                     <div class="accordion-content">
+                        <!-- Adicionar criador rápido de tags -->
+                        <div class="quick-tag-creator">
+                            <input type="text" id="editTagName" placeholder="Nome da tag">
+                            <input type="color" id="editTagColor" value="#1a73e8">
+                            <button type="button" onclick="createTagFromModal('edit')" class="create-tag-btn">Criar Tag</button>
+                        </div>
                         <div id="editCardTags" class="tags-selection scrollable">
                             <!-- Tags will be added here -->
                         </div>
@@ -402,6 +408,12 @@
                         <span class="accordion-icon">▼</span>
                     </div>
                     <div class="accordion-content">
+                        <!-- Adicionar criador rápido de tags -->
+                        <div class="quick-tag-creator">
+                            <input type="text" id="newTagName" placeholder="Nome da tag">
+                            <input type="color" id="newTagColor" value="#1a73e8">
+                            <button type="button" onclick="createTagFromModal('new')" class="create-tag-btn">Criar Tag</button>
+                        </div>
                         <div id="newCardTags" class="tags-selection scrollable">
                             <!-- Tags will be added here -->
                         </div>
@@ -2560,6 +2572,124 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<!-- Adicionar função JavaScript para criar tags no modal -->
+<script>
+// Função para criar uma nova tag dentro do modal
+async function createTagFromModal(modalType) {
+    // Determina os IDs dos elementos com base no tipo de modal
+    const nameInputId = modalType === 'edit' ? 'editTagName' : 'newTagName';
+    const colorInputId = modalType === 'edit' ? 'editTagColor' : 'newTagColor';
+    const tagsContainerId = modalType === 'edit' ? 'editCardTags' : 'newCardTags';
+    
+    const name = document.getElementById(nameInputId).value.trim();
+    const color = document.getElementById(colorInputId).value;
+    
+    if (!name) {
+        alert('O nome da tag é obrigatório!');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/tags', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: name,
+                color: color
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Limpa os campos
+            document.getElementById(nameInputId).value = '';
+            document.getElementById(colorInputId).value = '#1a73e8';
+            
+            // Adiciona a tag criada ao container de tags
+            const tagsContainer = document.getElementById(tagsContainerId);
+            const newTag = result.tag;
+            
+            const tagElement = document.createElement('div');
+            tagElement.className = 'tag-checkbox tag-created';
+            tagElement.innerHTML = `
+                <input type="checkbox" id="${modalType}_tag_${newTag.id}" value="${newTag.id}" checked>
+                <label for="${modalType}_tag_${newTag.id}" style="background-color: ${newTag.color}">
+                    ${newTag.name}
+                </label>
+            `;
+            
+            tagsContainer.appendChild(tagElement);
+            
+            // Depois de um tempo, remove a classe que indica animação
+            setTimeout(() => {
+                tagElement.classList.remove('tag-created');
+            }, 800);
+        } else {
+            alert('Erro ao criar tag: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Error creating tag:', error);
+        alert('Erro ao criar tag');
+    }
+}
+</script>
+
+<style>
+/* Estilos para o criador rápido de tags */
+.quick-tag-creator {
+    display: flex;
+    margin-bottom: 12px;
+    gap: 8px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.quick-tag-creator input[type="text"] {
+    flex: 1;
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.quick-tag-creator input[type="color"] {
+    width: 36px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.create-tag-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.create-tag-btn:hover {
+    background-color: var(--primary-dark);
+}
+
+/* Efeito de destaque para tag recém-criada */
+@keyframes tagCreated {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); background-color: rgba(138, 5, 190, 0.2); }
+    100% { transform: scale(1); }
+}
+
+.tag-created {
+    animation: tagCreated 0.7s ease;
+}
+
+.tag-checkbox label:hover {
+    filter: brightness(0.9);
+}
+</style>
 
 </body>
 </html>
