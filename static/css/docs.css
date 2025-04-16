@@ -734,20 +734,25 @@
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 100;
+    z-index: 9999; /* Aumentado significativamente para garantir que fique acima de tudo */
     align-items: center;
     justify-content: center;
 }
 
 .modal-content {
-    background-color: white;
+    position: relative; /* Adicionar posicionamento relativo */
+    z-index: 10000; /* Garantir que o conteúdo do modal fique acima do overlay */
+    background: white;
+    width: 90%;
+    max-width: 700px;
+    margin: 30px auto;
+    padding: 0;
     border-radius: 12px;
-    width: 500px;
-    max-width: 90%;
-    max-height: 90vh;
+    max-height: calc(100vh - 60px);
     overflow-y: auto;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-    animation: modalFadeIn 0.3s;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Sombra para destaque visual */
 }
 
 .modal-lg {
@@ -758,13 +763,41 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border-color);
+    padding: 12px 20px;
+    background-color: var(--primary-color);
+    color: #ffffff !important;
+    border-top-left-radius: 12px; /* Garantir que o raio do border é idêntico */
+    border-top-right-radius: 12px;
+    margin: 0; /* Remover qualquer margem */
 }
 
 .modal-header h3 {
     margin: 0;
-    color: var(--primary-color);
+    padding: 0;
+    color: #ffffff !important; /* Forçando cor branca */
+}
+
+/* Garantir que o SVG também tenha a cor branca */
+.modal-header svg path {
+    fill: #ffffff !important;
+}
+
+/* Reforçar que todos os elementos dentro do header são brancos */
+.modal-header, 
+.modal-header h3,
+.modal-header span,
+.modal-header .logo path,
+.modal-header * {
+    color: #ffffff !important;
+}
+
+.close-btn {
+    font-size: 24px;
+    cursor: pointer;
+}
+
+close-btn:hover {
+    opacity: 0.8;
 }
 
 .close {
@@ -780,7 +813,9 @@
 }
 
 .modal-body {
-    padding: 20px;
+    padding: 24px;
+    overflow-y: auto;
+    margin-top: 0; /* Garantir que não há margem no topo */
 }
 
 .modal-footer {

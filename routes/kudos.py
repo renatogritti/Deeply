@@ -12,9 +12,10 @@ def init_app(app):
 @login_required
 def kudos_page():
     user_id = session.get('user_id')
+    is_admin = session.get('is_admin')
     if not user_id:
         return redirect(url_for('index'))
-    return render_template('kudos.html')
+    return render_template('kudos.html',is_admin=is_admin)
 
 @kudos_bp.route('/api/kudos', methods=['GET'])
 @login_required

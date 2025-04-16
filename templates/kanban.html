@@ -79,6 +79,14 @@
 
     <div class="sidebar">
         <!-- Botão do Messenger - Agora como primeiro botão -->
+
+        <button class="sidebar-button" onclick="window.location.href='{{ add_project_param('/kanban') }}'">
+            <svg viewBox="0 0 24 24">
+                <path fill="currentColor" d="M4 3C2.89 3 2 3.89 2 5V19C2 20.11 2.89 21 4 21H20C21.11 21 22 20.11 22 19V5C22 3.89 21.11 3 20 3H4M4 5H20V19H4V5M6 7V17H10V7H6M12 7V11H16V7H12M12 13V17H16V13H12Z" /></svg>
+            <span>Kanban</span>
+        </button>
+    
+        
         <button class="sidebar-button" onclick="window.location.href='{{ add_project_param('/messenger') }}'">
             <svg viewBox="0 0 24 24">
                 <path fill="currentColor" d="M20,2H4A2,2 0 0,0 2,4V22L6,18H20A2,2 0 0,0 22,16V4A2,2 0 0,0 20,2M6,9H18V11H6M14,14H6V12H14M18,8H6V6H18" />

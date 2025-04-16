@@ -250,7 +250,6 @@ function openNewListModal() {
     // Certifica que o botão está com o texto correto
     document.querySelector('#newListModal .modal-buttons').innerHTML = `
         <button id="createListButton">Create</button>
-        <button onclick="closeModal('newListModal')">Cancel</button>
     `;
     document.getElementById('newListModal').style.display = 'block';
     
@@ -277,7 +276,6 @@ function editList(listId) {
             modal.setAttribute('data-list-id', listId);
             document.querySelector('#newListModal .modal-buttons').innerHTML = `
                 <button onclick="updateList(${listId})">Update</button>
-                <button onclick="closeModal('newListModal')">Cancel</button>
             `;
             modal.style.display = 'block';
         });
@@ -342,7 +340,6 @@ function editTask(taskId) {
             const modalButtons = modal.querySelector('.modal-buttons');
             modalButtons.innerHTML = `
                 <button onclick="updateTask(${taskId})">Save Changes</button>
-                <button onclick="closeModal('newTaskModal')">Cancel</button>
             `;
             
             // Abrir o modal

@@ -8,7 +8,8 @@ def init_app(app):
     def messenger():
         """Render messenger page with user data"""
         user_id = session.get('user_id')
-        return render_template('messenger.html', user_id=user_id)
+        is_admin = session.get('is_admin')
+        return render_template('messenger.html', user_id=user_id,is_admin=is_admin)
 
     @app.route('/api/channels', methods=['GET'])
     @login_required

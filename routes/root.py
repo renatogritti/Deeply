@@ -199,7 +199,8 @@ def init_app(app):
         return render_template('calendar.html',
                              cards_with_deadline=cards_with_deadline,
                              cards_without_deadline=cards_without_deadline,
-                             projects=projects)
+                             projects=projects,
+                             is_admin=is_admin)
 
     @app.route('/api/calendar/cards')
     @login_required
@@ -226,23 +227,26 @@ def init_app(app):
     @app.route('/projects')
     @login_required
     def projects():
+        is_admin = session.get('is_admin')
         """Render the projects management page."""
         projects = Project.query.all()
-        return render_template('projects.html', projects=projects)
+        return render_template('projects.html', projects=projects, is_admin=is_admin)
 
     @app.route('/teams')
     @login_required
     def teams():
+        is_admin = session.get('is_admin')
         """Render the teams management page."""
         teams = Team.query.all()
-        return render_template('teams.html', teams=teams)
+        return render_template('teams.html', teams=teams, is_admin=is_admin)
 
     @app.route('/tags')
     @login_required
     def tags():
+        is_admin = session.get('is_admin')
         """Render the tags management page."""
         tags = Tag.query.all()
-        return render_template('tags.html', tags=tags)
+        return render_template('tags.html', tags=tags, is_admin=is_admin)
 
     @app.route('/share')
     @login_required

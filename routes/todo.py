@@ -7,7 +7,8 @@ def init_app(app):
     @login_required
     def todo():
         """Render the TODO lists page."""
-        return render_template('todo.html')
+        is_admin = session.get('is_admin')
+        return render_template('todo.html', is_admin=is_admin)
 
     @app.route('/api/todo/lists', methods=['GET'])
     @login_required

@@ -48,12 +48,13 @@ def init_app(app):
 @ai_bp.route('/')
 @login_required
 def ai_page():
+    is_admin = session.get('is_admin')
     # Recebe os parâmetros da URL
     projeto_id = request.args.get('projeto')
     acao = request.args.get('acao')
     json_data = request.args.get('json')
     
-    return render_template('ai.html', projeto_id=projeto_id, acao=acao, json_data=json_data)
+    return render_template('ai.html', projeto_id=projeto_id, acao=acao, json_data=json_data,is_admin=is_admin)
 
 def get_response_from_local_model(message, system_prompt):
     """Obter resposta do modelo local Ollama"""

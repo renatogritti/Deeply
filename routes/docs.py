@@ -40,7 +40,7 @@ def init_app(app):
                 .filter(project_access.c.team_id == user_id)\
                 .all()
                 
-        return render_template('docs.html', projects=projects)
+        return render_template('docs.html', projects=projects,is_admin=is_admin, user_id=user_id)
     
     # API para obter a estrutura de pastas e documentos de um projeto
     @app.route('/api/docs/structure')

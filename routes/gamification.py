@@ -12,7 +12,8 @@ def init_app(app):
 @gamification_bp.route('/')
 @login_required
 def gamification_page():
-    return render_template('gamification.html')
+    is_admin = session.get('is_admin')
+    return render_template('gamification.html',is_admin=is_admin)
 
 @gamification_bp.route('/api/stats/<period>')
 @login_required
