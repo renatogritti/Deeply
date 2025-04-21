@@ -47,8 +47,23 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Variável global para armazenar o mapeamento de IDs de projetos para seus nomes
+let projectsMap = {};
+
 function loadTeamsList() {
-    fetch('/api/teams')
+    // Primeiro carregamos os projetos para garantir que temos os nomes
+    fetch('/api/projects')
+        .then(response => response.json())
+        .then(projects => {
+            // Criar mapeamento de id para nome de projeto
+            projectsMap = projects.reduce((map, project) => {
+                map[project.id] = project.name;
+                return map;
+            }, {});
+            
+            // Agora carregamos os usuários
+            return fetch('/api/teams');
+        })
         .then(response => response.json())
         .then(teams => {
             const teamsList = document.getElementById('teamsList');
@@ -63,7 +78,7 @@ function loadTeamsList() {
                             </div>
                             <div class="team-projects">
                                 ${team.project_access.map(projectId => 
-                                    `<span class="badge badge-project">Project ${projectId}</span>`
+                                    `<span class="badge badge-project">${projectsMap[projectId] || `Project ${projectId}`}</span>`
                                 ).join('')}
                             </div>
                         </div>
