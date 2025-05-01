@@ -32,28 +32,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function loadProjectDocs(projectId) {
     if (!projectId) {
-        document.getElementById('folderTree').innerHTML = '';
         document.getElementById('documentsList').innerHTML = '';
         document.getElementById('folderBreadcrumb').innerHTML = '';
-        
         currentProject = null;
         currentFolder = null;
         breadcrumbHistory = [];
-        
-        // Remove o parâmetro projeto da URL
-        const url = new URL(window.location.href);
-        url.searchParams.delete('projeto');
-        history.pushState({}, '', url);
         return;
     }
 
-    // Atualiza a URL com o projeto selecionado
-    const url = new URL(window.location.href);
-    url.searchParams.set('projeto', projectId);
-    history.pushState({}, '', url);
-
     currentProject = projectId;
     
+    // Destaca o projeto selecionado
+    const projectItems = document.querySelectorAll('.project-item');
+    projectItems.forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('data-id') === projectId) {
+            item.classList.add('active');
+        }
+    });
+
     // Carrega a estrutura de pastas e documentos raiz do projeto
     fetch(`/api/docs/structure?project_id=${projectId}`)
         .then(response => {
@@ -61,18 +58,107 @@ function loadProjectDocs(projectId) {
             return response.json();
         })
         .then(data => {
-            // Guarda a pasta atual
             currentFolder = data.folder ? data.folder.id : null;
             
             // Inicializa o breadcrumb
             breadcrumbHistory = [{
-                id: data.folder ? data.folder.id : null,
+                id: currentFolder,
                 name: "Home"
             }];
             
             renderBreadcrumb();
-            renderFolderTree(data.subfolders);
-            renderDocuments(data.documents);
+            
+            // Renderiza as pastas no painel de documentos
+            let documentsHTML = '';
+            
+            // Renderiza as pastas primeiro
+            if (data.subfolders && data.subfolders.length > 0) {
+                data.subfolders.forEach(folder => {
+                    documentsHTML += `
+                        <div class="document-item folder" onclick="loadFolder(${folder.id})">
+                            <div class="document-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <path fill="currentColor" d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z" />
+                                </svg>
+                            </div>
+                            <div class="document-info">
+                                <div class="document-name">${folder.name}</div>
+                                <div class="document-meta">
+                                    <span>${folder.created_by} - ${formatDate(folder.created_at)}</span>
+                                </div>
+                            </div>
+                            <div class="document-actions">
+                                <button class="doc-action-button" onclick="event.stopPropagation(); showRenameFolderModal(${folder.id}, '${folder.name}')" title="Renomear">
+                                    <svg viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
+                                    </svg>
+                                </button>
+                                <button class="doc-action-button" onclick="event.stopPropagation(); confirmDeleteFolder(event, ${folder.id})" title="Excluir">
+                                    <svg viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Renderiza os documentos depois
+            if (data.documents && data.documents.length > 0) {
+                data.documents.forEach(doc => {
+                    documentsHTML += `
+                        <div class="document-item">
+                            <div class="document-info">
+                                <div class="document-icon">
+                                    <svg viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M14,17H7V15H14M17,13H7V11H17M17,9H7V7H17M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3Z" />
+                                    </svg>
+                                </div>
+                                <div class="document-name">${doc.name}</div>
+                                <div class="document-meta">
+                                    <span>${doc.creator_name} - ${formatDate(doc.created_at)}</span>
+                                </div>
+                            </div>
+                            <div class="document-actions">
+                                <button class="doc-action-button" onclick="downloadLatestVersion(${doc.id})" title="Download">
+                                    <svg viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/>
+                                    </svg>
+                                </button>
+                                <button class="doc-action-button" onclick="showNewVersionModal(${doc.id}, '${doc.name}')" title="Nova versão">
+                                    <svg viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M11,15V12H9V15H6V17H9V20H11V17H14V15H11Z"/>
+                                    </svg>
+                                </button>
+                                <button class="doc-action-button" onclick="showVersionHistory(${doc.id})" title="Histórico">
+                                    <svg viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M13,3A9,9 0 0,0 4,12H1L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3"/>
+                                    </svg>
+                                </button>
+                                <button class="doc-action-button" onclick="event.stopPropagation(); confirmDeleteDocument(${doc.id})" title="Excluir">
+                                    <svg viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            if (!documentsHTML) {
+                documentsHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/>
+                        </svg>
+                        <p>Nenhum item encontrado nesta pasta</p>
+                    </div>
+                `;
+            }
+
+            document.getElementById('documentsList').innerHTML = documentsHTML;
         })
         .catch(error => {
             console.error('Erro ao carregar estrutura do projeto:', error);
@@ -124,19 +210,15 @@ function loadFolder(folderId) {
             return response.json();
         })
         .then(data => {
-            // Atualiza a pasta atual
             currentFolder = folderId;
             
             // Atualiza o breadcrumb
             if (data.folder) {
-                // Verifica se a pasta já está no breadcrumb
                 const existingIndex = breadcrumbHistory.findIndex(item => item.id === folderId);
                 
                 if (existingIndex >= 0) {
-                    // Se já existe, remove tudo depois dela
                     breadcrumbHistory = breadcrumbHistory.slice(0, existingIndex + 1);
                 } else {
-                    // Caso contrário, adiciona ao histórico
                     breadcrumbHistory.push({
                         id: data.folder.id,
                         name: data.folder.name
@@ -146,12 +228,97 @@ function loadFolder(folderId) {
                 renderBreadcrumb();
             }
             
-            // Renderiza pastas e documentos
-            renderFolderTree(data.subfolders);
-            renderDocuments(data.documents);
+            // Usa a mesma lógica de renderização do loadProjectDocs
+            let documentsHTML = '';
             
-            // Destaca a pasta na árvore
-            highlightActiveFolder(folderId);
+            // Renderiza as pastas primeiro
+            if (data.subfolders && data.subfolders.length > 0) {
+                data.subfolders.forEach(folder => {
+                    documentsHTML += `
+                        <div class="document-item folder" onclick="loadFolder(${folder.id})">
+                            <div class="document-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <path fill="currentColor" d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z" />
+                                </svg>
+                            </div>
+                            <div class="document-info">
+                                <div class="document-name">${folder.name}</div>
+                                <div class="document-meta">
+                                    <span>${folder.created_by} - ${formatDate(folder.created_at)}</span>
+                                </div>
+                            </div>
+                            <div class="document-actions">
+                                <button class="doc-action-button" onclick="event.stopPropagation(); showRenameFolderModal(${folder.id}, '${folder.name}')" title="Renomear">
+                                    <svg viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
+                                    </svg>
+                                </button>
+                                <button class="doc-action-button" onclick="event.stopPropagation(); confirmDeleteFolder(event, ${folder.id})" title="Excluir">
+                                    <svg viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Renderiza os documentos depois
+            if (data.documents && data.documents.length > 0) {
+                data.documents.forEach(doc => {
+                    documentsHTML += `
+                        <div class="document-item">
+                            <div class="document-info">
+                                <div class="document-icon">
+                                    <svg viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M14,17H7V15H14M17,13H7V11H17M17,9H7V7H17M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3Z" />
+                                    </svg>
+                                </div>
+                                <div class="document-name">${doc.name}</div>
+                                <div class="document-meta">
+                                    <span>${doc.creator_name} - ${formatDate(doc.created_at)}</span>
+                                </div>
+                            </div>
+                            <div class="document-actions">
+                                <button class="doc-action-button" onclick="downloadLatestVersion(${doc.id})" title="Download">
+                                    <svg viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/>
+                                    </svg>
+                                </button>
+                                <button class="doc-action-button" onclick="showNewVersionModal(${doc.id}, '${doc.name}')" title="Nova versão">
+                                    <svg viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M11,15V12H9V15H6V17H9V20H11V17H14V15H11Z"/>
+                                    </svg>
+                                </button>
+                                <button class="doc-action-button" onclick="showVersionHistory(${doc.id})" title="Histórico">
+                                    <svg viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M13,3A9,9 0 0,0 4,12H1L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3"/>
+                                    </svg>
+                                </button>
+                                <button class="doc-action-button" onclick="event.stopPropagation(); confirmDeleteDocument(${doc.id})" title="Excluir">
+                                    <svg viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            if (!documentsHTML) {
+                documentsHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/>
+                        </svg>
+                        <p>Nenhum item encontrado nesta pasta</p>
+                    </div>
+                `;
+            }
+
+            document.getElementById('documentsList').innerHTML = documentsHTML;
         })
         .catch(error => {
             console.error('Erro ao carregar pasta:', error);
@@ -256,59 +423,40 @@ function renderDocuments(documents) {
     documents.forEach(doc => {
         documentsHTML += `
             <div class="document-item">
-                <div class="document-header">
-                    <div class="document-title">${doc.name}</div>
+                <div class="document-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M14,17H7V15H14M17,13H7V11H17M17,9H7V7H17M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3Z" />
+                    </svg>
                 </div>
-                <div class="document-body">
-                    <div class="document-description">${doc.description || 'Sem descrição'}</div>
+                <div class="document-info">
+                    <div class="document-name">${doc.name}</div>
                     <div class="document-meta">
-                        <span>
-                            <svg viewBox="0 0 24 24">
-                                <path fill="currentColor" d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
-                            </svg>
-                            ${doc.creator_name}
-                        </span>
-                        <span>
-                            <svg viewBox="0 0 24 24">
-                                <path fill="currentColor" d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z" />
-                            </svg>
-                            ${formatDate(doc.updated_at)}
-                        </span>
-                        ${doc.latest_version ? `
-                        <span>
-                            <svg viewBox="0 0 24 24">
-                                <path fill="currentColor" d="M17,3L22.25,7.5L17,12L22.25,16.5L17,21V16.5H8.5V21L3.25,16.5L8.5,12L3.25,7.5L8.5,3V7.5H17M17,8.5V6.5H8.5V8.5H17M8.5,15.5H17V13.5H8.5V15.5Z" />
-                            </svg>
-                            Versão ${doc.latest_version} (${doc.latest_version_by})
-                        </span>
-                        ` : ''}
+                        <span>Criado por: ${doc.creator_name}</span>
+                        <span>Última atualização: ${formatDate(doc.updated_at)}</span>
+                        ${doc.latest_version ? `<span>Versão ${doc.latest_version}</span>` : ''}
                     </div>
-                    <div class="document-actions">
-                        <button class="btn-sm btn-success" onclick="downloadLatestVersion(${doc.id})">
-                            <svg viewBox="0 0 24 24" width="16" height="16">
-                                <path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
-                            </svg>
-                            Download
-                        </button>
-                        <button class="btn-sm btn-primary-outline" onclick="showNewVersionModal(${doc.id}, '${doc.name}')">
-                            <svg viewBox="0 0 24 24" width="16" height="16">
-                                <path fill="currentColor" d="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M11,15V12H9V15H6V17H9V20H11V17H14V15H11Z" />
-                            </svg>
-                            Nova versão
-                        </button>
-                        <button class="btn-sm btn-primary-outline" onclick="showVersionHistory(${doc.id})">
-                            <svg viewBox="0 0 24 24" width="16" height="16">
-                                <path fill="currentColor" d="M13.5,8H12V13L16.28,15.54L17,14.33L13.5,12.25V8M13,3A9,9 0 0,0 4,12H1L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3" />
-                            </svg>
-                            Histórico
-                        </button>
-                        <button class="btn-sm btn-danger" onclick="confirmDeleteDocument(${doc.id})">
-                            <svg viewBox="0 0 24 24" width="16" height="16">
-                                <path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
-                            </svg>
-                            Excluir
-                        </button>
-                    </div>
+                </div>
+                <div class="document-actions">
+                    <button class="doc-action-button" onclick="downloadLatestVersion(${doc.id})" title="Download">
+                        <svg viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/>
+                        </svg>
+                    </button>
+                    <button class="doc-action-button" onclick="showNewVersionModal(${doc.id}, '${doc.name}')" title="Nova versão">
+                        <svg viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M11,15V12H9V15H6V17H9V20H11V17H14V15H11Z"/>
+                        </svg>
+                    </button>
+                    <button class="doc-action-button" onclick="showVersionHistory(${doc.id})" title="Histórico">
+                        <svg viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M13,3A9,9 0 0,0 4,12H1L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3"/>
+                        </svg>
+                    </button>
+                    <button class="doc-action-button" onclick="confirmDeleteDocument(${doc.id})" title="Excluir">
+                        <svg viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
         `;
@@ -397,6 +545,40 @@ function deleteFolder(folderId) {
     .catch(error => {
         console.error('Erro ao excluir pasta:', error);
         showNotification('Erro ao excluir pasta', 'error');
+    });
+}
+
+function showRenameFolderModal(folderId, currentName) {
+    event.stopPropagation(); // Previne a navegação para a pasta
+    const newName = prompt('Digite o novo nome da pasta:', currentName);
+    if (newName && newName.trim() !== '' && newName !== currentName) {
+        renameFolder(folderId, newName.trim());
+    }
+}
+
+function renameFolder(folderId, newName) {
+    fetch(`/api/docs/folders/${folderId}/rename`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: newName })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw new Error(data.error || 'Erro ao renomear pasta');
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        showNotification('Pasta renomeada com sucesso', 'success');
+        loadFolder(currentFolder); // Recarrega a pasta atual
+    })
+    .catch(error => {
+        console.error('Erro ao renomear pasta:', error);
+        showNotification(error.message || 'Erro ao renomear pasta', 'error');
     });
 }
 

@@ -554,12 +554,35 @@
 
 .document-item {
     display: flex;
-    flex-direction: column;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    overflow: hidden;
-    background-color: white;
-    transition: all 0.2s ease;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+    gap: 0; /* Remove o gap inicial */
+}
+
+.document-icon {
+    flex-shrink: 0; /* Impede que o ícone encolha */
+    width: 32px; /* Largura fixa para o ícone */
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Alinha à esquerda */
+    color: var(--primary-color);
+}
+
+.document-info {
+    flex: 1;
+    padding-left: 8px; /* Espaçamento após o ícone */
+    min-width: 0;
+    text-align: left;
+}
+
+.document-actions {
+    margin-left: auto; /* Empurra as ações para a direita */
+    padding-left: 16px; /* Espaçamento antes das ações */
 }
 
 .document-item:hover {
@@ -1152,4 +1175,266 @@ close-btn:hover {
         min-width: 100%;
         max-width: 100%;
     }
+}
+
+/* Nova estrutura de frames */
+.frames-container {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr); /* Ajuste para permitir conteúdo flexível */
+    gap: 0;
+    padding: 60px 0 0 80px;
+    height: calc(100vh - 60px);
+    background: #f8f9fa;
+    width: calc(100vw - 80px);
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* Painel de Projetos */
+.projects-panel {
+    background: white;
+    height: calc(100vh - 60px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #e0e0e0;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    height: 64px;
+    border-bottom: 1px solid #e0e0e0;
+    background: white;
+    gap: 16px;
+    flex-shrink: 0; /* Evita que o header encolha */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.panel-header h2 {
+    font-size: 16px;
+    color: #202124;
+    font-weight: 500;
+    margin: 0;
+}
+
+.projects-list {
+    padding: 8px;
+    overflow-y: auto;
+}
+
+.project-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    cursor: pointer;
+    border-radius: 20px;
+    margin-bottom: 2px;
+    color: var(--primary-color); /* Alterado para roxo do projeto */
+}
+
+.project-item svg {
+    width: 20px;
+    height: 20px;
+    color: inherit;
+}
+
+.project-item.active {
+    background: var(--primary-lighter);
+    color: var(--primary-color); /* Mantém roxo mesmo quando ativo */
+}
+
+/* Painel de Documentos */
+.documents-panel {
+    background: white;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    width: 100%; /* Garante que ocupa toda a largura disponível */
+}
+
+.documents-grid {
+    padding: 24px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.documents-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+    width: 100%; /* Garante que ocupa toda a largura disponível */
+}
+
+.document-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+    gap: 0; /* Remove o gap inicial */
+}
+
+.document-icon {
+    flex-shrink: 0; /* Impede que o ícone encolha */
+    width: 32px; /* Largura fixa para o ícone */
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Alinha à esquerda */
+    color: var(--primary-color);
+}
+
+.document-info {
+    flex: 1;
+    padding-left: 8px; /* Espaçamento após o ícone */
+    min-width: 0;
+    text-align: left;
+}
+
+.document-actions {
+    margin-left: auto; /* Empurra as ações para a direita */
+    padding-left: 16px; /* Espaçamento antes das ações */
+}
+
+.document-item:hover .document-actions {
+    display: flex;
+}
+
+.doc-action-button {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.doc-action-button:hover {
+    background: var(--primary-lighter);
+    color: var(--primary-color);
+}
+
+.doc-action-button svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Header actions */
+.header-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.header-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    background: var(--primary-color);
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.header-button:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+.header-button svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-right: auto; /* Empurra os botões para a direita */
+    flex-wrap: wrap; /* Permite quebra de linha */
+}
+
+.breadcrumb-item {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--primary-color);
+}
+
+.breadcrumb-item:hover {
+    background: var(--primary-lighter);
+}
+
+.breadcrumb-item.active {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    color: #5f6368;
+}
+
+.breadcrumb-item {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.breadcrumb-item:hover {
+    background: #f1f3f4;
+}
+
+.breadcrumb-item.active {
+    color: #202124;
+    font-weight: 500;
+}
+
+/* Document item folder styles */
+.document-item.folder {
+    background-color: var(--background-color);
+}
+
+.document-item.folder:hover {
+    background-color: var(--primary-lighter);
+}
+
+.document-item.folder .document-icon {
+    color: var(--primary-color);
+}
+
+.document-item.folder .document-actions {
+    display: none;
+}
+
+.document-item.folder:hover .document-actions {
+    display: flex;
 }

@@ -191,6 +191,57 @@ def init_app(app):
             db.session.rollback()
             return jsonify({"error": str(e)}), 500
     
+    # API para renomear pasta
+    @app.route('/api/docs/folders/<int:folder_id>/rename', methods=['POST'])
+    @login_required
+    def rename_folder(folder_id):
+        """Renomear pasta existente"""
+        try:
+            folder = DocFolder.query.get_or_404(folder_id)
+            data = request.json
+            new_name = data.get('name', '').strip()
+            
+            if not new_name:
+                return jsonify({"error": "Nome da pasta é obrigatório"}), 400
+            
+            # Verifica se o nome é diferente do atual
+            if folder.name == new_name:
+                return jsonify({"error": "O novo nome é igual ao atual"}), 400
+                
+            # Verifica se já existe uma pasta com este nome no mesmo nível
+            parent_id = folder.parent_id
+            existing_folder = DocFolder.query.filter_by(
+                parent_id=parent_id,
+                name=new_name,
+                project_id=folder.project_id
+            ).first()
+            
+            if existing_folder and existing_folder.id != folder_id:
+                return jsonify({"error": "Já existe uma pasta com este nome"}), 400
+            
+            # Atualiza o nome da pasta no banco
+            folder.name = new_name
+            
+            # Atualiza o caminho físico da pasta
+            old_path = folder.path
+            parent_path = os.path.dirname(old_path)
+            new_path = os.path.join(parent_path, secure_filename(new_name))
+            
+            # Renomeia o diretório físico se existir
+            if os.path.exists(old_path):
+                try:
+                    os.rename(old_path, new_path)
+                    folder.path = new_path
+                except OSError as e:
+                    return jsonify({"error": f"Erro ao renomear diretório: {str(e)}"}), 500
+            
+            db.session.commit()
+            return jsonify({"success": True, "folder": folder.to_dict()})
+            
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"error": str(e)}), 500
+    
     # API para criar um novo documento
     @app.route('/api/docs/documents', methods=['POST'])
     @login_required
