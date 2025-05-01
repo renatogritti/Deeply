@@ -139,8 +139,31 @@
                 try {
                     // Decodifica o JSON de base64
                     const jsonData = atob(params.json);
-                    // Monta a mensagem de análise
-                    const analysisPrompt = "monte um relatorio de analise do kanban board, avaliando wip, gargalos, sobrealocacao de recursos e monte recomendacoes. segue o board: " + jsonData;
+                    // Monta a mensagem de análise com requisitos aprimorados
+                    const analysisPrompt = `Por favor, faça uma análise detalhada do board do Kanban do projeto com as seguintes considerações especiais:
+
+1. TAREFAS ATRASADAS: Identifique e destaque tarefas com prazo vencido (deadline anterior a hoje) e não concluídas (percentual < 100%). Para cada atividade atrasada:
+   - Indique o título da atividade, responsável e quanto está atrasada
+   - Sugira um plano de ação específico com passos concretos
+   - Recomende um replanejamento com nova deadline estimada
+   - Proponha ações para mitigar atrasos semelhantes no futuro
+
+2. TAREFAS MUITO GRANDES: Analise tarefas com estimativas acima de 16 horas, recomendando que sejam divididas em atividades menores conforme as boas práticas ágeis.
+
+3. GARGALOS DE RECURSOS: Identifique membros da equipe que estão com mais de 3 tarefas em andamento simultaneamente, o que pode indicar sobrecarga.
+
+4. ANÁLISE DO WIP (Work in Progress): Avalie a distribuição de tarefas entre as colunas e identifique possíveis gargalos no fluxo de trabalho.
+
+5. RECOMENDAÇÕES: Com base nessas análises, forneça recomendações práticas para melhorar o andamento do projeto.
+
+Formatação:
+- Use linguagem clara e direta
+- Destaque as datas de entrega
+- Organize por prioridade dentro de cada seção
+- Enfatize tarefas atrasadas usando **negrito**
+- Para os planos de ação, use formato de lista com passos numerados
+
+Dados do board: ${jsonData}`;
                     
                     // Adiciona mensagem de análise em andamento
                     addMessage("Analisando o Projeto...", 'ai');
@@ -184,7 +207,32 @@
                     // Decodifica o JSON de base64
                     const jsonData = atob(params.json);
                     // Monta a mensagem de relatório
-                    const reportPrompt = "monte um status report em Portugues do Board com as atividades:1. a iniciar; 2. atividades em andamento; 3. atividades finalizadas; Faca uam analise de riscos baseado nas informacoes e monte recomendacoes de gestao de projetos baseado no seguinte board: " + jsonData;
+                    const reportPrompt = `Monte um status report em Português do Board com as seguintes seções:
+
+1. ATIVIDADES A INICIAR: Liste as atividades que ainda não começaram (colunas iniciais do fluxo).
+
+2. ATIVIDADES EM ANDAMENTO: Detalhe as atividades que estão em execução atualmente, com seus responsáveis e progresso.
+
+3. ATIVIDADES ATRASADAS: Destaque as atividades com deadline anterior à data atual e que não foram concluídas (percentual < 100%). Esta seção é PRIORITÁRIA e para cada atividade atrasada:
+   - Indique o título da atividade, responsável e quanto está atrasada
+   - Sugira um plano de ação específico com passos concretos
+   - Recomende um replanejamento com nova deadline estimada
+   - Proponha ações para mitigar atrasos semelhantes no futuro
+
+4. ATIVIDADES FINALIZADAS: Liste as atividades concluídas recentemente.
+
+5. ANÁLISE DE RISCOS: Identifique possíveis gargalos e riscos para o andamento do projeto com base nas informações disponíveis.
+
+6. RECOMENDAÇÕES: Sugira ações práticas de gestão de projetos para melhorar o andamento das atividades.
+
+Formatação:
+- Use linguagem clara e direta
+- Destaque as datas de entrega
+- Organize por prioridade dentro de cada seção
+- Emfatize tarefas atrasadas usando **negrito**
+- Para os planos de ação, use formato de lista com passos numerados
+
+Board: ${jsonData}`;
                     
                     // Adiciona mensagem de relatório em andamento
                     addMessage("Analisando o Projeto...", 'ai');

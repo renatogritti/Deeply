@@ -200,257 +200,275 @@
     </div>
 
     <div id="editModal" class="modal">
-    <div class="modal-content create-card-modal">
-        <h3>Edit Card</h3>
-        <div class="modal-grid">
-            <!-- Coluna 1 -->
-            <div class="modal-col">
-                <div class="form-group">
-                    <label>Project</label>
-                    <select id="editCardProject" required disabled>
-                        <option value="">Select Project</option>
-                        {% for project in projects %}
-                            <option value="{{ project.id }}">{{ project.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Phase</label>
-                    <select id="editCardPhase" required>
-                        <option value="">Select Phase</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Card</label>
-                    <input type="text" id="editCardTitle" placeholder="Card title">
-                </div>
-
-                <div class="form-group">
-                    <textarea id="editCardDescription" placeholder="Card description" rows="4"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Time Estimate</label>
-                    <div class="tempo-group">
-                        <input type="text" id="editCardTempo" placeholder="e.g., 2h">
-                        <button type="button" id="aiEstimateEditBtn" class="ai-estimate-btn" title="Get AI-based estimate">AI</button>
-                    </div>
-                    <div id="estimateEditToast" class="toast-message"></div>
-                </div>
+        <div class="modal-content create-card-modal">
+            <div class="modal-header">
+                <h3>
+                    <svg class="logo" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M4 3C2.89 3 2 3.89 2 5V19C2 20.11 2.89 21 4 21H20C21.11 21 22 20.11 22 19V5C22 3.89 21.11 3 20 3H4M4 5H20V19H4V5M6 7V17H10V7H6M12 7V11H16V7H12M12 13V17H16V13H12Z"/>
+                    </svg>
+                    Edit Card
+                </h3>
+                <span class="close-btn" onclick="closeModal()">&times;</span>
             </div>
-
-            <!-- Coluna 2 - Accordions -->
-            <div class="modal-col">
-                <!-- Accordion Dates -->
-                <div class="accordion">
-                    <div class="accordion-header">
-                        <h4>Dates</h4>
-                        <span class="accordion-icon">▼</span>
-                    </div>
-                    <div class="accordion-content">
+            <div class="modal-body">
+                <div class="modal-grid">
+                    <!-- Coluna 1 -->
+                    <div class="modal-col">
                         <div class="form-group">
-                            <label>Start Date</label>
-                            <input type="date" id="editCardStartDate">
-                        </div>
-                        <div class="form-group">
-                            <label>Due Date</label>
-                            <input type="date" id="editCardDeadline">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Accordion Team Members -->
-                <div class="accordion">
-                    <div class="accordion-header">
-                        <h4>Team Members</h4>
-                        <span class="accordion-icon">▼</span>
-                    </div>
-                    <div class="accordion-content">
-                        <div class="form-group">
-                            <label>Assigned Team Members</label>
-                            <select id="editCardUsers" multiple size="6">
-                                {% for team in teams|sort(attribute='name') %}
-                                    <option value="{{ team.id }}">{{ team.name }}</option>
+                            <label>Project/ Phase</label>
+                            <select id="editCardProject" required disabled>
+                                <option value="">Select Project</option>
+                                {% for project in projects %}
+                                    <option value="{{ project.id }}">{{ project.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Accordion Tags -->
-                <div class="accordion">
-                    <div class="accordion-header">
-                        <h4>Tags</h4>
-                        <span class="accordion-icon">▼</span>
-                    </div>
-                    <div class="accordion-content">
-                        <!-- Adicionar criador rápido de tags -->
-                        <div class="quick-tag-creator">
-                            <input type="text" id="editTagName" placeholder="Nome da tag">
-                            <input type="color" id="editTagColor" value="#1a73e8">
-                            <button type="button" onclick="createTagFromModal('edit')" class="create-tag-btn">Criar Tag</button>
+                        
+                        <div class="form-group">
+                            <label></label>
+                            <select id="editCardPhase" required>
+                                <option value="">Select Phase</option>
+                            </select>
                         </div>
-                        <div id="editCardTags" class="tags-selection scrollable">
-                            <!-- Tags will be added here -->
+                        
+                        <div class="form-group">
+                            <label>Card</label>
+                            <input type="text" id="editCardTitle" placeholder="Card title">
+                        </div>
+
+                        <div class="form-group">
+                            <textarea id="editCardDescription" placeholder="Card description" rows="4"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Time Estimate</label>
+                            <div class="tempo-group">
+                                <input type="text" id="editCardTempo" placeholder="e.g., 2h">
+                                <button type="button" id="aiEstimateEditBtn" class="ai-estimate-btn" title="Get AI-based estimate">AI</button>
+                            </div>
+                            <div id="estimateEditToast" class="toast-message"></div>
+                        </div>
+                    </div>
+
+                    <!-- Coluna 2 - Accordions -->
+                    <div class="modal-col">
+                        <!-- Accordion Dates -->
+                        <div class="accordion">
+                            <div class="accordion-header">
+                                <h4>Dates</h4>
+                                <span class="accordion-icon">▼</span>
+                            </div>
+                            <div class="accordion-content">
+                                <div class="form-group">
+                                    <label>Start Date</label>
+                                    <input type="date" id="editCardStartDate">
+                                </div>
+                                <div class="form-group">
+                                    <label>Due Date</label>
+                                    <input type="date" id="editCardDeadline">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Accordion Team Members -->
+                        <div class="accordion">
+                            <div class="accordion-header">
+                                <h4>Team Members</h4>
+                                <span class="accordion-icon">▼</span>
+                            </div>
+                            <div class="accordion-content">
+                                <div class="form-group">
+                                    <label>Assigned Team Members</label>
+                                    <select id="editCardUsers" multiple size="6">
+                                        {% for team in teams|sort(attribute='name') %}
+                                            <option value="{{ team.id }}">{{ team.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Accordion Tags -->
+                        <div class="accordion">
+                            <div class="accordion-header">
+                                <h4>Tags</h4>
+                                <span class="accordion-icon">▼</span>
+                            </div>
+                            <div class="accordion-content">
+                                <!-- Adicionar criador rápido de tags -->
+                                <div class="quick-tag-creator">
+                                    <input type="text" id="editTagName" placeholder="Nome da tag">
+                                    <input type="color" id="editTagColor" value="#1a73e8">
+                                    <button type="button" onclick="createTagFromModal('edit')" class="create-tag-btn">Criar Tag</button>
+                                </div>
+                                <div id="editCardTags" class="tags-selection scrollable">
+                                    <!-- Tags will be added here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Accordion Comments -->
+                        <div class="accordion">
+                            <div class="accordion-header">
+                                <h4>Comments</h4>
+                                <span class="accordion-icon">▼</span>
+                            </div>
+                            <div class="accordion-content">
+                                <textarea id="editCardComments" placeholder="Additional comments" rows="3"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Percentage Slider -->
+                        <div class="percentage-slider">
+                            <label>Progress</label>
+                            <input type="range" id="editCardPercentage" min="0" max="100" value="0">
+                            <div class="percentage-value">0%</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Accordion Comments -->
-                <div class="accordion">
-                    <div class="accordion-header">
-                        <h4>Comments</h4>
-                        <span class="accordion-icon">▼</span>
-                    </div>
-                    <div class="accordion-content">
-                        <textarea id="editCardComments" placeholder="Additional comments" rows="3"></textarea>
-                    </div>
+                <div class="modal-footer">
+                    <button class="btn-create" onclick="saveCardEdit()">Save Changes</button>
+                    <button class="btn-create delete-button" onclick="deleteCard()">Delete Card</button>
                 </div>
-
-                <!-- Percentage Slider -->
-                <div class="percentage-slider">
-                    <label>Progress</label>
-                    <input type="range" id="editCardPercentage" min="0" max="100" value="0">
-                    <div class="percentage-value">0%</div>
-                </div>
+                <input type="hidden" id="editCardId">
             </div>
         </div>
-
-        <div class="modal-footer">
-            <button class="btn-create" onclick="saveCardEdit()">Save Changes</button>
-            <button class="btn-create delete-button" onclick="deleteCard()">Delete Card</button>
-            <button class="btn-cancel" onclick="closeModal()">Cancel</button>
         </div>
-        <input type="hidden" id="editCardId">
     </div>
-</div>
 
-<!-- Substitua o modal de criação existente por este -->
 <div id="createModal" class="modal">
     <div class="modal-content create-card-modal">
-        <h3>Create New Card</h3>
-        <div class="modal-grid">
-            <!-- Coluna 1 -->
-            <div class="modal-col">
-                <div class="form-group">
-                    <label>Project</label>
-                    <select id="newCardProject" required onchange="loadPhasesByProject(this.value)">
-                        <option value="">Select Project</option>
-                        {% for project in projects %}
-                            <option value="{{ project.id }}">{{ project.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Phase</label>
-                    <select id="newCardPhase" required>
-                        <option value="">Select Phase</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Card</label>
-                    <input type="text" id="newCardTitle" placeholder="Card title">
-                </div>
-
-                <div class="form-group">
-                    <textarea id="newCardDescription" placeholder="Card description" rows="4"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Time Estimate</label>
-                    <div class="tempo-group">
-                        <input type="text" id="newCardTempo" placeholder="e.g., 2h">
-                        <button type="button" id="aiEstimateBtn" class="ai-estimate-btn" title="Get AI-based estimate">AI</button>
-                    </div>
-                    <div id="estimateToast" class="toast-message"></div>
-                </div>
-
-            </div>
-
-            <!-- Coluna 2 - Accordions -->
-            <div class="modal-col">
-                <!-- Accordion Dates -->
-                <div class="accordion">
-                    <div class="accordion-header">
-                        <h4>Dates</h4>
-                        <span class="accordion-icon">▼</span>
-                    </div>
-                    <div class="accordion-content">
-                        <div class="form-group">
-                            <label>Start Date</label>
-                            <input type="date" id="newCardStartDate">
-                        </div>
-                        <div class="form-group">
-                            <label>Due Date</label>
-                            <input type="date" id="newCardDeadline">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Accordion Team Members -->
-                <div class="accordion">
-                    <div class="accordion-header">
-                        <h4>Team Members</h4>
-                        <span class="accordion-icon">▼</span>
-                    </div>
-                    <div class="accordion-content">
-                        <div class="form-group">
-                            <label>Assigned Team Members</label>
-                            <select id="newCardUsers" multiple size="6">
-                                {% for team in teams|sort(attribute='name') %}
-                                    <option value="{{ team.id }}">{{ team.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Accordion Tags -->
-                <div class="accordion">
-                    <div class="accordion-header">
-                        <h4>Tags</h4>
-                        <span class="accordion-icon">▼</span>
-                    </div>
-                    <div class="accordion-content">
-                        <!-- Adicionar criador rápido de tags -->
-                        <div class="quick-tag-creator">
-                            <input type="text" id="newTagName" placeholder="Nome da tag">
-                            <input type="color" id="newTagColor" value="#1a73e8">
-                            <button type="button" onclick="createTagFromModal('new')" class="create-tag-btn">Criar Tag</button>
-                        </div>
-                        <div id="newCardTags" class="tags-selection scrollable">
-                            <!-- Tags will be added here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Accordion Comments -->
-                <div class="accordion">
-                    <div class="accordion-header">
-                        <h4>Comments</h4>
-                        <span class="accordion-icon">▼</span>
-                    </div>
-                    <div class="accordion-content">
-                        <textarea id="newCardComments" placeholder="Additional comments" rows="3"></textarea>
-                    </div>
-                </div>
-
-                <!-- Percentage Slider -->
-                <div class="percentage-slider">
-                    <label>Progress</label>
-                    <input type="range" id="newCardPercentage" min="0" max="100" value="0">
-                    <div class="percentage-value">0%</div>
-                </div>
-            </div>
+        <div class="modal-header">
+            <h3>
+                <svg class="logo" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M4 3C2.89 3 2 3.89 2 5V19C2 20.11 2.89 21 4 21H20C21.11 21 22 20.11 22 19V5C22 3.89 21.11 3 20 3H4M4 5H20V19H4V5M6 7V17H10V7H6M12 7V11H16V7H12M12 13V17H16V13H12Z"/>
+                </svg>
+                Create New Card
+            </h3>
+            <span class="close-btn" onclick="closeCreateModal()">&times;</span>
         </div>
+        <div class="modal-body">
+            <div class="modal-grid">
+                <!-- Coluna 1 -->
+                <div class="modal-col">
+                    <div class="form-group">
+                        <label>Project/ Phase</label>
+                        <select id="newCardProject" required onchange="loadPhasesByProject(this.value)">
+                            <option value="">Select Project</option>
+                            {% for project in projects %}
+                                <option value="{{ project.id }}">{{ project.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label></label>
+                        <select id="newCardPhase" required>
+                            <option value="">Select Phase</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Card</label>
+                        <input type="text" id="newCardTitle" placeholder="Card title">
+                    </div>
 
-        <div class="modal-footer">
-            <button class="btn-create" onclick="createNewCard()">Create Card</button>
-            <button class="btn-cancel" onclick="closeCreateModal()">Cancel</button>
+                    <div class="form-group">
+                        <textarea id="newCardDescription" placeholder="Card description" rows="4"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Time Estimate</label>
+                        <div class="tempo-group">
+                            <input type="text" id="newCardTempo" placeholder="e.g., 2h">
+                            <button type="button" id="aiEstimateBtn" class="ai-estimate-btn" title="Get AI-based estimate">AI</button>
+                        </div>
+                        <div id="estimateToast" class="toast-message"></div>
+                    </div>
+
+                </div>
+
+                <!-- Coluna 2 - Accordions -->
+                <div class="modal-col">
+                    <!-- Accordion Dates -->
+                    <div class="accordion">
+                        <div class="accordion-header">
+                            <h4>Dates</h4>
+                            <span class="accordion-icon">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="form-group">
+                                <label>Start Date</label>
+                                <input type="date" id="newCardStartDate">
+                            </div>
+                            <div class="form-group">
+                                <label>Due Date</label>
+                                <input type="date" id="newCardDeadline">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Accordion Team Members -->
+                    <div class="accordion">
+                        <div class="accordion-header">
+                            <h4>Team Members</h4>
+                            <span class="accordion-icon">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="form-group">
+                                <label>Assigned Team Members</label>
+                                <select id="newCardUsers" multiple size="6">
+                                    {% for team in teams|sort(attribute='name') %}
+                                        <option value="{{ team.id }}">{{ team.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Accordion Tags -->
+                    <div class="accordion">
+                        <div class="accordion-header">
+                            <h4>Tags</h4>
+                            <span class="accordion-icon">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <!-- Adicionar criador rápido de tags -->
+                            <div class="quick-tag-creator">
+                                <input type="text" id="newTagName" placeholder="Nome da tag">
+                                <input type="color" id="newTagColor" value="#1a73e8">
+                                <button type="button" onclick="createTagFromModal('new')" class="create-tag-btn">Criar Tag</button>
+                            </div>
+                            <div id="newCardTags" class="tags-selection scrollable">
+                                <!-- Tags will be added here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Accordion Comments -->
+                    <div class="accordion">
+                        <div class="accordion-header">
+                            <h4>Comments</h4>
+                            <span class="accordion-icon">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <textarea id="newCardComments" placeholder="Additional comments" rows="3"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Percentage Slider -->
+                    <div class="percentage-slider">
+                        <label>Progress</label>
+                        <input type="range" id="newCardPercentage" min="0" max="100" value="0">
+                        <div class="percentage-value">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-create" onclick="createNewCard()">Create Card</button>
+            </div>
         </div>
     </div>
 </div>
@@ -2023,38 +2041,81 @@
             // Cria o objeto para armazenar os dados do projeto
             const projectData = {
                 projectId: projectId,
+                projectName: document.querySelector('#projectFilter option:checked').textContent,
+                currentDate: new Date().toISOString(),
+                analysisRequirements: {
+                    highlightOverdue: true,      // Atividades com deadline < hoje e % < 100
+                    checkLargeTasks: true,       // Atividades com estimativa > 16h
+                    checkResourceBottlenecks: true // Recursos com mais de 3 cards em andamento
+                },
                 columns: []
             };
 
+            // Mapa para contar WIP por usuário
+            const userWipCount = {};
+
             // Coleta dados de todas as colunas e seus cards
             document.querySelectorAll('.kanban-column').forEach(column => {
+                const columnId = column.id;
+                const columnName = column.querySelector('.column-header').textContent.trim();
+                
                 const columnData = {
-                    id: column.id,
-                    name: column.querySelector('h2').textContent,
+                    id: columnId,
+                    name: columnName,
                     cards: []
                 };
 
                 // Coleta dados de todos os cards na coluna
                 column.querySelectorAll('.kanban-card').forEach(card => {
+                    // Extrai o tempo estimado do texto "Tempo: XhYm"
+                    const tempoText = card.querySelector("p").textContent.replace("Tempo: ", "");
+                    
+                    // Extrai o percentual de conclusão
+                    const progressBar = card.querySelector(".progress-bar");
+                    const percentage = progressBar ? 
+                        parseInt(progressBar.querySelector(".progress-text").textContent) : 0;
+                    
+                    // Extrai a deadline, se existir
+                    const deadlineEl = card.querySelector(".card-deadline");
+                    const deadline = deadlineEl ? 
+                        deadlineEl.textContent.replace("Deadline: ", "") : null;
+                    
+                    // Extrai os usuários atribuídos
+                    const userTags = card.querySelectorAll(".user-tag");
+                    const users = Array.from(userTags).map(tag => tag.textContent.trim());
+                    
+                    // Contabiliza cards por usuário (exceto colunas "Concluído" ou similares)
+                    if (!columnName.toLowerCase().includes('conclu') && 
+                        !columnName.toLowerCase().includes('done')) {
+                        users.forEach(user => {
+                            userWipCount[user] = (userWipCount[user] || 0) + 1;
+                        });
+                    }
+                    
                     const cardData = {
                         id: card.id,
-                        title: card.querySelector('h3').textContent,
+                        title: card.querySelector("h3").textContent.trim(),
                         description: card.getAttribute('data-description'),
-                        tempo: card.querySelector('p').textContent.replace('Tempo: ', ''),
-                        deadline: card.querySelector('.card-deadline')?.textContent.replace('Deadline: ', ''),
-                        team: card.querySelector('.team-tag')?.textContent,
-                        tags: Array.from(card.querySelectorAll('.card-tag')).map(tag => ({
-                            name: tag.textContent,
-                            color: tag.style.backgroundColor
-                        })),
-                        users: Array.from(card.querySelectorAll('.user-tag')).map(user => ({
-                            name: user.textContent
-                        }))
+                        tempo: tempoText,
+                        deadline: deadline,
+                        percentage: card.querySelector(".progress-bar") ? 
+                            parseInt(card.querySelector(".progress-text").textContent) : 0,
+                        users: users
                     };
+                    
                     columnData.cards.push(cardData);
                 });
 
                 projectData.columns.push(columnData);
+            });
+            
+            // Adiciona as contagens de WIP por usuário
+            projectData.userWipStats = Object.entries(userWipCount).map(([user, count]) => {
+                return {
+                    user: user,
+                    wipCount: count,
+                    isOverloaded: count > 3
+                };
             });
 
             // Codifica os dados em base64 para evitar problemas com caracteres especiais
@@ -2071,37 +2132,76 @@
                 return;
             }
 
+            // Data atual para comparação com deadlines
+            const currentDate = new Date();
+            
             // Cria o objeto para armazenar os dados do projeto
             const projectData = {
                 projectId: projectId,
+                projectName: document.querySelector('#projectFilter option:checked').textContent,
+                currentDate: currentDate.toISOString(), // Data atual para verificar atrasos
                 columns: []
             };
 
             // Coleta dados de todas as colunas e seus cards
             document.querySelectorAll('.kanban-column').forEach(column => {
+                const columnId = column.id;
+                const columnName = column.querySelector('.column-header').textContent.trim();
+                
                 const columnData = {
-                    id: column.id,
-                    name: column.querySelector('h2').textContent,
+                    id: columnId,
+                    name: columnName,
                     cards: []
                 };
 
                 // Coleta dados de todos os cards na coluna
                 column.querySelectorAll('.kanban-card').forEach(card => {
+                    // Extrai o tempo estimado e informações de deadline
+                    const tempoText = card.querySelector("p").textContent.replace("Tempo: ", "");
+                    const deadlineEl = card.querySelector(".card-deadline");
+                    let deadlineText = null;
+                    let isOverdue = false;
+                    
+                    // Verifica se há deadline e se está atrasado
+                    if (deadlineEl) {
+                        deadlineText = deadlineEl.textContent.replace("Deadline: ", "");
+                        const deadlineParts = deadlineText.split('/');
+                        const deadlineDate = new Date(
+                            parseInt(deadlineParts[2]), 
+                            parseInt(deadlineParts[1]) - 1, 
+                            parseInt(deadlineParts[0])
+                        );
+                        
+                        // Extrai o percentual de conclusão
+                        const progressBar = card.querySelector(".progress-bar");
+                        const percentage = progressBar ? 
+                            parseInt(progressBar.querySelector(".progress-text").textContent) : 0;
+                        
+                        // Card está atrasado se a deadline é anterior à data atual e não está 100% concluído
+                        isOverdue = deadlineDate < currentDate && percentage < 100;
+                    }
+                    
+                    // Extrai os usuários atribuídos
+                    const userTags = card.querySelectorAll(".user-tag");
+                    const users = Array.from(userTags).map(tag => tag.textContent.trim());
+                    
                     const cardData = {
                         id: card.id,
-                        title: card.querySelector('h3').textContent,
+                        title: card.querySelector("h3").textContent.trim(),
                         description: card.getAttribute('data-description'),
-                        tempo: card.querySelector('p').textContent.replace('Tempo: ', ''),
-                        deadline: card.querySelector('.card-deadline')?.textContent.replace('Deadline: ', ''),
+                        tempo: tempoText,
+                        deadline: deadlineText,
+                        percentage: card.querySelector(".progress-bar") ? 
+                            parseInt(card.querySelector(".progress-text").textContent) : 0,
+                        isOverdue: isOverdue, // Flag explícita para cards atrasados
+                        users: users,
                         team: card.querySelector('.team-tag')?.textContent,
                         tags: Array.from(card.querySelectorAll('.card-tag')).map(tag => ({
                             name: tag.textContent,
                             color: tag.style.backgroundColor
-                        })),
-                        users: Array.from(card.querySelectorAll('.user-tag')).map(user => ({
-                            name: user.textContent
                         }))
                     };
+                    
                     columnData.cards.push(cardData);
                 });
 
@@ -2696,6 +2796,83 @@ async function createTagFromModal(modalType) {
 
 .tag-checkbox label:hover {
     filter: brightness(0.9);
+}
+</style>
+
+<style>
+/* Estilos específicos para os modais baseados em kudos.html */
+.modal-content {
+    background: white;
+    width: 90%;
+    max-width: 700px;
+    margin: 30px auto;
+    padding: 0;
+    border-radius: 12px;
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background-color: var(--primary-color);
+    color: #ffffff !important;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+/* Garantindo que todos os elementos dentro do header sejam brancos */
+.modal-header h3,
+.modal-header span,
+.modal-header .logo path,
+.modal-header * {
+    color: #ffffff !important;
+}
+
+/* Garantir que o SVG também tenha a cor branca */
+.modal-header svg path {
+    fill: #ffffff !important;
+}
+
+.modal-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.modal-header .logo {
+    width: 24px;
+    height: 24px;
+}
+
+.close-btn {
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.close-btn:hover {
+    opacity: 0.8;
+}
+
+.modal-body {
+    padding: 24px;
+    overflow-y: auto;
+}
+
+/* Sobrescrever estilos existentes para os modais de kanban para seguir o padrão de kudos */
+.create-card-modal {
+    max-width: 900px !important;
+    padding: 0 !important;
+}
+
+.create-card-modal .modal-body {
+    padding: 24px;
 }
 </style>
 

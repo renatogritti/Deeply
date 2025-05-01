@@ -159,27 +159,53 @@ def chat():
                     .filter(
                         card_users.c.team_id == user_id,
                         KanbanCard.percentage < 100,
-                        (KanbanCard.start_date == None) | (KanbanCard.start_date.cast(db.Date) <= current_date),
-                        (KanbanCard.deadline == None) | (KanbanCard.deadline.cast(db.Date) >= current_date)
+                        (KanbanCard.start_date == None) | (KanbanCard.start_date.cast(db.Date) <= current_date)
                     )
                     .order_by(Project.name, KanbanCard.deadline.asc())  # Ordena por projeto e deadline
                     .all())
             
-            # Organiza cards por projeto
-            projects_cards = {}
+            # Separa atividades atrasadas e não atrasadas
+            overdue_cards = {}
+            pending_cards = {}
+            
             for card in cards:
                 project = Project.query.get(card.project_id)
                 project_name = project.name if project else "Projeto Desconhecido"
                 
-                if project_name not in projects_cards:
-                    projects_cards[project_name] = []
-                
-                projects_cards[project_name].append({
+                card_data = {
                     "title": card.title,
                     "due_date": card.deadline.strftime('%d/%m/%Y') if card.deadline else "Sem prazo",
                     "percentage": card.percentage,
-                    "description": card.description  # Adiciona descrição para mais contexto
-                })
+                    "description": card.description,
+                    "days_overdue": None  # Inicializa campo para dias de atraso
+                }
+                
+                # Verifica se está atrasado (deadline no passado e não concluído)
+                is_overdue = False
+                if card.deadline and card.percentage < 100:
+                    is_overdue = card.deadline.date() < current_date
+                    if is_overdue:
+                        # Calcula dias de atraso
+                        days_overdue = (current_date - card.deadline.date()).days
+                        card_data["days_overdue"] = days_overdue
+                
+                # Adiciona ao dicionário apropriado
+                if is_overdue:
+                    if project_name not in overdue_cards:
+                        overdue_cards[project_name] = []
+                    overdue_cards[project_name].append(card_data)
+                else:
+                    if project_name not in pending_cards:
+                        pending_cards[project_name] = []
+                    pending_cards[project_name].append(card_data)
+            
+            # Ordena cards atrasados por dias de atraso (mais atrasados primeiro)
+            for project in overdue_cards:
+                overdue_cards[project] = sorted(
+                    overdue_cards[project], 
+                    key=lambda x: x.get("days_overdue", 0) or 0, 
+                    reverse=True
+                )
             
             # Busca TODOs do usuário
             todo_lists = TodoList.query.filter_by(user_id=user_id).all()
@@ -215,24 +241,36 @@ def chat():
             # Cria o resumo
             summary = {
                 "user_name": user.name,
+                "overdue_activities": {  # Nova seção para atividades atrasadas
+                    "title": "Atividades atrasadas (PRIORIDADE)",
+                    "projects": [
+                        {
+                            "name": project_name,
+                            "cards": cards_list
+                        } for project_name, cards_list in overdue_cards.items()
+                    ]
+                },
                 "activities": {
                     "title": "Atividades pendentes no Kanban",
                     "projects": [
                         {
                             "name": project_name,
                             "cards": cards_list
-                        } for project_name, cards_list in projects_cards.items()
+                        } for project_name, cards_list in pending_cards.items()
                     ]
                 },
-                "todos": todos_by_list,  # Mantido o nome da variável, mas alterado no prompt
+                "todos": todos_by_list,
                 "messages": messages,
                 "kudos": [{"message": k.message, "category": k.category, "sender": k.sender.name, 
                           "receiver": k.receiver.name, "created_at": k.created_at.strftime('%d/%m/%Y')} for k in kudos]
             }
             
-            # Atualiza o prompt para refletir a nova estrutura mais concisa
+            # Atualiza o prompt para incluir a seção de atividades atrasadas
             prompt = f"""
 O usuário {summary['user_name']} acabou de fazer login. Monte um resumo personalizado com as informações abaixo:
+
+ATIVIDADES ATRASADAS (PRIORIDADE):
+{json.dumps(summary['overdue_activities'], ensure_ascii=False, indent=2)}
 
 ATIVIDADES PENDENTES NO KANBAN:
 {json.dumps(summary['activities'], ensure_ascii=False, indent=2)}
@@ -248,6 +286,11 @@ RECONHECIMENTOS RECENTES:
 
 Formatação esperada:
 - Saudação casual e personalizada (bom dia/tarde/noite + nome do usuário)
+
+<div class="level-0 bullet-main"><a href='/kanban' class="alert-link">Atividades atrasadas (PRIORIDADE)</a></div>
+<div class="level-1 bullet-sub">Projeto X</div>
+<div class="level-2 bullet-item important">Card Y (atrasado há Z dias) - W% concluído</div>
+<div class="level-3 bullet-action">⚠️ Estas atividades devem ser priorizadas e replanejadas junto à gestão.</div>
 
 <div class="level-0 bullet-main"><a href='/kanban'>Atividades pendentes no Kanban</a></div>
 <div class="level-1 bullet-sub">Projeto X</div>
@@ -267,7 +310,9 @@ Instruções:
 - Use os caracteres especificados através das classes CSS
 - Mantenha exatamente esta estrutura HTML e as classes
 - Use linguagem casual e concisa
-- Não adicione espaçamentos extras
+- Destaque atividades atrasadas com formatação em negrito e cor vermelha
+- Se não houver atividades atrasadas, omita esta seção
+- Adicione uma mensagem de alerta sobre a necessidade de priorizar e replanejar atividades atrasadas
 """
 
             system_prompt = """Instruções:
@@ -275,6 +320,8 @@ Instruções:
 - Responda sempre em português do Brasil
 - Seja direto e objetivo com tom acolhedor mas conciso
 - Mantenha o texto compacto e bem organizado
+- Destaque com ênfase visual as atividades atrasadas (usando negrito e símbolos de alerta)
+- Enfatize a importância de priorizar atividades atrasadas e conversar com a gestão
 - Use apenas os links principais para cada seção
 - Seja motivador mas breve
 - Ajude o usuário a ter uma visão rápida do seu dia"""

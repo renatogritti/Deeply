@@ -17,9 +17,9 @@ def init_app(app):
     KCRUD: Kanban User CRUD Operations
     This module provides REST API endpoints for managing Kanban users.
     """
-    @app.route('/api/projects', methods=['GET'])  # Corrigido: methods=['GET'] ao invés de methods['GET']
+    @app.route('/api/projects', methods=['GET'])
     def get_projects():
-        projects = Project.query.all()
+        projects = Project.query.order_by(Project.name).all()
         return jsonify([project.to_dict() for project in projects])
 
     @app.route('/api/projects', methods=['POST'])

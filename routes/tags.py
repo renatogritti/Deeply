@@ -15,7 +15,7 @@ def init_app(app):
     """
     @app.route('/api/tags', methods=['GET'])
     def get_tags():
-        tags = Tag.query.all()
+        tags = Tag.query.order_by(Tag.name).all()
         return jsonify([tag.to_dict() for tag in tags])
 
     @app.route('/api/tags/<int:tag_id>', methods=['GET'])

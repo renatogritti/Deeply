@@ -1,11 +1,71 @@
 let isProcessing = false;
 
-// Adiciona mensagem de boas-vindas quando carregar a página
+// Adiciona mensagem de boas-vindas ou realiza análise do projeto ao carregar a página
 document.addEventListener('DOMContentLoaded', function() {
-    // Verifica se tem parâmetros na URL para análise
     const params = new URLSearchParams(window.location.search);
     acao = params.get('acao');
-    if (acao !== 'analise' && acao !== 'report' && acao !== 'login') {
+    if (acao === 'analise') {
+        try {
+            const jsonData = atob(params.get('json'));
+            const projectData = JSON.parse(jsonData);
+            
+            // Criar um prompt aprimorado
+            const prompt = `Por favor, faça uma análise detalhada do board do Kanban do projeto "${projectData.projectName}" com as seguintes considerações especiais:
+
+1. TAREFAS ATRASADAS: Identifique e destaque tarefas com prazo vencido (deadline anterior a hoje) e não concluídas (percentual < 100%). Para cada atividade atrasada:
+   - Indique o título da atividade, responsável e quanto está atrasada
+   - Sugira um plano de ação específico com passos concretos
+   - Recomende um replanejamento com nova deadline estimada
+   - Proponha ações para mitigar atrasos semelhantes no futuro
+
+2. TAREFAS MUITO GRANDES: Analise tarefas com estimativas acima de 16 horas, recomendando que sejam divididas em atividades menores conforme as boas práticas ágeis.
+
+3. GARGALOS DE RECURSOS: Identifique membros da equipe que estão com mais de 3 tarefas em andamento simultaneamente, o que pode indicar sobrecarga.
+
+4. ANÁLISE DO WIP (Work in Progress): Avalie a distribuição de tarefas entre as colunas e identifique possíveis gargalos no fluxo de trabalho.
+
+5. RECOMENDAÇÕES: Com base nessas análises, forneça recomendações práticas para melhorar o andamento do projeto.
+
+Dados do board: ${jsonData}`;
+            
+            // Adicionamos apenas uma mensagem, não duas
+            // addMessage("Analisando o Projeto...", 'ai');
+            
+            fetch('/ai/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: prompt })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                // Remove a mensagem "Analisando o Projeto..."
+                const messages = document.getElementById('chat-messages');
+                messages.removeChild(messages.lastChild);
+                
+                // Adiciona a resposta da análise
+                addMessage(data.response, 'ai');
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                const messages = document.getElementById('chat-messages');
+                if (messages.lastChild) {
+                    messages.removeChild(messages.lastChild);
+                }
+                addMessage('Erro ao processar análise: ' + error.message, 'error');
+            });
+
+        } catch (error) {
+            console.error('Erro ao processar JSON:', error);
+            addMessage('Erro ao processar dados do board para análise.', 'error');
+        }
+    } else if (acao === 'report') {
+        // ...resto do código
+    } else if (acao !== 'login') {
         const welcomeMessage = `Olá! Sou Deeply, seu assistente especializado em trabalho colaborativo. 
         Posso ajudar com:
         • Métodos de trabalho profundo (Deep Work)

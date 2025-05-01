@@ -92,6 +92,7 @@ def init_app(app):
                 session['usuario'] = 'admin'
                 session['csrf_token'] = secrets.token_hex(32)
                 session['last_activity'] = datetime.now().timestamp()
+                session['is_admin'] = True
                 
                 return jsonify({"success": True})
             
@@ -229,7 +230,7 @@ def init_app(app):
     def projects():
         is_admin = session.get('is_admin')
         """Render the projects management page."""
-        projects = Project.query.all()
+        projects = Project.query.order_by(Project.name).all()
         return render_template('projects.html', projects=projects, is_admin=is_admin)
 
     @app.route('/teams')
@@ -237,7 +238,7 @@ def init_app(app):
     def teams():
         is_admin = session.get('is_admin')
         """Render the teams management page."""
-        teams = Team.query.all()
+        teams = Team.query.order_by(Team.name).all()
         return render_template('teams.html', teams=teams, is_admin=is_admin)
 
     @app.route('/tags')
@@ -245,7 +246,7 @@ def init_app(app):
     def tags():
         is_admin = session.get('is_admin')
         """Render the tags management page."""
-        tags = Tag.query.all()
+        tags = Tag.query.order_by(Tag.name).all()
         return render_template('tags.html', tags=tags, is_admin=is_admin)
 
     @app.route('/share')

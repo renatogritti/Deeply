@@ -16,7 +16,13 @@ def init_app(app):
     """
     @app.route('/api/teams', methods=['GET'])
     def get_teams():
-        teams = Team.query.all()
+        """
+        Get all teams sorted alphabetically by name.
+        
+        Returns:
+            JSON: List of all teams
+        """
+        teams = Team.query.order_by(Team.name).all()
         return jsonify([team.to_dict() for team in teams])
 
     @app.route('/api/teams/<int:team_id>', methods=['GET'])
