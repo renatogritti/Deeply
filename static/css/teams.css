@@ -39,8 +39,14 @@
 .team-card {
     display: flex;
     justify-content: space-between;
-    align-items: start;
-    padding: 15px;
+    align-items: flex-start;
+    padding: 16px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 12px;
+    width: 100%; /* Garante que ocupe toda a largura disponível */
+    box-sizing: border-box; /* Inclui padding e border na largura */
 }
 
 .team-info {
@@ -166,6 +172,13 @@
     overflow: hidden;
 }
 
+/* Ajuste para a lista de usuários existentes */
+.teams-list {
+    width: 100%;
+    padding-right: 15px; /* Pequeno espaço na direita */
+    overflow-y: auto;
+}
+
 /* Cards e Fences */
 .card {
     background: white;
@@ -288,6 +301,8 @@
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     margin-bottom: 12px;
+    width: 100%; /* Garante que ocupe toda a largura disponível */
+    box-sizing: border-box; /* Inclui padding e border na largura */
 }
 
 .team-info {

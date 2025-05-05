@@ -104,9 +104,13 @@
         <div class="messenger-container">
             <div class="channels-sidebar">
                 <div class="channels-header">
-                    <h2>Channels</h2>
+                    <h2>Projetos & Canais</h2>
                 </div>
-                <div id="channelsList" class="channels-list"></div>
+                
+                <!-- Accordeon de projetos -->
+                <div id="projectsAccordion" class="projects-accordion">
+                    <!-- Projetos e canais serão carregados via JavaScript -->
+                </div>
             </div>
 
             <!-- Frame de filtros ativos -->
@@ -139,10 +143,39 @@
 
             <div class="messages-container">
                 <div id="messagesContainer" class="messages-list"></div>
-                <div class="message-input-container">
-                    <textarea id="messageInput" placeholder="Type your message..."></textarea>
+                
+                <div class="format-toolbar">
+                    <button type="button" class="format-button" onclick="formatText('bold')">
+                        <svg viewBox="0 0 24 24" width="16" height="16">
+                            <path fill="currentColor" d="M13.5,15.5H10V12.5H13.5A1.5,1.5 0 0,1 15,14A1.5,1.5 0 0,1 13.5,15.5M10,6.5H13A1.5,1.5 0 0,1 14.5,8A1.5,1.5 0 0,1 13,9.5H10M15.6,10.79C16.57,10.11 17.25,9 17.25,8C17.25,5.74 15.5,4 13.25,4H7V18H14.04C16.14,18 17.75,16.3 17.75,14.21C17.75,12.69 16.89,11.39 15.6,10.79Z"/>
+                        </svg>
+                    </button>
+                    <button type="button" class="format-button" onclick="formatText('italic')">
+                        <svg viewBox="0 0 24 24" width="16" height="16">
+                            <path fill="currentColor" d="M10,4V7H12.21L8.79,15H6V18H14V15H11.79L15.21,7H18V4H10Z"/>
+                        </svg>
+                    </button>
+                    <button type="button" class="format-button" onclick="formatText('code')">
+                        <svg viewBox="0 0 24 24" width="16" height="16">
+                            <path fill="currentColor" d="M14.6,16.6L19.2,12L14.6,7.4L16,6L22,12L16,18L14.6,16.6M9.4,16.6L4.8,12L9.4,7.4L8,6L2,12L8,18L9.4,16.6Z"/>
+                        </svg>
+                    </button>
+                    <button type="button" class="format-button" onclick="formatText('strikethrough')">
+                        <svg viewBox="0 0 24 24" width="16" height="16">
+                            <path fill="currentColor" d="M3,14H21V12H3M5,4V7H10V10H14V7H19V4M10,19H14V16H10V19Z"/>
+                        </svg>
+                    </button>
+                    <button type="button" class="format-button" onclick="formatText('link')">
+                        <svg viewBox="0 0 24 24" width="16" height="16">
+                            <path fill="currentColor" d="M3.9,12C3.9,10.29 5.29,8.9 7,8.9H11V7H7A5,5 0 0,0 2,12A5,5 0 0,0 7,17H11V15.1H7C5.29,15.1 3.9,13.71 3.9,12M8,13H16V11H8V13M17,7H13V8.9H17C18.71,8.9 20.1,10.29 20.1,12C20.1,13.71 18.71,15.1 17,15.1H13V17H17A5,5 0 0,0 22,12A5,5 0 0,0 17,7Z"/>
+                        </svg>
+                    </button>
                     <button class="emoji-trigger" onclick="toggleEmojiPicker(event)">😊</button>
-                    <button onclick="sendMessage()">Send</button>
+                </div>
+                
+                <div class="message-input-container">
+                    <textarea id="messageInput" placeholder="Digite sua mensagem. Use # para hashtags e @ para menções"></textarea>
+                    <button onclick="sendMessage()">Enviar</button>
                 </div>
                 
                 <!-- Adicione o Emoji Picker -->
@@ -168,14 +201,23 @@
                 <span class="close-btn" onclick="closeModal()">&times;</span>
             </div>
             <div class="modal-body">
-                <input type="text" id="channelName" placeholder="Channel Name" required>
-                <textarea id="channelDescription" placeholder="Channel Description"></textarea>
+                <!-- Seleção de projeto -->
+                <div class="project-selection">
+                    <label for="projectSelect">Projeto:</label>
+                    <select id="projectSelect" required>
+                        <option value="">Selecione um projeto</option>
+                        <!-- Projetos serão carregados via JavaScript -->
+                    </select>
+                </div>
+                
+                <input type="text" id="channelName" placeholder="Nome do canal" required>
+                <textarea id="channelDescription" placeholder="Descrição do canal"></textarea>
                 <div class="member-selection">
-                    <h4>Add Members</h4>
+                    <h4>Adicionar membros</h4>
                     <div id="membersList" class="members-list"></div>
                 </div>
                 <div class="modal-buttons">
-                    <button onclick="createChannel()">Create</button>
+                    <button onclick="createChannel()">Criar</button>
                 </div>
             </div>
         </div>
@@ -194,6 +236,15 @@
                 <span class="close-btn" onclick="closeEditModal()">&times;</span>
             </div>
             <div class="modal-body">
+                <!-- Seleção de projeto (apenas para o criador) -->
+                <div class="project-selection">
+                    <label for="editProjectSelect">Projeto:</label>
+                    <select id="editProjectSelect">
+                        <option value="">Selecione um projeto</option>
+                        <!-- Projetos serão carregados via JavaScript -->
+                    </select>
+                </div>
+                
                 <input type="text" id="editChannelName" placeholder="Channel Name" required>
                 <textarea id="editChannelDescription" placeholder="Channel Description"></textarea>
                 <div class="member-selection">

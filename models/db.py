@@ -319,8 +319,10 @@ class Channel(db.Model):
     is_private = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     created_by = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=False)
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)  # Nova referência ao projeto
     members = db.relationship('Team', secondary='channel_members', lazy='subquery',
                             backref=db.backref('channels', lazy=True))
+    project = db.relationship('Project', backref='channels', lazy=True)  # Relação com o projeto
 
     def to_dict(self):
         return {
@@ -330,6 +332,7 @@ class Channel(db.Model):
             'is_private': self.is_private,
             'created_at': self.created_at.isoformat(),
             'created_by': self.created_by,
+            'project_id': self.project_id,
             'members': [member.to_dict() for member in self.members]
         }
 

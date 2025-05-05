@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_file, g
-from models.db import db, Channel, Message, Team
+from models.db import db, Channel, Message, Team, Project
 from auth.authorization import login_required
 
 def init_app(app):
@@ -10,6 +10,34 @@ def init_app(app):
         user_id = session.get('user_id')
         is_admin = session.get('is_admin')
         return render_template('messenger.html', user_id=user_id,is_admin=is_admin)
+
+    @app.route('/api/projects/user', methods=['GET'])
+    @login_required
+    def get_user_projects():
+        """Get all projects accessible by the current user"""
+        user_id = session.get('user_id')
+        user = Team.query.get(user_id)
+        
+        # Verifica se o usuário é administrador
+        if user.is_admin:
+            # Administradores têm acesso a todos os projetos
+            all_projects = Project.query.all()
+            return jsonify([project.to_dict() for project in all_projects])
+        else:
+            # Usuários normais só veem os projetos aos quais têm acesso explícito
+            return jsonify([project.to_dict() for project in user.project_access])
+
+    @app.route('/api/projects/<int:project_id>/channels', methods=['GET'])
+    @login_required
+    def get_project_channels(project_id):
+        """Get all channels for a specific project"""
+        user_id = session.get('user_id')
+        user = Team.query.get(user_id)
+        
+        channels = Channel.query.filter_by(project_id=project_id).all()
+        # Filtrar apenas canais onde o usuário é membro
+        user_channels = [channel for channel in channels if user in channel.members]
+        return jsonify([channel.to_dict() for channel in user_channels])
 
     @app.route('/api/channels', methods=['GET'])
     @login_required
@@ -31,17 +59,22 @@ def init_app(app):
             return jsonify({"success": False, "error": "User not authenticated"}), 401
         
         try:
-            # Verifica se já existe um canal com este nome
-            existing_channel = Channel.query.filter_by(name=data['name']).first()
+            # Verifica se já existe um canal com este nome no mesmo projeto
+            existing_channel = Channel.query.filter_by(
+                name=data['name'], 
+                project_id=data['project_id']
+            ).first()
+            
             if existing_channel:
-                return jsonify({"success": False, "error": "Channel name already exists"}), 400
+                return jsonify({"success": False, "error": "Channel name already exists in this project"}), 400
 
             # Cria o novo canal
             new_channel = Channel(
                 name=data['name'],
                 description=data.get('description', ''),
                 is_private=data.get('is_private', False),
-                created_by=user_id
+                created_by=user_id,
+                project_id=data['project_id']  # Novo campo project_id
             )
 
             # Adiciona o criador como membro
@@ -66,7 +99,7 @@ def init_app(app):
             
         except Exception as e:
             db.session.rollback()
-            print(f"Error creating channel: {str(e)}")  # Log do erro
+            print(f"Error creating channel: {str(e)}")
             return jsonify({"success": False, "error": str(e)}), 500
 
     @app.route('/api/channels/<int:channel_id>', methods=['GET'])
@@ -92,6 +125,10 @@ def init_app(app):
             channel.name = data['name']
             channel.description = data.get('description', '')
             
+            # O projeto pode ser atualizado apenas pelo criador
+            if channel.created_by == user_id and 'project_id' in data:
+                channel.project_id = data['project_id']
+            
             # Garante que o criador permaneça como membro
             creator = Team.query.get(channel.created_by)
             members = [creator] if creator else []
@@ -107,7 +144,7 @@ def init_app(app):
             return jsonify({"success": True, "channel": channel.to_dict()})
         except Exception as e:
             db.session.rollback()
-            print(f"Error updating channel: {str(e)}")  # Log do erro
+            print(f"Error updating channel: {str(e)}")
             return jsonify({"success": False, "error": str(e)}), 500
 
     @app.route('/api/channels/<int:channel_id>', methods=['DELETE'])

@@ -32,7 +32,7 @@ if DB_TYPE == "sqlite":
 elif DB_TYPE == "mariadb":
     # Conexão com MariaDB
     MARIADB_USER = os.getenv("MARIADB_USER", "root")
-    MARIADB_PASSWORD = os.getenv("MARIADB_PASSWORD", "")
+    MARIADB_PASSWORD = os.getenv("MARIADB_PASSWORD", "Ximbic@1")
     MARIADB_HOST = os.getenv("MARIADB_HOST", "localhost")
     MARIADB_PORT = os.getenv("MARIADB_PORT", "3306")
     MARIADB_DB = os.getenv("MARIADB_DB", "deeply")
