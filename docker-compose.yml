@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: deeply-app
+    restart: always
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./instance:/app/instance  # Para SQLite, se usado
+    environment:
+      - SECRET_KEY=chave_secreta_para_docker
+      - DB_TYPE=mariadb  # Altere para 'sqlite' se preferir
+      - MARIADB_USER=root
+      - MARIADB_PASSWORD=Ximbic@1
+      - MARIADB_HOST=db
+      - MARIADB_PORT=3306
+      - MARIADB_DB=deeply
+      # Para SQLite:
+      # - SQLITE_DATABASE_URI=sqlite:///instance/kanban.db
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:10.6
+    container_name: deeply-db
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=Ximbic@1
+      - MYSQL_DATABASE=deeply
+      - MYSQL_USER=deeply_user
+      - MYSQL_PASSWORD=deeply_password
+    volumes:
+      - deeply_mariadb_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+volumes:
+  deeply_mariadb_data:
